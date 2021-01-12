@@ -18,10 +18,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scottrippey/react-next-router-mock.git"
+    "url": "git+https://github.com/scottrippey/next-router-mock.git"
   },
   "keywords": [
     "react",
+    "next",
     "next.js",
     "nextjs",
     "router",
@@ -32,9 +33,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/scottrippey/react-next-router-mock/issues"
+    "url": "https://github.com/scottrippey/next-router-mock/issues"
   },
-  "homepage": "https://github.com/scottrippey/react-next-router-mock#readme",
+  "homepage": "https://github.com/scottrippey/next-router-mock#readme",
   "peerDependencies": {
     "next": "^10.0.0",
     "react": "^17.0.0"
