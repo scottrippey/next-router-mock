@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react-hooks";
-import { router, useRouter } from "./router";
+import router, { useRouter } from "./router";
 import { MemoryRouter } from "./MemoryRouter";
 
 describe("router", () => {

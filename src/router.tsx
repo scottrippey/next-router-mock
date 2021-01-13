@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 
 import { MemoryRouter } from "./MemoryRouter";
 
-// Create a singleton:
-export let memoryRouter = new MemoryRouter();
-
-// Default export the singleton:
-export { memoryRouter as router };
+// Default export a singleton:
+const memoryRouter = new MemoryRouter();
 export default memoryRouter;
 
 // Overrides the useRouter hook:

@@ -10,7 +10,7 @@ Install via NPM: `npm install --save-dev next-router-mock`
 
 ### Jest
 ```js
-import { router, useRouter } from 'next/router';
+import router, { useRouter } from 'next/router';
 
 jest.mock('next/router', () => require('next-router-mock'));
 
