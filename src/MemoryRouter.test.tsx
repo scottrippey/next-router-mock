@@ -3,15 +3,16 @@ import { MemoryRouter } from "./MemoryRouter";
 describe("MemoryRouter", () => {
   const memoryRouter = new MemoryRouter();
   function currentRoute() {
-    const { pathname, query, asPath } = memoryRouter;
+    const { pathname, query, asPath, locale } = memoryRouter;
 
-    return { pathname, query, asPath };
+    return { pathname, query, asPath, locale };
   }
 
   it("should start empty", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "",
+        "locale": undefined,
         "pathname": "",
         "query": Object {},
       }
@@ -22,6 +23,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three",
+        "locale": undefined,
         "pathname": "/one/two/three",
         "query": Object {},
       }
@@ -31,6 +33,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three?four=4&five=",
+        "locale": undefined,
         "pathname": "/one/two/three",
         "query": Object {
           "five": "",
@@ -58,6 +61,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one",
+        "locale": undefined,
         "pathname": "/one",
         "query": Object {},
       }
@@ -70,6 +74,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three?four=4&five=",
+        "locale": undefined,
         "pathname": "/one/two/three",
         "query": Object {
           "five": "",
@@ -83,6 +88,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two",
+        "locale": undefined,
         "pathname": "/one/[id]",
         "query": Object {
           "id": "two",
@@ -94,6 +100,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three",
+        "locale": undefined,
         "pathname": "/one/[id]/three",
         "query": Object {
           "id": "two",
@@ -108,6 +115,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three?four=4",
+        "locale": undefined,
         "pathname": "/one/[id]/three",
         "query": Object {
           "four": "4",
@@ -122,6 +130,7 @@ describe("MemoryRouter", () => {
     expect(currentRoute()).toMatchInlineSnapshot(`
       Object {
         "asPath": "/one/two/three/4",
+        "locale": undefined,
         "pathname": "/one/[id]/three/[four]",
         "query": Object {
           "four": "4",
@@ -130,4 +139,15 @@ describe("MemoryRouter", () => {
       }
     `);
   });
+  it("push the locale", () => {
+    memoryRouter.push("/", "/", { locale: "en" });
+    expect(currentRoute()).toMatchInlineSnapshot(`
+      Object {
+        "asPath": "/",
+        "locale": "en",
+        "pathname": "/",
+        "query": Object {},
+      }
+    `);
+  })
 });
