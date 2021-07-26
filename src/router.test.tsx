@@ -30,5 +30,16 @@ describe("router", () => {
         query: { bar: "baz" },
       });
     });
+
+    it("support the locales and locale properties", () => {
+      const { result } = renderHook(() => useRouter());
+      expect(result.current.locale).toBe(undefined);
+      expect(result.current.locales).toEqual([]);
+
+      act(() => {
+        result.current.push("/", undefined, { locale: "en" })
+      });
+      expect(result.current.locale).toBe("en");
+    });
   });
 });
