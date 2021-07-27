@@ -36,8 +36,6 @@ describe('router', () => {
     });
 });
 ```
-### Storybook
-{TODO}
 
 # Features
 
@@ -49,8 +47,11 @@ Currently supported features:
 - `router.pathname`
 - `router.asPath`
 - `router.query`
+- `router.locale`
+- `router.locales`
 
 ## Not yet supported:
+PRs welcome!
 - `router.isReady`
 - `router.route`
 - `router.basePath`
