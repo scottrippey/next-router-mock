@@ -36,6 +36,13 @@ type UrlObject = {
 };
 type Url = string | UrlObject;
 
+// interface not exported by the package next/router
+interface TransitionOptions {
+  shallow?: boolean;
+  locale?: string | false;
+  scroll?: boolean;
+}
+
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
@@ -48,8 +55,10 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   events = new EventEmitter();
+  locale: string | undefined = undefined;
+  locales = [];
 
-  push = async (url: Url): Promise<boolean> => {
+  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
     throw new Error("NotImplemented");
   };
   replace = async (url: Url): Promise<boolean> => {
@@ -76,8 +85,8 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  push = async (url: Url) => {
-    this.setMemoryRoute(url);
+  push = async (url: Url, as?: Url, options?: TransitionOptions) => {
+    this.setMemoryRoute(url, as, options);
 
     return true;
   };
@@ -92,13 +101,17 @@ export class MemoryRouter extends BaseRouter {
    * Sets the current route to the specified url.
    * @param url - String or Url-like object
    */
-  setMemoryRoute = (url: Url) => {
+  setMemoryRoute = (url: Url, as?: Url, options?: TransitionOptions) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
     this.pathname = urlObject.pathname || "";
     this.query = urlObject.query || {};
     this.asPath = getRouteAsPath(this.pathname, this.query);
+
+    if (options?.locale) {
+      this.locale = options.locale;
+    }
 
     this.events.emit("routeChangeComplete");
   };
