@@ -56,7 +56,7 @@ export abstract class BaseRouter implements NextRouter {
   isFallback = false;
   events = new EventEmitter();
   locale: string | undefined = undefined;
-  locales = [];
+  locales: string[] = [];
 
   push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
     throw new Error("NotImplemented");

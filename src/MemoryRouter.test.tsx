@@ -118,5 +118,7 @@ describe("MemoryRouter", () => {
 
   it('should support the locales property', () => {
     expect(memoryRouter.locales).toEqual([ ]);
+    memoryRouter.locales = ["en", "fr"];
+    expect(memoryRouter.locales).toEqual(["en", "fr"])
   });
 });
