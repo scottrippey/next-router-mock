@@ -74,7 +74,7 @@ export abstract class BaseRouter implements NextRouter {
   beforePopState = () => {
     throw new Error("NotImplemented");
   };
-  prefetch = () => {
+  prefetch = async (): Promise<void> => {
     throw new Error("NotImplemented");
   };
   reload = () => {
@@ -119,4 +119,6 @@ export class MemoryRouter extends BaseRouter {
 
     this.events.emit("routeChangeComplete");
   };
+
+  prefetch = async () => { /* Do nothing */ }
 }
