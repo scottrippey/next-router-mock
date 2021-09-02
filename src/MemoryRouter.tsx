@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import mitt from "mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
@@ -43,6 +43,10 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
+type SupportedEventTypes = {
+  routeChangeComplete: undefined;
+};
+
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
@@ -54,7 +58,7 @@ export abstract class BaseRouter implements NextRouter {
   asPath = "";
   basePath = "";
   isFallback = false;
-  events = new EventEmitter();
+  events = mitt<SupportedEventTypes>();
   locale: string | undefined = undefined;
   locales: string[] = [];
 
