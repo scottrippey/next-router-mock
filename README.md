@@ -77,6 +77,7 @@ Currently supported features:
 - `router.query`
 - `router.locale`
 - `router.locales`
+- `router.prefetch(url)` (does nothing)
 - Works with `next/link` (see Jest notes)
 
 ## Not yet supported:
@@ -89,5 +90,4 @@ PRs welcome!
 - `router.isFallback`
 - `router.back()`
 - `router.beforePopState(cb)`
-- `router.prefetch(url)`
 - `router.reload()`

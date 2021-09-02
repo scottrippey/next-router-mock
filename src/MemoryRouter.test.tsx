@@ -121,4 +121,8 @@ describe("MemoryRouter", () => {
     memoryRouter.locales = ["en", "fr"];
     expect(memoryRouter.locales).toEqual(["en", "fr"])
   });
+
+  it('prefetch should do nothing', async () => {
+    expect(await memoryRouter.prefetch()).toBeUndefined();
+  });
 });
