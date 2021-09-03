@@ -1,4 +1,4 @@
-import mitt from "mitt";
+import mitt, { MittEmitter } from "./lib/mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
@@ -43,9 +43,7 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes = {
-  routeChangeComplete: undefined;
-};
+type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -58,11 +56,15 @@ export abstract class BaseRouter implements NextRouter {
   asPath = "";
   basePath = "";
   isFallback = false;
-  events = mitt<SupportedEventTypes>();
+  events: MittEmitter<SupportedEventTypes> = mitt();
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
+  push = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions
+  ): Promise<boolean> => {
     throw new Error("NotImplemented");
   };
   replace = async (url: Url): Promise<boolean> => {
@@ -117,8 +119,11 @@ export class MemoryRouter extends BaseRouter {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeComplete");
+    this.events.emit("routeChangeStart", this.asPath, { shallow: false });
+    this.events.emit("routeChangeComplete", this.asPath, { shallow: false });
   };
 
-  prefetch = async () => { /* Do nothing */ }
+  prefetch = async () => {
+    /* Do nothing */
+  };
 }

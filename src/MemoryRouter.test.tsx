@@ -30,16 +30,37 @@ describe("MemoryRouter", () => {
       },
     });
   });
+
+  it("pushing should trigger the routeChangeStart event", () => {
+    const routeChangeStart = jest.fn();
+    memoryRouter.events.on("routeChangeStart", routeChangeStart);
+
+    memoryRouter.push(`/one`);
+    expect(routeChangeStart).toHaveBeenCalledTimes(1);
+    expect(routeChangeStart).toHaveBeenCalledWith('/one', { shallow: false });
+    memoryRouter.push(`/one/two`);
+    expect(routeChangeStart).toHaveBeenCalledTimes(2);
+    expect(routeChangeStart).toHaveBeenCalledWith('/one/two', { shallow: false });
+    memoryRouter.push({ pathname: `/one/two/three` });
+    expect(routeChangeStart).toHaveBeenCalledTimes(3);
+    expect(routeChangeStart).toHaveBeenCalledWith('/one/two/three', { shallow: false });
+
+    memoryRouter.events.off("routeChangeStart", routeChangeStart);
+  });
+
   it("pushing should trigger the routeChangeComplete event", () => {
     const routeChangeComplete = jest.fn();
     memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
 
     memoryRouter.push(`/one`);
     expect(routeChangeComplete).toHaveBeenCalledTimes(1);
+    expect(routeChangeComplete).toHaveBeenCalledWith('/one', { shallow: false });
     memoryRouter.push(`/one/two`);
     expect(routeChangeComplete).toHaveBeenCalledTimes(2);
+    expect(routeChangeComplete).toHaveBeenCalledWith('/one/two', { shallow: false });
     memoryRouter.push({ pathname: `/one/two/three` });
     expect(routeChangeComplete).toHaveBeenCalledTimes(3);
+    expect(routeChangeComplete).toHaveBeenCalledWith('/one/two/three', { shallow: false });
 
     memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
   });
