@@ -11,8 +11,8 @@ describe("MemoryRouter", () => {
       locale: undefined,
     })
   });
-  it("pushing URLs should update the route", () => {
-    memoryRouter.push(`/one/two/three`);
+  it("pushing URLs should update the route", async () => {
+    await memoryRouter.push(`/one/two/three`);
 
     expect(memoryRouter).toMatchObject({
       asPath: "/one/two/three",
@@ -20,7 +20,8 @@ describe("MemoryRouter", () => {
       query: {},
     })
 
-    memoryRouter.push(`/one/two/three?four=4&five=`);
+    await memoryRouter.push(`/one/two/three?four=4&five=`);
+    
     expect(memoryRouter).toMatchObject({
       asPath: "/one/two/three?four=4&five=",
       pathname: "/one/two/three",
@@ -31,34 +32,34 @@ describe("MemoryRouter", () => {
     });
   });
 
-  it("pushing should trigger the routeChangeStart event", () => {
+  it("pushing should trigger the routeChangeStart event", async () => {
     const routeChangeStart = jest.fn();
     memoryRouter.events.on("routeChangeStart", routeChangeStart);
 
-    memoryRouter.push(`/one`);
+    await memoryRouter.push(`/one`);
     expect(routeChangeStart).toHaveBeenCalledTimes(1);
     expect(routeChangeStart).toHaveBeenCalledWith('/one', { shallow: false });
-    memoryRouter.push(`/one/two`);
+    await memoryRouter.push(`/one/two`);
     expect(routeChangeStart).toHaveBeenCalledTimes(2);
     expect(routeChangeStart).toHaveBeenCalledWith('/one/two', { shallow: false });
-    memoryRouter.push({ pathname: `/one/two/three` });
+    await memoryRouter.push({ pathname: `/one/two/three` });
     expect(routeChangeStart).toHaveBeenCalledTimes(3);
     expect(routeChangeStart).toHaveBeenCalledWith('/one/two/three', { shallow: false });
 
     memoryRouter.events.off("routeChangeStart", routeChangeStart);
   });
 
-  it("pushing should trigger the routeChangeComplete event", () => {
+  it("pushing should trigger the routeChangeComplete event", async () => {
     const routeChangeComplete = jest.fn();
     memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
 
-    memoryRouter.push(`/one`);
+    await memoryRouter.push(`/one`);
     expect(routeChangeComplete).toHaveBeenCalledTimes(1);
     expect(routeChangeComplete).toHaveBeenCalledWith('/one', { shallow: false });
-    memoryRouter.push(`/one/two`);
+    await memoryRouter.push(`/one/two`);
     expect(routeChangeComplete).toHaveBeenCalledTimes(2);
     expect(routeChangeComplete).toHaveBeenCalledWith('/one/two', { shallow: false });
-    memoryRouter.push({ pathname: `/one/two/three` });
+    await memoryRouter.push({ pathname: `/one/two/three` });
     expect(routeChangeComplete).toHaveBeenCalledTimes(3);
     expect(routeChangeComplete).toHaveBeenCalledWith('/one/two/three', { shallow: false });
 

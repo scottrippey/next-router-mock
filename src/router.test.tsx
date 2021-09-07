@@ -14,13 +14,13 @@ describe("router", () => {
       expect(result.current).toBe(router);
     });
 
-    it('"push" will cause a rerender with the new route', () => {
+    it('"push" will cause a rerender with the new route', async () => {
       const { result, rerender } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
 
-      act(() => {
-        result.current.push("/foo?bar=baz");
+      await act(async () => {
+        await result.current.push("/foo?bar=baz");
       });
 
       expect(result.current).not.toBe(router);
@@ -37,7 +37,7 @@ describe("router", () => {
       expect(result.current.locales).toEqual([]);
 
       act(() => {
-        result.current.push("/", undefined, { locale: "en" })
+        result.current.push("/", undefined, { locale: "en" });
       });
       expect(result.current.locale).toBe("en");
     });

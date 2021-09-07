@@ -91,16 +91,12 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  push = async (url: Url, as?: Url, options?: TransitionOptions) => {
-    this.setMemoryRoute(url, as, options);
-
-    return true;
+  push = (url: Url, as?: Url, options?: TransitionOptions) => {
+    return this.setMemoryRoute(url, as, options);
   };
 
-  replace = async (url: Url) => {
-    this.setMemoryRoute(url);
-
-    return true;
+  replace = (url: Url) => {
+    return this.setMemoryRoute(url);
   };
 
   /**
@@ -119,8 +115,19 @@ export class MemoryRouter extends BaseRouter {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeStart", this.asPath, { shallow: false });
-    this.events.emit("routeChangeComplete", this.asPath, { shallow: false });
+    this.events.emit("routeChangeStart", this.asPath, {
+      shallow: options?.shallow ?? false,
+    });
+
+    // Schedule next event emit on next tick to allow for setState updates
+    return new Promise<boolean>((resolve) =>
+      setTimeout(() => {
+        this.events.emit("routeChangeComplete", this.asPath, {
+          shallow: options?.shallow ?? false,
+        });
+        resolve(true);
+      }, 0)
+    );
   };
 
   prefetch = async () => {
