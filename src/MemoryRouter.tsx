@@ -104,22 +104,24 @@ export class MemoryRouter extends BaseRouter {
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
     const shallow = options?.shallow || false;
-    const asPath = getRouteAsPath(this.pathname, this.query);
-    
+    const pathname = urlObject.pathname || "";
+    const query = urlObject.query || {};
+    const asPath = getRouteAsPath(pathname, query);
+
     this.events.emit("routeChangeStart", asPath, { shallow });
-    
+
     // Simulate the async nature of this method
     await new Promise(resolve => setImmediate(resolve));
-    
-    this.pathname = urlObject.pathname || "";
-    this.query = urlObject.query || {};
+
+    this.pathname = pathname;
+    this.query = query;
     this.asPath = asPath;
     if (options?.locale) {
       this.locale = options.locale;
     }
-    
+
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
-    
+
     return true;
   };
 
