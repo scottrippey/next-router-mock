@@ -60,11 +60,7 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (
-    url: Url,
-    as?: Url,
-    options?: TransitionOptions
-  ): Promise<boolean> => {
+  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
     throw new Error("NotImplemented");
   };
   replace = async (url: Url): Promise<boolean> => {
@@ -103,31 +99,28 @@ export class MemoryRouter extends BaseRouter {
    * Sets the current route to the specified url.
    * @param url - String or Url-like object
    */
-  setMemoryRoute = (url: Url, as?: Url, options?: TransitionOptions) => {
+  setMemoryRoute = async (url: Url, as?: Url, options?: TransitionOptions) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
+    const shallow = options?.shallow || false;
+    const asPath = getRouteAsPath(this.pathname, this.query);
+    
+    this.events.emit("routeChangeStart", asPath, { shallow });
+    
+    // Simulate the async nature of this method
+    await new Promise(resolve => setImmediate(resolve));
+    
     this.pathname = urlObject.pathname || "";
     this.query = urlObject.query || {};
-    this.asPath = getRouteAsPath(this.pathname, this.query);
-
+    this.asPath = asPath;
     if (options?.locale) {
       this.locale = options.locale;
     }
-
-    this.events.emit("routeChangeStart", this.asPath, {
-      shallow: options?.shallow ?? false,
-    });
-
-    // Schedule next event emit on next tick to allow for setState updates
-    return new Promise<boolean>((resolve) =>
-      setTimeout(() => {
-        this.events.emit("routeChangeComplete", this.asPath, {
-          shallow: options?.shallow ?? false,
-        });
-        resolve(true);
-      }, 0)
-    );
+    
+    this.events.emit("routeChangeComplete", this.asPath, { shallow });
+    
+    return true;
   };
 
   prefetch = async () => {
