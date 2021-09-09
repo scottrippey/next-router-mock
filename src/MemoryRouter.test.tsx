@@ -32,47 +32,58 @@ describe("MemoryRouter", () => {
     });
   });
 
-  it("pushing should trigger the routeChangeStart event", async () => {
+  it("pushing should trigger the routeChangeStart and routeChangeComplete events", async () => {
     const routeChangeStart = jest.fn();
+    const routeChangeComplete = jest.fn();
     memoryRouter.events.on("routeChangeStart", routeChangeStart);
+    memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
 
-    await memoryRouter.push(`/one`);
+    let promise: Promise<boolean>;
+
+    // Push a URL:
+    promise = memoryRouter.push(`/one`);
     expect(routeChangeStart).toHaveBeenCalledTimes(1);
-    expect(routeChangeStart).toHaveBeenCalledWith("/one", { shallow: false });
-    await memoryRouter.push(`/one/two`);
-    expect(routeChangeStart).toHaveBeenCalledTimes(2);
-    expect(routeChangeStart).toHaveBeenCalledWith("/one/two", {
+    expect(routeChangeStart).toHaveBeenLastCalledWith("/one", {
       shallow: false,
     });
-    await memoryRouter.push({ pathname: `/one/two/three` });
+    expect(routeChangeComplete).toHaveBeenCalledTimes(0);
+    await promise;
+    expect(routeChangeComplete).toHaveBeenCalledTimes(1);
+    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one", {
+      shallow: false,
+    });
+
+    // Push a URL Object, and use "shallow":
+    promise = memoryRouter.push(
+      { pathname: "/one/two", query: { foo: "bar" } },
+      undefined,
+      { shallow: true }
+    );
+    expect(routeChangeStart).toHaveBeenCalledTimes(2);
+    expect(routeChangeStart).toHaveBeenLastCalledWith("/one/two?foo=bar", {
+      shallow: true,
+    });
+    expect(routeChangeComplete).toHaveBeenCalledTimes(1);
+    await promise;
+    expect(routeChangeComplete).toHaveBeenCalledTimes(2);
+    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one/two?foo=bar", {
+      shallow: true,
+    });
+
+    // Replace this time:
+    promise = memoryRouter.replace("/one/two/three");
     expect(routeChangeStart).toHaveBeenCalledTimes(3);
-    expect(routeChangeStart).toHaveBeenCalledWith("/one/two/three", {
+    expect(routeChangeStart).toHaveBeenLastCalledWith("/one/two/three", {
+      shallow: false,
+    });
+    expect(routeChangeComplete).toHaveBeenCalledTimes(2);
+    await promise;
+    expect(routeChangeComplete).toHaveBeenCalledTimes(3);
+    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one/two/three", {
       shallow: false,
     });
 
     memoryRouter.events.off("routeChangeStart", routeChangeStart);
-  });
-
-  it("pushing should trigger the routeChangeComplete event", async () => {
-    const routeChangeComplete = jest.fn();
-    memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
-
-    await memoryRouter.push(`/one`);
-    expect(routeChangeComplete).toHaveBeenCalledTimes(1);
-    expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
-      shallow: false,
-    });
-    await memoryRouter.push(`/one/two`);
-    expect(routeChangeComplete).toHaveBeenCalledTimes(2);
-    expect(routeChangeComplete).toHaveBeenCalledWith("/one/two", {
-      shallow: false,
-    });
-    await memoryRouter.push({ pathname: `/one/two/three` });
-    expect(routeChangeComplete).toHaveBeenCalledTimes(3);
-    expect(routeChangeComplete).toHaveBeenCalledWith("/one/two/three", {
-      shallow: false,
-    });
-
     memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
   });
 
