@@ -22,26 +22,28 @@ jest.mock('next/router', () => require('next-router-mock'));
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 ```
 
-> Note: it's better to mock `next/dist/client/router` instead of  `next/router`, because both `next/router` and `next/link` depend directly on this nested path.  It's also perfectly fine to mock both.
+> Note: it's better to mock `next/dist/client/router` instead of  `next/router`, because both `next/router` and `next/link` depend directly on this nested path. It's also perfectly fine to mock both.
 
 Here's a full working example:
 
 ```js
 import router, { useRouter } from 'next/router';
+import NextLink from 'next/link';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 
 describe('router', () => {
-  it('supports the `push` and `replace` methods', () => {
-    router.push('/foo?bar=baz');
+  it('supports the `push` and `replace` methods', async () => {
+    await router.push('/foo?bar=baz');
     expect(router).toMatchObject({
       asPath: '/foo?bar=baz',
       pathname: '/foo',
       query: { bar: 'baz' },
     });
   });
-  it('supports url object routes too', () => {
-    router.push({
+  it('supports url object routes too', async () => {
+    await router.push({
       pathname: '/foo/[id]',
       query: { id: '123', bar: 'baz' },
     });
@@ -52,13 +54,15 @@ describe('router', () => {
     });
   });
 
-  it('next/link can be tested too', () => {
+  it('next/link can be tested too', async () => {
     render(<NextLink href="/example?foo=bar">Example Link</NextLink>);
     fireEvent.click(screen.getByText('Example Link'));
-    expect(router).toMatchObject({
-      asPath: '/example?foo=bar',
-      pathname: '/example',
-      query: { foo: 'bar' },
+    await waitFor(() => {
+      expect(router).toMatchObject({
+        asPath: '/example?foo=bar',
+        pathname: '/example',
+        query: { foo: 'bar' },
+      });
     });
   });
 
@@ -70,8 +74,8 @@ describe('router', () => {
 Currently supported features:
 
 - `useRouter()`
-- `router.push(url)`
-- `router.replace(url)`
+- `router.push(url, as, options)`
+- `router.replace(url, as, options)`
 - `router.pathname`
 - `router.asPath`
 - `router.query`
@@ -79,6 +83,9 @@ Currently supported features:
 - `router.locales`
 - `router.prefetch(url)` (does nothing)
 - Works with `next/link` (see Jest notes)
+- `router.events` supports:
+  - `routeChangeStart(url, { shallow })`
+  - `routeChangeComplete(url, { shallow })`
 
 ## Not yet supported:
 
@@ -91,3 +98,9 @@ PRs welcome!
 - `router.back()`
 - `router.beforePopState(cb)`
 - `router.reload()`
+- `router.events` not yet supported: 
+  - `routeChangeError`
+  - `beforeHistoryChange`
+  - `hashChangeStart`
+  - `hashChangeComplete`
+
