@@ -8,14 +8,14 @@ describe("router", () => {
   });
 
   describe("useRouter", () => {
-    it("the useRouter hook should return the same instance of the router", () => {
+    it("the useRouter hook should return the same instance of the router", async () => {
       const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
     });
 
     it('"push" will cause a rerender with the new route', async () => {
-      const { result, rerender } = renderHook(() => useRouter());
+      const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
 
@@ -31,13 +31,13 @@ describe("router", () => {
       });
     });
 
-    it("support the locales and locale properties", () => {
+    it("support the locales and locale properties", async () => {
       const { result } = renderHook(() => useRouter());
       expect(result.current.locale).toBe(undefined);
       expect(result.current.locales).toEqual([]);
 
-      act(() => {
-        result.current.push("/", undefined, { locale: "en" });
+      await act(async () => {
+        await result.current.push("/", undefined, { locale: "en" });
       });
       expect(result.current.locale).toBe("en");
     });
