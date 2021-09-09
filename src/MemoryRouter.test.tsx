@@ -1,6 +1,10 @@
 import { MemoryRouter } from "./MemoryRouter";
 
 describe("MemoryRouter", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const memoryRouter = new MemoryRouter();
 
   it("should start empty", async () => {
@@ -32,59 +36,72 @@ describe("MemoryRouter", () => {
     });
   });
 
-  it("pushing should trigger the routeChangeStart and routeChangeComplete events", async () => {
+  describe("routeChangeStart and routeChangeComplete events", () => {
     const routeChangeStart = jest.fn();
     const routeChangeComplete = jest.fn();
-    memoryRouter.events.on("routeChangeStart", routeChangeStart);
-    memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
-
-    let promise: Promise<boolean>;
-
-    // Push a URL:
-    promise = memoryRouter.push(`/one`);
-    expect(routeChangeStart).toHaveBeenCalledTimes(1);
-    expect(routeChangeStart).toHaveBeenLastCalledWith("/one", {
-      shallow: false,
+    beforeAll(() => {
+      memoryRouter.events.on("routeChangeStart", routeChangeStart);
+      memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
     });
-    expect(routeChangeComplete).toHaveBeenCalledTimes(0);
-    await promise;
-    expect(routeChangeComplete).toHaveBeenCalledTimes(1);
-    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one", {
-      shallow: false,
+    afterAll(() => {
+      memoryRouter.events.off("routeChangeStart", routeChangeStart);
+      memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
     });
 
-    // Push a URL Object, and use "shallow":
-    promise = memoryRouter.push(
-      { pathname: "/one/two", query: { foo: "bar" } },
-      undefined,
-      { shallow: true }
-    );
-    expect(routeChangeStart).toHaveBeenCalledTimes(2);
-    expect(routeChangeStart).toHaveBeenLastCalledWith("/one/two?foo=bar", {
-      shallow: true,
-    });
-    expect(routeChangeComplete).toHaveBeenCalledTimes(1);
-    await promise;
-    expect(routeChangeComplete).toHaveBeenCalledTimes(2);
-    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one/two?foo=bar", {
-      shallow: true,
+    it("should both be triggered when pushing a URL", async () => {
+      await memoryRouter.push("/one");
+      expect(routeChangeStart).toHaveBeenCalledWith("/one", {
+        shallow: false,
+      });
+      expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
+        shallow: false,
+      });
     });
 
-    // Replace this time:
-    promise = memoryRouter.replace("/one/two/three");
-    expect(routeChangeStart).toHaveBeenCalledTimes(3);
-    expect(routeChangeStart).toHaveBeenLastCalledWith("/one/two/three", {
-      shallow: false,
-    });
-    expect(routeChangeComplete).toHaveBeenCalledTimes(2);
-    await promise;
-    expect(routeChangeComplete).toHaveBeenCalledTimes(3);
-    expect(routeChangeComplete).toHaveBeenLastCalledWith("/one/two/three", {
-      shallow: false,
+    it("should both be triggered in the correct async order", async () => {
+      const promise = memoryRouter.push("/one/two/three");
+      expect(routeChangeStart).toHaveBeenCalledWith("/one/two/three", {
+        shallow: false,
+      });
+      expect(routeChangeComplete).not.toHaveBeenCalled();
+      await promise;
+      expect(routeChangeComplete).toHaveBeenCalledWith("/one/two/three", {
+        shallow: false,
+      });
     });
 
-    memoryRouter.events.off("routeChangeStart", routeChangeStart);
-    memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
+    it("should be triggered when pushing a URL Object", async () => {
+      await memoryRouter.push({ pathname: "/one/two", query: { foo: "bar" } });
+      expect(routeChangeStart).toHaveBeenCalled();
+      expect(routeChangeStart).toHaveBeenCalledWith("/one/two?foo=bar", {
+        shallow: false,
+      });
+      expect(routeChangeComplete).toHaveBeenCalledWith("/one/two?foo=bar", {
+        shallow: false,
+      });
+    });
+
+    it("should be triggered when replacing", async () => {
+      await memoryRouter.replace("/one/two/three");
+      expect(routeChangeStart).toHaveBeenCalled();
+      expect(routeChangeStart).toHaveBeenCalledWith("/one/two/three", {
+        shallow: false,
+      });
+      expect(routeChangeComplete).toHaveBeenCalledWith("/one/two/three", {
+        shallow: false,
+      });
+    });
+
+    it("should provide the 'shallow' value", async () => {
+      await memoryRouter.push("/test", undefined, { shallow: true });
+      expect(routeChangeStart).toHaveBeenCalled();
+      expect(routeChangeStart).toHaveBeenCalledWith("/test", {
+        shallow: true,
+      });
+      expect(routeChangeComplete).toHaveBeenCalledWith("/test", {
+        shallow: true,
+      });
+    });
   });
 
   it("pushing UrlObjects should update the route", async () => {
