@@ -15,11 +15,9 @@ export const useRouter = () => {
       // Clone the (mutable) memoryRouter, to ensure we trigger an update
       setRouter({ ...memoryRouter });
     };
-    memoryRouter.events.on("routeChangeStart", handleRouteChange);
     memoryRouter.events.on("routeChangeComplete", handleRouteChange);
 
     return () => {
-      memoryRouter.events.off("routeChangeStart", handleRouteChange);
       memoryRouter.events.off("routeChangeComplete", handleRouteChange);
     };
   }, []);
