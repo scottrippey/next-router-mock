@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
+
 import router, { useRouter } from "./router";
 import { MemoryRouter } from "./MemoryRouter";
 
@@ -8,36 +10,74 @@ describe("router", () => {
   });
 
   describe("useRouter", () => {
-    it("the useRouter hook should return the same instance of the router", () => {
+    it("the useRouter hook initially returns the same instance of the router", async () => {
       const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
     });
 
-    it('"push" will cause a rerender with the new route', () => {
-      const { result, rerender } = renderHook(() => useRouter());
+    it("will allow capturing previous route values in hooks with routing events", async () => {
+      // see: https://github.com/streamich/react-use/blob/master/src/usePrevious.ts
+      const usePrevious = function <T>(value: T): T | undefined {
+        const previous = useRef<T>();
+
+        useEffect(() => {
+          previous.current = value;
+        });
+
+        return previous.current;
+      };
+
+      const useRouterWithPrevious = () => {
+        const { asPath } = useRouter();
+        const previousAsPath = usePrevious(asPath);
+
+        return [previousAsPath, asPath];
+      };
+
+      // Set initial state:
+      router.setCurrentUrl("/foo");
+
+      const { result } = renderHook(() => useRouterWithPrevious());
+
+      expect(result.current).toEqual([undefined, "/foo"]);
+
+      await act(async () => {
+        await router.push("/foo?bar=baz");
+      });
+
+      expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
+      expect(result.all).toHaveLength(2);
+    });
+
+    it('"push" will cause a rerender with the new route', async () => {
+      const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
 
-      act(() => {
-        result.current.push("/foo?bar=baz");
+      await act(async () => {
+        await result.current.push("/foo?bar=baz");
       });
 
       expect(result.current).not.toBe(router);
+      expect(result.current).toEqual(router);
       expect(result.current).toMatchObject({
         asPath: "/foo?bar=baz",
         pathname: "/foo",
         query: { bar: "baz" },
       });
+
+      // Ensure only 2 renders happened:
+      expect(result.all).toHaveLength(2);
     });
 
-    it("support the locales and locale properties", () => {
+    it("support the locales and locale properties", async () => {
       const { result } = renderHook(() => useRouter());
       expect(result.current.locale).toBe(undefined);
       expect(result.current.locales).toEqual([]);
 
-      act(() => {
-        result.current.push("/", undefined, { locale: "en" })
+      await act(async () => {
+        await result.current.push("/", undefined, { locale: "en" });
       });
       expect(result.current.locale).toBe("en");
     });

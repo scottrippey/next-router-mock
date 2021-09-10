@@ -1,4 +1,4 @@
-import mitt from "mitt";
+import mitt, { MittEmitter } from "./lib/mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
@@ -43,9 +43,7 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes = {
-  routeChangeComplete: undefined;
-};
+type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -58,11 +56,15 @@ export abstract class BaseRouter implements NextRouter {
   asPath = "";
   basePath = "";
   isFallback = false;
-  events = mitt<SupportedEventTypes>();
+  events: MittEmitter<SupportedEventTypes> = mitt();
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
+  push = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions
+  ): Promise<boolean> => {
     throw new Error("NotImplemented");
   };
   replace = async (url: Url): Promise<boolean> => {
@@ -89,36 +91,53 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  push = async (url: Url, as?: Url, options?: TransitionOptions) => {
-    this.setMemoryRoute(url, as, options);
-
-    return true;
+  push = (url: Url, as?: Url, options?: TransitionOptions) => {
+    return this._setCurrentUrl(url, as, options, true);
   };
 
-  replace = async (url: Url) => {
-    this.setMemoryRoute(url);
-
-    return true;
+  replace = (url: Url, as?: Url, options?: TransitionOptions) => {
+    return this._setCurrentUrl(url, as, options, true);
   };
 
   /**
-   * Sets the current route to the specified url.
-   * @param url - String or Url-like object
+   * Sets the current Memory route to the specified url, synchronously.
    */
-  setMemoryRoute = (url: Url, as?: Url, options?: TransitionOptions) => {
+  public setCurrentUrl = (url: Url) => {
+    void this._setCurrentUrl(url); // (ignore the returned promise)
+  };
+
+  private _setCurrentUrl = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions,
+    async?: boolean
+  ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
-    this.pathname = urlObject.pathname || "";
-    this.query = urlObject.query || {};
-    this.asPath = getRouteAsPath(this.pathname, this.query);
+    const shallow = options?.shallow || false;
+    const pathname = urlObject.pathname || "";
+    const query = urlObject.query || {};
+    const asPath = getRouteAsPath(pathname, query);
 
+    this.events.emit("routeChangeStart", asPath, { shallow });
+
+    // Simulate the async nature of this method
+    if (async) await new Promise((resolve) => setImmediate(resolve));
+
+    this.pathname = pathname;
+    this.query = query;
+    this.asPath = asPath;
     if (options?.locale) {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeComplete");
+    this.events.emit("routeChangeComplete", this.asPath, { shallow });
+
+    return true;
   };
 
-  prefetch = async () => { /* Do nothing */ }
+  prefetch = async () => {
+    /* Do nothing */
+  };
 }

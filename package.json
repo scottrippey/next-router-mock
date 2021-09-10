@@ -54,7 +54,5 @@
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
   },
-  "dependencies": {
-    "mitt": "^3.0.0"
-  }
+  "dependencies": {}
 }
