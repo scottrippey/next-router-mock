@@ -35,8 +35,8 @@ describe("router", () => {
         return [previousAsPath, asPath];
       };
 
-      // Push initial state
-      await router.push('/foo');
+      // Set initial state:
+      router.setCurrentUrl("/foo");
 
       const { result } = renderHook(() => useRouterWithPrevious());
 

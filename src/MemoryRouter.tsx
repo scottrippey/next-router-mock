@@ -60,7 +60,11 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
+  push = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions
+  ): Promise<boolean> => {
     throw new Error("NotImplemented");
   };
   replace = async (url: Url): Promise<boolean> => {
@@ -88,18 +92,26 @@ export abstract class BaseRouter implements NextRouter {
  */
 export class MemoryRouter extends BaseRouter {
   push = (url: Url, as?: Url, options?: TransitionOptions) => {
-    return this.setMemoryRoute(url, as, options);
+    return this._setCurrentUrl(url, as, options, true);
   };
 
-  replace = (url: Url) => {
-    return this.setMemoryRoute(url);
+  replace = (url: Url, as?: Url, options?: TransitionOptions) => {
+    return this._setCurrentUrl(url, as, options, true);
   };
 
   /**
-   * Sets the current route to the specified url.
-   * @param url - String or Url-like object
+   * Sets the current Memory route to the specified url, synchronously.
    */
-  setMemoryRoute = async (url: Url, as?: Url, options?: TransitionOptions) => {
+  public setCurrentUrl = (url: Url) => {
+    void this._setCurrentUrl(url); // (ignore the returned promise)
+  };
+
+  private _setCurrentUrl = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions,
+    async?: boolean
+  ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
@@ -111,7 +123,7 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeStart", asPath, { shallow });
 
     // Simulate the async nature of this method
-    await new Promise(resolve => setImmediate(resolve));
+    if (async) await new Promise((resolve) => setImmediate(resolve));
 
     this.pathname = pathname;
     this.query = query;
