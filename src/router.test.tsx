@@ -1,7 +1,8 @@
+import { useEffect, useRef } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
+
 import router, { useRouter } from "./router";
 import { MemoryRouter } from "./MemoryRouter";
-import { useEffect, useRef } from "react";
 
 describe("router", () => {
   it("should export a default router", () => {
@@ -9,15 +10,13 @@ describe("router", () => {
   });
 
   describe("useRouter", () => {
-    it("the useRouter hook should return the same instance of the router", async () => {
+    it("the useRouter hook initially returns the same instance of the router", async () => {
       const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
     });
 
     it("will allow capturing previous route values in hooks with routing events", async () => {
-      const mockOnRouteChange = jest.fn();
-
       // see: https://github.com/streamich/react-use/blob/master/src/usePrevious.ts
       const usePrevious = function <T>(value: T): T | undefined {
         const previous = useRef<T>();
@@ -30,21 +29,10 @@ describe("router", () => {
       };
 
       const useRouterWithPrevious = () => {
-        const { asPath, events } = useRouter();
+        const { asPath } = useRouter();
         const previousAsPath = usePrevious(asPath);
 
-        useEffect(() => {
-          const handleRouteChangeComplete = (nextUrl: string) =>
-            mockOnRouteChange(previousAsPath, nextUrl);
-
-          events.on("routeChangeComplete", handleRouteChangeComplete);
-
-          return () => {
-            events.off("routeChangeComplete", handleRouteChangeComplete);
-          };
-        }, [previousAsPath, events]);
-
-        return router;
+        return [previousAsPath, asPath];
       };
 
       // Push initial state
@@ -52,14 +40,17 @@ describe("router", () => {
 
       const { result } = renderHook(() => useRouterWithPrevious());
 
+      expect(result.current).toEqual([undefined, "/foo"]);
+
       await act(async () => {
-        await result.current.push("/foo?bar=baz");
+        await router.push("/foo?bar=baz");
       });
 
-      expect(mockOnRouteChange).toHaveBeenCalledWith("/foo", "/foo?bar=baz");
+      expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
+      expect(result.all).toHaveLength(2);
     });
 
-    it('"push" will cause a rerender on routeChangeComplete with the new route', async () => {
+    it('"push" will cause a rerender with the new route', async () => {
       const { result } = renderHook(() => useRouter());
 
       expect(result.current).toBe(router);
@@ -69,11 +60,15 @@ describe("router", () => {
       });
 
       expect(result.current).not.toBe(router);
+      expect(result.current).toEqual(router);
       expect(result.current).toMatchObject({
         asPath: "/foo?bar=baz",
         pathname: "/foo",
         query: { bar: "baz" },
       });
+
+      // Ensure only 2 renders happened:
+      expect(result.all).toHaveLength(2);
     });
 
     it("support the locales and locale properties", async () => {

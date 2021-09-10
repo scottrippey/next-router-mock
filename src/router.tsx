@@ -9,7 +9,6 @@ export default memoryRouter;
 // Overrides the useRouter hook:
 export const useRouter = () => {
   const [router, setRouter] = useState(memoryRouter);
-  const [, rerender] = useState<object>();
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -17,15 +16,9 @@ export const useRouter = () => {
       setRouter({ ...memoryRouter });
     };
 
-    const handleRouteStart = () => {
-      rerender({});
-    };
-
-    memoryRouter.events.on("routeChangeStart", handleRouteStart);
     memoryRouter.events.on("routeChangeComplete", handleRouteChange);
 
     return () => {
-      memoryRouter.events.off("routeChangeStart", handleRouteStart);
       memoryRouter.events.off("routeChangeComplete", handleRouteChange);
     };
   }, []);
