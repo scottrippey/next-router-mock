@@ -60,28 +60,28 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (
+  async push(
     url: Url,
     as?: Url,
     options?: TransitionOptions
-  ): Promise<boolean> => {
+  ): Promise<boolean> {
     throw new Error("NotImplemented");
-  };
-  replace = async (url: Url): Promise<boolean> => {
+  }
+  async replace(url: Url): Promise<boolean> {
     throw new Error("NotImplemented");
-  };
-  back = () => {
+  }
+  back() {
     throw new Error("NotImplemented");
-  };
-  beforePopState = () => {
+  }
+  beforePopState() {
     throw new Error("NotImplemented");
-  };
-  prefetch = async (): Promise<void> => {
+  }
+  async prefetch(): Promise<void> {
     throw new Error("NotImplemented");
-  };
-  reload = () => {
+  }
+  reload() {
     throw new Error("NotImplemented");
-  };
+  }
 }
 
 /**
@@ -100,27 +100,27 @@ export class MemoryRouter extends BaseRouter {
    */
   public async = false;
 
-  push = (url: Url, as?: Url, options?: TransitionOptions) => {
+  push(url: Url, as?: Url, options?: TransitionOptions) {
     return this._setCurrentUrl(url, as, options);
-  };
+  }
 
-  replace = (url: Url, as?: Url, options?: TransitionOptions) => {
+  replace(url: Url, as?: Url, options?: TransitionOptions) {
     return this._setCurrentUrl(url, as, options);
-  };
+  }
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
-  public setCurrentUrl = (url: Url) => {
+  public setCurrentUrl(url: Url) {
     void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
-  };
+  }
 
-  private _setCurrentUrl = async (
+  private async _setCurrentUrl(
     url: Url,
     as?: Url,
     options?: TransitionOptions,
     async = this.async
-  ) => {
+  ) {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
@@ -144,9 +144,9 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
 
     return true;
-  };
+  }
 
-  prefetch = async () => {
+  async prefetch() {
     /* Do nothing */
-  };
+  }
 }
