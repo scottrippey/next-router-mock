@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
 
-import router, { useRouter } from "./router";
+import router, { useRouter } from "./useRouter";
 import { MemoryRouter } from "./MemoryRouter";
 
 describe("router", () => {

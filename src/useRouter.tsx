@@ -13,7 +13,7 @@ export const useRouter = () => {
   useEffect(() => {
     const handleRouteChange = () => {
       // Clone the (mutable) memoryRouter, to ensure we trigger an update
-      setRouter({ ...memoryRouter });
+      setRouter(r => MemoryRouter.clone(r));
     };
 
     memoryRouter.events.on("routeChangeComplete", handleRouteChange);

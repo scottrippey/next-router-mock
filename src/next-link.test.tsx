@@ -2,9 +2,9 @@ import React from "react";
 import NextLink from "next/link";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import MockRouter from "./router";
+import MockRouter from "./useRouter";
 
-jest.mock("next/dist/client/router", () => require("./router"));
+jest.mock("next/dist/client/router", () => require("./useRouter"));
 
 describe("next/link", () => {
   describe("clicking a link will mock navigate", () => {
