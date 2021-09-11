@@ -5,7 +5,7 @@ export { useMemoryRouter } from "./useMemoryRouter";
 export { MemoryRouter, BaseRouter } from "./MemoryRouter";
 
 export const memoryRouter = new MemoryRouter();
-memoryRouter.async = false;
+memoryRouter.async = true;
 export default memoryRouter;
 
 export const useRouter = () => {

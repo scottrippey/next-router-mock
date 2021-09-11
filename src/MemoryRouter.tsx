@@ -98,7 +98,7 @@ export class MemoryRouter extends BaseRouter {
   /**
    *
    */
-  public async = true;
+  public async = false;
 
   push = (url: Url, as?: Url, options?: TransitionOptions) => {
     return this._setCurrentUrl(url, as, options);
@@ -119,7 +119,7 @@ export class MemoryRouter extends BaseRouter {
     url: Url,
     as?: Url,
     options?: TransitionOptions,
-    async = this.async,
+    async = this.async
   ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
