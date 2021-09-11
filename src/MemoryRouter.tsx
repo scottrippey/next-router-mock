@@ -91,26 +91,35 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
+  static clone(original: MemoryRouter): MemoryRouter {
+    return Object.assign(new MemoryRouter(), original);
+  }
+
+  /**
+   *
+   */
+  public async = true;
+
   push = (url: Url, as?: Url, options?: TransitionOptions) => {
-    return this._setCurrentUrl(url, as, options, true);
+    return this._setCurrentUrl(url, as, options);
   };
 
   replace = (url: Url, as?: Url, options?: TransitionOptions) => {
-    return this._setCurrentUrl(url, as, options, true);
+    return this._setCurrentUrl(url, as, options);
   };
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
   public setCurrentUrl = (url: Url) => {
-    void this._setCurrentUrl(url); // (ignore the returned promise)
+    void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
   };
 
   private _setCurrentUrl = async (
     url: Url,
     as?: Url,
     options?: TransitionOptions,
-    async?: boolean
+    async = this.async,
   ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
