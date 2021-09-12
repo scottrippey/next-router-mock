@@ -49,7 +49,7 @@ type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
 export abstract class BaseRouter implements NextRouter {
-  isReady = false;
+  isReady = true;
   route = "";
   pathname = "";
   query = {} as ParsedUrlQuery;
@@ -60,27 +60,23 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  async push(
+  abstract push(
     url: Url,
     as?: Url,
     options?: TransitionOptions
-  ): Promise<boolean> {
-    throw new Error("NotImplemented");
-  }
-  async replace(url: Url): Promise<boolean> {
-    throw new Error("NotImplemented");
-  }
+  ): Promise<boolean>;
+  abstract replace(url: Url): Promise<boolean>;
   back() {
-    throw new Error("NotImplemented");
+    // Do nothing
   }
   beforePopState() {
-    throw new Error("NotImplemented");
+    // Do nothing
   }
   async prefetch(): Promise<void> {
-    throw new Error("NotImplemented");
+    // Do nothing
   }
   reload() {
-    throw new Error("NotImplemented");
+    // Do nothing
   }
 }
 
@@ -144,9 +140,5 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
 
     return true;
-  }
-
-  async prefetch() {
-    /* Do nothing */
   }
 }

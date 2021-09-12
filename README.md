@@ -97,7 +97,6 @@ However, Next normally handles route changes asynchronously, and in certain case
 - `router.query`
 - `router.locale`
 - `router.locales`
-- `router.prefetch(url)` (does nothing)
 - Works with `next/link` (see Jest notes)
 - `router.events` supports:
   - `routeChangeStart(url, { shallow })`
@@ -105,16 +104,18 @@ However, Next normally handles route changes asynchronously, and in certain case
 
 ## Not yet supported:
 
-PRs welcome!
+PRs welcome!  
+These fields have default values; these methods do nothing.
 
 - `router.isReady`
 - `router.route`
 - `router.basePath`
 - `router.isFallback`
+- `router.prefetch()` 
 - `router.back()`
 - `router.beforePopState(cb)`
 - `router.reload()`
-- `router.events` not yet supported: 
+- `router.events` not implemented: 
   - `routeChangeError`
   - `beforeHistoryChange`
   - `hashChangeStart`
