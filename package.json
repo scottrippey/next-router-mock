@@ -1,8 +1,8 @@
 {
   "name": "next-router-mock",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Mock implementation of the Next.js Router",
-  "main": "dist/router",
+  "main": "dist/index",
   "files": [
     "dist",
     "src"
@@ -54,7 +54,5 @@
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
   },
-  "dependencies": {
-    "mitt": "^3.0.0"
-  }
+  "dependencies": {}
 }

@@ -1,4 +1,4 @@
-import mitt from "mitt";
+import mitt, { MittEmitter } from "./lib/mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
@@ -43,43 +43,41 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes = {
-  routeChangeComplete: undefined;
-};
+type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
 export abstract class BaseRouter implements NextRouter {
-  isReady = false;
+  isReady = true;
   route = "";
   pathname = "";
   query = {} as ParsedUrlQuery;
   asPath = "";
   basePath = "";
   isFallback = false;
-  events = mitt<SupportedEventTypes>();
+  events: MittEmitter<SupportedEventTypes> = mitt();
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  push = async (url: Url, as?: Url, options?: TransitionOptions): Promise<boolean> => {
-    throw new Error("NotImplemented");
-  };
-  replace = async (url: Url): Promise<boolean> => {
-    throw new Error("NotImplemented");
-  };
-  back = () => {
-    throw new Error("NotImplemented");
-  };
-  beforePopState = () => {
-    throw new Error("NotImplemented");
-  };
-  prefetch = async (): Promise<void> => {
-    throw new Error("NotImplemented");
-  };
-  reload = () => {
-    throw new Error("NotImplemented");
-  };
+  abstract push(
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions
+  ): Promise<boolean>;
+  abstract replace(url: Url): Promise<boolean>;
+  back() {
+    // Do nothing
+  }
+  beforePopState() {
+    // Do nothing
+  }
+  async prefetch(): Promise<void> {
+    // Do nothing
+  }
+  reload() {
+    // Do nothing
+  }
 }
 
 /**
@@ -89,36 +87,58 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  push = async (url: Url, as?: Url, options?: TransitionOptions) => {
-    this.setMemoryRoute(url, as, options);
-
-    return true;
-  };
-
-  replace = async (url: Url) => {
-    this.setMemoryRoute(url);
-
-    return true;
-  };
+  static clone(original: MemoryRouter): MemoryRouter {
+    return Object.assign(new MemoryRouter(), original);
+  }
 
   /**
-   * Sets the current route to the specified url.
-   * @param url - String or Url-like object
+   *
    */
-  setMemoryRoute = (url: Url, as?: Url, options?: TransitionOptions) => {
+  public async = false;
+
+  push(url: Url, as?: Url, options?: TransitionOptions) {
+    return this._setCurrentUrl(url, as, options);
+  }
+
+  replace(url: Url, as?: Url, options?: TransitionOptions) {
+    return this._setCurrentUrl(url, as, options);
+  }
+
+  /**
+   * Sets the current Memory route to the specified url, synchronously.
+   */
+  public setCurrentUrl(url: Url) {
+    void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
+  }
+
+  private async _setCurrentUrl(
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions,
+    async = this.async
+  ) {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
-    this.pathname = urlObject.pathname || "";
-    this.query = urlObject.query || {};
-    this.asPath = getRouteAsPath(this.pathname, this.query);
+    const shallow = options?.shallow || false;
+    const pathname = urlObject.pathname || "";
+    const query = urlObject.query || {};
+    const asPath = getRouteAsPath(pathname, query);
 
+    this.events.emit("routeChangeStart", asPath, { shallow });
+
+    // Simulate the async nature of this method
+    if (async) await new Promise((resolve) => setImmediate(resolve));
+
+    this.pathname = pathname;
+    this.query = query;
+    this.asPath = asPath;
     if (options?.locale) {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeComplete");
-  };
+    this.events.emit("routeChangeComplete", this.asPath, { shallow });
 
-  prefetch = async () => { /* Do nothing */ }
+    return true;
+  }
 }
