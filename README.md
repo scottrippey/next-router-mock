@@ -1,9 +1,8 @@
 # `next-router-mock`
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
-address bar). Useful in tests and in Storybook. Inspired
-by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)
-.
+address bar). Useful in tests. Inspired
+by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md).
 
 # API
 
@@ -34,16 +33,17 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 
 describe('router', () => {
-  it('supports the `push` and `replace` methods', async () => {
-    await router.push('/foo?bar=baz');
+  it('supports the `push` and `replace` methods', () => {
+    router.push('/foo?bar=baz');
     expect(router).toMatchObject({
       asPath: '/foo?bar=baz',
       pathname: '/foo',
       query: { bar: 'baz' },
     });
   });
-  it('supports url object routes too', async () => {
-    await router.push({
+  
+  it('supports url object routes too', () => {
+    router.push({
       pathname: '/foo/[id]',
       query: { id: '123', bar: 'baz' },
     });
@@ -54,6 +54,25 @@ describe('router', () => {
     });
   });
 
+  it('next/link can be tested too', () => {
+    render(<NextLink href="/example?foo=bar">Example Link</NextLink>);
+    fireEvent.click(screen.getByText('Example Link'));
+    expect(router).toMatchObject({
+      asPath: '/example?foo=bar',
+      pathname: '/example',
+      query: { foo: 'bar' },
+    });
+  });
+});
+```
+
+[comment]: <> (# `next-router-mock/async`)
+# Sync vs Async
+
+By default, `next-router-mock` handles route changes synchronously.  This is convenient for testing, and works for most use-cases.  
+However, Next normally handles route changes asynchronously, and in certain cases you might actually rely on that behavior.  If that's the case, you can use `next-router-mock/async`.  Tests will need to account for the async behavior too; for example:
+
+```jsx
   it('next/link can be tested too', async () => {
     render(<NextLink href="/example?foo=bar">Example Link</NextLink>);
     fireEvent.click(screen.getByText('Example Link'));
@@ -65,13 +84,10 @@ describe('router', () => {
       });
     });
   });
-
-});
 ```
 
-# Features
 
-Currently supported features:
+# Supported Features
 
 - `useRouter()`
 - `router.push(url, as, options)`
