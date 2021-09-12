@@ -66,7 +66,6 @@ describe('router', () => {
 });
 ```
 
-[comment]: <> (# `next-router-mock/async`)
 # Sync vs Async
 
 By default, `next-router-mock` handles route changes synchronously.  This is convenient for testing, and works for most use-cases.  
