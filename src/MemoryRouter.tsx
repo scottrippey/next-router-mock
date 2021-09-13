@@ -79,12 +79,9 @@ export abstract class BaseRouter implements NextRouter {
 
 /**
  * An implementation of NextRouter that does not change the URL, but just stores the current route in memory.
- *
- * Currently only supports the `push` and `replace` methods.
- * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  static clone(original: MemoryRouter): MemoryRouter {
+  static snapshot(original: MemoryRouter): Readonly<MemoryRouter> {
     return Object.assign(new MemoryRouter(), original);
   }
 
@@ -95,8 +92,9 @@ export class MemoryRouter extends BaseRouter {
   }
 
   /**
-   * By default, route changes happen synchronously.
-   * Set this to `true` to handle route changes asynchronously.
+   * When enabled, there will be a short delay between calling `push` and when the router is updated.
+   * This is used to simulate Next's async behavior.
+   * However, for most tests, it is more convenient to leave this off.
    */
   public async = false;
 
@@ -115,14 +113,10 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
   }
 
-  private async _setCurrentUrl(
-    url: Url,
-    as?: Url,
-    options?: TransitionOptions,
-    // internal:
-    source?: "push" | "replace" | "set",
-    async = this.async
-  ) {
+  private _setCurrentUrl = async (url: Url, as?: Url, options?: TransitionOptions,
+                                  source?: "push" | "replace" | "set",
+
+                                  async = this.async) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
@@ -134,7 +128,7 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeStart", asPath, { shallow });
 
     // Simulate the async nature of this method
-    if (async) await new Promise((resolve) => setImmediate(resolve));
+    if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     this.pathname = pathname;
     this.query = query;
@@ -150,5 +144,5 @@ export class MemoryRouter extends BaseRouter {
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
-  }
+  };
 }

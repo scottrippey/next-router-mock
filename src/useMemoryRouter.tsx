@@ -10,39 +10,36 @@ export type MemoryRouterEventHandlers = {
 };
 
 export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: MemoryRouterEventHandlers) => {
-  const [router, setRouter] = useState(singletonRouter);
+  const [router, setRouter] = useState(() => MemoryRouter.snapshot(singletonRouter));
 
   // Trigger updates on route changes:
   useEffect(() => {
     const handleRouteChange = () => {
-      // Clone the (mutable) memoryRouter, to ensure we trigger an update
-      setRouter((r) => MemoryRouter.clone(r));
+      // Ensure the reference changes each render:
+      setRouter(MemoryRouter.snapshot(singletonRouter));
     };
 
-    router.events.on("routeChangeComplete", handleRouteChange);
-    return () => router.events.off("routeChangeComplete", handleRouteChange);
-  }, [
-    // Events is a singleton, shared by all clones, so this should never actually change:
-    router.events,
-  ]);
+    singletonRouter.events.on("routeChangeComplete", handleRouteChange);
+    return () => singletonRouter.events.off("routeChangeComplete", handleRouteChange);
+  }, [singletonRouter]);
 
   useEffect(() => {
     if (!eventHandlers) return;
     const { onRouteChange, onRouteChangeStart, onPush, onReplace } = eventHandlers;
     if (!(onRouteChange || onRouteChangeStart || onPush || onReplace)) return;
 
-    if (onRouteChangeStart) router.events.on("routeChangeStart", onRouteChangeStart);
-    if (onRouteChange) router.events.on("routeChangeComplete", onRouteChange);
-    if (onPush) router.events.on("NEXT_ROUTER_MOCK:push", onPush);
-    if (onReplace) router.events.on("NEXT_ROUTER_MOCK:replace", onReplace);
+    if (onRouteChangeStart) singletonRouter.events.on("routeChangeStart", onRouteChangeStart);
+    if (onRouteChange) singletonRouter.events.on("routeChangeComplete", onRouteChange);
+    if (onPush) singletonRouter.events.on("NEXT_ROUTER_MOCK:push", onPush);
+    if (onReplace) singletonRouter.events.on("NEXT_ROUTER_MOCK:replace", onReplace);
     return () => {
-      if (onRouteChangeStart) router.events.off("routeChangeStart", onRouteChangeStart);
-      if (onRouteChange) router.events.off("routeChangeComplete", onRouteChange);
-      if (onPush) router.events.off("NEXT_ROUTER_MOCK:push", onPush);
-      if (onReplace) router.events.off("NEXT_ROUTER_MOCK:replace", onReplace);
+      if (onRouteChangeStart) singletonRouter.events.off("routeChangeStart", onRouteChangeStart);
+      if (onRouteChange) singletonRouter.events.off("routeChangeComplete", onRouteChange);
+      if (onPush) singletonRouter.events.off("NEXT_ROUTER_MOCK:push", onPush);
+      if (onReplace) singletonRouter.events.off("NEXT_ROUTER_MOCK:replace", onReplace);
     };
   }, [
-    router.events,
+    singletonRouter.events,
     eventHandlers?.onRouteChange,
     eventHandlers?.onRouteChangeStart,
     eventHandlers?.onPush,
