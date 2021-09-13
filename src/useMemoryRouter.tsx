@@ -2,24 +2,18 @@ import { useEffect, useState } from "react";
 
 import { MemoryRouter } from "./MemoryRouter";
 
-export const useMemoryRouter = (initialRouter: MemoryRouter) => {
-  const [router, setRouter] = useState(initialRouter);
+export const useMemoryRouter = (singletonRouter: MemoryRouter) => {
+  const [router, setRouter] = useState(() => MemoryRouter.snapshot(singletonRouter));
 
   useEffect(() => {
     const handleRouteChange = () => {
-      // Clone the (mutable) memoryRouter, to ensure we trigger an update
-      setRouter((r) => MemoryRouter.clone(r));
+      // Ensure the reference changes each render:
+      setRouter(MemoryRouter.snapshot(singletonRouter));
     };
 
-    router.events.on("routeChangeComplete", handleRouteChange);
-
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [
-    // Events is a singleton, shared by all clones, so this should never actually change:
-    router.events,
-  ]);
+    singletonRouter.events.on("routeChangeComplete", handleRouteChange);
+    return () => singletonRouter.events.off("routeChangeComplete", handleRouteChange);
+  }, [singletonRouter]);
 
   return router;
 };

@@ -12,15 +12,12 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(
-    /\[(.+?)]/g,
-    ($0, slug: keyof ParsedUrlQuery) => {
-      const value = remainingQuery[slug]!;
-      delete remainingQuery[slug];
+  let asPath = pathname.replace(/\[(.+?)]/g, ($0, slug: keyof ParsedUrlQuery) => {
+    const value = remainingQuery[slug]!;
+    delete remainingQuery[slug];
 
-      return encodeURIComponent(String(value));
-    }
-  );
+    return encodeURIComponent(String(value));
+  });
 
   // Append remaining query as a querystring, if needed:
   const qs = stringifyQueryString(remainingQuery);
@@ -60,11 +57,7 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  abstract push(
-    url: Url,
-    as?: Url,
-    options?: TransitionOptions
-  ): Promise<boolean>;
+  abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
   back() {
     // Do nothing
@@ -82,17 +75,16 @@ export abstract class BaseRouter implements NextRouter {
 
 /**
  * An implementation of NextRouter that does not change the URL, but just stores the current route in memory.
- *
- * Currently only supports the `push` and `replace` methods.
- * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  static clone(original: MemoryRouter): MemoryRouter {
+  static snapshot(original: MemoryRouter): Readonly<MemoryRouter> {
     return Object.assign(new MemoryRouter(), original);
   }
 
   /**
-   *
+   * When enabled, there will be a short delay between calling `push` and when the router is updated.
+   * This is used to simulate Next's async behavior.
+   * However, for most tests, it is more convenient to leave this off.
    */
   public async = false;
 
@@ -111,12 +103,7 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
   }
 
-  private async _setCurrentUrl(
-    url: Url,
-    as?: Url,
-    options?: TransitionOptions,
-    async = this.async
-  ) {
+  private _setCurrentUrl = async (url: Url, as?: Url, options?: TransitionOptions, async = this.async) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
@@ -140,5 +127,5 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
 
     return true;
-  }
+  };
 }
