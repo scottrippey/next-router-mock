@@ -9,8 +9,8 @@ export type MemoryRouterEventHandlers = {
   onReplace?: (url: string, options: { shallow: boolean }) => void;
 };
 
-export const useMemoryRouter = (initialRouter: () => MemoryRouter, eventHandlers?: MemoryRouterEventHandlers) => {
-  const [router, setRouter] = useState(initialRouter);
+export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: MemoryRouterEventHandlers) => {
+  const [router, setRouter] = useState(singletonRouter);
 
   // Trigger updates on route changes:
   useEffect(() => {

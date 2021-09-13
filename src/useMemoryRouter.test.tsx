@@ -4,14 +4,11 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 
-export function useRouterTests(
-  router: MemoryRouter,
-  useRouter: () => MemoryRouter
-) {
+export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => Readonly<MemoryRouter>) {
   it("the useRouter hook initially returns the same instance of the router", async () => {
     const { result } = renderHook(() => useRouter());
 
-    expect(result.current).toBe(router);
+    expect(result.current).toBe(singletonRouter);
   });
 
   it("will allow capturing previous route values in hooks with routing events", async () => {
@@ -34,14 +31,14 @@ export function useRouterTests(
     };
 
     // Set initial state:
-    router.setCurrentUrl("/foo");
+    singletonRouter.setCurrentUrl("/foo");
 
     const { result } = renderHook(() => useRouterWithPrevious());
 
     expect(result.current).toEqual([undefined, "/foo"]);
 
     await act(async () => {
-      await router.push("/foo?bar=baz");
+      await singletonRouter.push("/foo?bar=baz");
     });
 
     expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
@@ -51,14 +48,14 @@ export function useRouterTests(
   it('"push" will cause a rerender with the new route', async () => {
     const { result } = renderHook(() => useRouter());
 
-    expect(result.current).toBe(router);
+    expect(result.current).toBe(singletonRouter);
 
     await act(async () => {
       await result.current.push("/foo?bar=baz");
     });
 
-    expect(result.current).not.toBe(router);
-    expect(result.current).toEqual(router);
+    expect(result.current).not.toBe(singletonRouter);
+    expect(result.current).toEqual(singletonRouter);
     expect(result.current).toMatchObject({
       asPath: "/foo?bar=baz",
       pathname: "/foo",
@@ -82,7 +79,7 @@ export function useRouterTests(
 }
 
 describe("useMemoryRouter", () => {
-  const router = new MemoryRouter();
-  const useRouter = () => useMemoryRouter(() => router);
-  useRouterTests(router, useRouter);
+  const singletonRouter = new MemoryRouter();
+  const useRouter = () => useMemoryRouter(singletonRouter);
+  useRouterTests(singletonRouter, useRouter);
 });

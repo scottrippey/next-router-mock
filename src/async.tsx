@@ -9,5 +9,5 @@ memoryRouter.async = true;
 export default memoryRouter;
 
 export const useRouter = () => {
-  return useMemoryRouter(() => memoryRouter);
+  return useMemoryRouter(memoryRouter);
 };
