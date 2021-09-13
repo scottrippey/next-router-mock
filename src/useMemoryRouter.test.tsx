@@ -26,9 +26,15 @@ export function useRouterTests(
       return previous.current;
     };
 
+    const renderSpy = jest.fn();
+
     const useRouterWithPrevious = () => {
       const { asPath } = useRouter();
       const previousAsPath = usePrevious(asPath);
+
+      useEffect(() => {
+        renderSpy();
+      });
 
       return [previousAsPath, asPath];
     };
@@ -46,10 +52,31 @@ export function useRouterTests(
 
     expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
     expect(result.all).toHaveLength(2);
+
+    await act(async () => {
+      await router.push("/foo?joe=doe");
+    });
+
+    expect(result.current).toEqual(["/foo?bar=baz", "/foo?joe=doe"]);
+    expect(result.all).toHaveLength(3);
+    // Only 3 changes have happened to the router,
+    // so the spy should be called exactly 3 times.
+    expect(renderSpy).toHaveBeenCalledTimes(3);
   });
 
   it('"push" will cause a rerender with the new route', async () => {
-    const { result } = renderHook(() => useRouter());
+    const renderSpy = jest.fn();
+
+    const { result } = renderHook(() => {
+      const router = useRouter();
+      // track how many times the hook does a render pass
+      // by spying on a `useEffect` with no dependencies
+      useEffect(() => {
+        renderSpy();
+      });
+
+      return router;
+    });
 
     expect(result.current).toBe(router);
 
@@ -57,16 +84,31 @@ export function useRouterTests(
       await result.current.push("/foo?bar=baz");
     });
 
-    expect(result.current).not.toBe(router);
     expect(result.current).toEqual(router);
     expect(result.current).toMatchObject({
       asPath: "/foo?bar=baz",
       pathname: "/foo",
-      query: { bar: "baz" },
+      query: { bar: "baz" }
     });
 
     // Ensure only 2 renders happened:
     expect(result.all).toHaveLength(2);
+
+    await act(async () => {
+      await result.current.push("/foo?joe=doe");
+    });
+
+    expect(result.current).toEqual(router);
+    expect(result.current).toMatchObject({
+      asPath: "/foo?joe=doe",
+      pathname: "/foo",
+      query: { joe: "doe" }
+    });
+
+    expect(result.all).toHaveLength(3);
+    // Only 3 changes have happened to the router,
+    // so the spy should be called exactly 3 times.
+    expect(renderSpy).toHaveBeenCalledTimes(3);
   });
 
   it("support the locales and locale properties", async () => {
