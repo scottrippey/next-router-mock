@@ -4,11 +4,11 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 
-export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRouter) {
-  it("the useRouter hook initially returns the same instance of the router", async () => {
+export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => Readonly<MemoryRouter>) {
+  it("the useRouter hook only returns a snapshot of the singleton router", async () => {
     const { result } = renderHook(() => useRouter());
 
-    expect(result.current).toBe(router);
+    expect(result.current).not.toBe(singletonRouter);
   });
 
   it("will allow capturing previous route values in hooks with routing events", async () => {
@@ -31,14 +31,14 @@ export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRout
     };
 
     // Set initial state:
-    router.setCurrentUrl("/foo");
+    singletonRouter.setCurrentUrl("/foo");
 
     const { result } = renderHook(() => useRouterWithPrevious());
 
     expect(result.current).toEqual([undefined, "/foo"]);
 
     await act(async () => {
-      await router.push("/foo?bar=baz");
+      await singletonRouter.push("/foo?bar=baz");
     });
 
     expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
@@ -48,14 +48,12 @@ export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRout
   it('"push" will cause a rerender with the new route', async () => {
     const { result } = renderHook(() => useRouter());
 
-    expect(result.current).toBe(router);
-
     await act(async () => {
       await result.current.push("/foo?bar=baz");
     });
 
-    expect(result.current).not.toBe(router);
-    expect(result.current).toEqual(router);
+    expect(result.current).not.toBe(singletonRouter);
+    expect(result.current).toEqual(singletonRouter);
     expect(result.current).toMatchObject({
       asPath: "/foo?bar=baz",
       pathname: "/foo",
@@ -68,6 +66,8 @@ export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRout
 
   it('calling "push" multiple times will rerender with the correct route', async () => {
     const { result } = renderHook(() => useRouter());
+
+    // Push using the router instance:
     await act(async () => {
       result.current.push("/one");
       result.current.push("/two");
@@ -78,14 +78,47 @@ export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRout
       asPath: "/three",
     });
 
+    // Push using the singleton router:
     await act(async () => {
-      router.push("/four");
-      router.push("/five");
-      await router.push("/six");
+      singletonRouter.push("/four");
+      singletonRouter.push("/five");
+      await singletonRouter.push("/six");
     });
     expect(result.current).toMatchObject({
       asPath: "/six",
     });
+
+    // Push using the router instance (again):
+    await act(async () => {
+      result.current.push("/seven");
+      result.current.push("/eight");
+      await result.current.push("/nine");
+    });
+
+    expect(result.current).toMatchObject({
+      asPath: "/nine",
+    });
+  });
+
+  it("the singleton and the router instances can be used interchangeably", async () => {
+    const { result } = renderHook(() => useRouter());
+    await act(async () => {
+      await result.current.push("/one");
+    });
+    expect(result.current).toMatchObject({ asPath: "/one" });
+    expect(result.current).toMatchObject(singletonRouter);
+
+    await act(async () => {
+      await result.current.push("/two");
+    });
+    expect(result.current).toMatchObject({ asPath: "/two" });
+    expect(result.current).toMatchObject(singletonRouter);
+
+    await act(async () => {
+      await singletonRouter.push("/three");
+    });
+    expect(result.current).toMatchObject({ asPath: "/three" });
+    expect(result.current).toMatchObject(singletonRouter);
   });
 
   it("support the locales and locale properties", async () => {
