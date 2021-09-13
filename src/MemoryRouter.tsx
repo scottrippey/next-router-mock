@@ -128,7 +128,7 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeStart", asPath, { shallow });
 
     // Simulate the async nature of this method
-    if (async) await new Promise((resolve) => setImmediate(resolve));
+    if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     this.pathname = pathname;
     this.query = query;
