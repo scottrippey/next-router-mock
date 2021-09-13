@@ -12,15 +12,12 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(
-    /\[(.+?)]/g,
-    ($0, slug: keyof ParsedUrlQuery) => {
-      const value = remainingQuery[slug]!;
-      delete remainingQuery[slug];
+  let asPath = pathname.replace(/\[(.+?)]/g, ($0, slug: keyof ParsedUrlQuery) => {
+    const value = remainingQuery[slug]!;
+    delete remainingQuery[slug];
 
-      return encodeURIComponent(String(value));
-    }
-  );
+    return encodeURIComponent(String(value));
+  });
 
   // Append remaining query as a querystring, if needed:
   const qs = stringifyQueryString(remainingQuery);
@@ -34,7 +31,7 @@ type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
-type Url = string | UrlObject;
+export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
 interface TransitionOptions {
@@ -43,7 +40,11 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
+type SupportedEventTypes =
+  | "routeChangeStart"
+  | "routeChangeComplete"
+  | "NEXT_ROUTER_MOCK:push"
+  | "NEXT_ROUTER_MOCK:replace";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -60,11 +61,7 @@ export abstract class BaseRouter implements NextRouter {
   locale: string | undefined = undefined;
   locales: string[] = [];
 
-  abstract push(
-    url: Url,
-    as?: Url,
-    options?: TransitionOptions
-  ): Promise<boolean>;
+  abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
   back() {
     // Do nothing
@@ -91,30 +88,39 @@ export class MemoryRouter extends BaseRouter {
     return Object.assign(new MemoryRouter(), original);
   }
 
+  constructor(initialUrl?: Url, async?: boolean) {
+    super();
+    if (initialUrl) this.setCurrentUrl(initialUrl);
+    if (async) this.async = async;
+  }
+
   /**
-   *
+   * By default, route changes happen synchronously.
+   * Set this to `true` to handle route changes asynchronously.
    */
   public async = false;
 
   push(url: Url, as?: Url, options?: TransitionOptions) {
-    return this._setCurrentUrl(url, as, options);
+    return this._setCurrentUrl(url, as, options, "push");
   }
 
   replace(url: Url, as?: Url, options?: TransitionOptions) {
-    return this._setCurrentUrl(url, as, options);
+    return this._setCurrentUrl(url, as, options, "replace");
   }
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
   public setCurrentUrl(url: Url) {
-    void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
+    void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
   }
 
   private async _setCurrentUrl(
     url: Url,
     as?: Url,
     options?: TransitionOptions,
+    // internal:
+    source?: "push" | "replace" | "set",
     async = this.async
   ) {
     // Parse the URL if needed:
@@ -138,6 +144,10 @@ export class MemoryRouter extends BaseRouter {
     }
 
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
+
+    const eventName =
+      source === "push" ? "NEXT_ROUTER_MOCK:push" : source === "replace" ? "NEXT_ROUTER_MOCK:replace" : undefined;
+    if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
   }

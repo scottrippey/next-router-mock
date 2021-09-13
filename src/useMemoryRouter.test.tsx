@@ -83,6 +83,6 @@ export function useRouterTests(
 
 describe("useMemoryRouter", () => {
   const router = new MemoryRouter();
-  const useRouter = () => useMemoryRouter(router);
+  const useRouter = () => useMemoryRouter(() => router);
   useRouterTests(router, useRouter);
 });
