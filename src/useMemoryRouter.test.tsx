@@ -4,10 +4,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 
-export function useRouterTests(
-  router: MemoryRouter,
-  useRouter: () => MemoryRouter
-) {
+export function useRouterTests(router: MemoryRouter, useRouter: () => MemoryRouter) {
   it("the useRouter hook initially returns the same instance of the router", async () => {
     const { result } = renderHook(() => useRouter());
 
@@ -67,6 +64,28 @@ export function useRouterTests(
 
     // Ensure only 2 renders happened:
     expect(result.all).toHaveLength(2);
+  });
+
+  it('calling "push" multiple times will rerender with the correct route', async () => {
+    const { result } = renderHook(() => useRouter());
+    await act(async () => {
+      result.current.push("/one");
+      result.current.push("/two");
+      await result.current.push("/three");
+    });
+
+    expect(result.current).toMatchObject({
+      asPath: "/three",
+    });
+
+    await act(async () => {
+      router.push("/four");
+      router.push("/five");
+      await router.push("/six");
+    });
+    expect(result.current).toMatchObject({
+      asPath: "/six",
+    });
   });
 
   it("support the locales and locale properties", async () => {
