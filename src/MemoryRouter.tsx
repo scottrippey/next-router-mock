@@ -87,10 +87,6 @@ export abstract class BaseRouter implements NextRouter {
  * TODO: Implement more methods!
  */
 export class MemoryRouter extends BaseRouter {
-  static clone(original: MemoryRouter): MemoryRouter {
-    return Object.assign(new MemoryRouter(), original);
-  }
-
   /**
    *
    */
@@ -128,7 +124,7 @@ export class MemoryRouter extends BaseRouter {
     this.events.emit("routeChangeStart", asPath, { shallow });
 
     // Simulate the async nature of this method
-    if (async) await new Promise((resolve) => setImmediate(resolve));
+    if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     this.pathname = pathname;
     this.query = query;
