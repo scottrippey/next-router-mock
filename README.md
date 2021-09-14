@@ -1,18 +1,37 @@
+
 # `next-router-mock`
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
-address bar). Useful in tests. Inspired
+address bar). Useful in tests and Storybook. Inspired
 by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)
 .
 
-# API
-
-`next-router-mock` is a drop-in replacement for `next/router`. It exports both a default (singleton) router and
-the `useRouter` hook.
-
 Install via NPM: `npm install --save-dev next-router-mock`
 
-### Jest
+# API
+
+`next-router-mock` can be used as a drop-in replacement for `next/router`. It exports both a default (singleton) router and
+the `useRouter` hook.  See the Jest section for details.
+
+Alternatively, it can be used as a React Provider.  See the Storybook section for details.
+
+
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Jest](#jest)
+- [Storybook](#storybook)
+    - [Compatibility](#compatibility)
+- [Sync vs Async](#sync-vs-async)
+- [Supported Features](#supported-features)
+  - [Not yet supported](#not-yet-supported)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
+# Jest
 
 Simply drop-in the `next-router-mock` like this:
 
@@ -40,7 +59,7 @@ describe('next-router-mock', () => {
   beforeEach(() => {
     mockRouter.setCurrentUrl("/initial");
   });
-  
+
   it('supports `push` and `replace` methods', () => {
     singletonRouter.push('/foo?bar=baz');
     expect(singletonRouter).toMatchObject({
@@ -49,7 +68,7 @@ describe('next-router-mock', () => {
       query: { bar: 'baz' },
     });
   });
-  
+
   it('supports URL objects with templates', () => {
     singletonRouter.push({
       pathname: '/[id]/foo',
@@ -78,6 +97,67 @@ describe('next-router-mock', () => {
   });
 });
 ```
+
+# Storybook
+
+For Storybook, we use a Context-based approach to supply the mocks. Start by importing `MemoryRouterProvider`:
+
+```jsx
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+```
+
+Then, you can wrap your stories, individually, with the provider:
+
+```jsx
+export const ExampleStory = () => (
+  <MemoryRouterProvider>
+    <NextLink href="/example"><a>Example Link</a></NextLink>
+  </MemoryRouterProvider>
+);
+```
+
+Or you can wrap ALL stories, globally, using a decorator:
+`storybook/preview.js`
+
+```jsx
+import { addDecorator } from "@storybook/react";
+
+addDecorator((Story) => (
+  <MemoryRouterProvider>
+    <Story/>
+  </MemoryRouterProvider>
+));
+```
+
+The `MemoryRouterProvider` has the following optional properties:
+
+- `url` (`string` or `object`) sets the current route's URL to a string or URL object
+- `async` enables async mode, if necessary (see section below for details)
+- Events:
+  - `onPush(url, { shallow })`
+  - `onReplace(url, { shallow })`
+  - `onRouteChangeStart(url, { shallow })`
+  - `onRouteChangeComplete(url, { shallow })`
+
+Full Example:
+
+```jsx
+export const ExampleStory = () => (
+  <MemoryRouterProvider
+    url="/initial"
+    async
+    onPush={action('push')}
+    onReplace={action('replace')}
+    onRouteChangeStart={action('routeChangeStart')}
+    onRouteChangeComplete={action('routeChangeComplete')}
+  >
+    <NextLink href="/example"><a>Example Link</a></NextLink>
+  </MemoryRouterProvider>
+);
+```
+
+### Compatibility
+The above `MemoryRouterProvider` has been tested with Next `v10` and `v11.1.2`.  It depends on importing from `"next/dist/next-server/lib/router-context"`, which can easily change or break in future Next versions.  
 
 # Sync vs Async
 
@@ -116,7 +196,7 @@ it('next/link can be tested too', async () => {
   - `routeChangeStart(url, { shallow })`
   - `routeChangeComplete(url, { shallow })`
 
-## Not yet supported:
+## Not yet supported
 
 PRs welcome!  
 These fields have default values; these methods do nothing.
