@@ -2,7 +2,8 @@
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
 address bar). Useful in tests. Inspired
-by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md).
+by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)
+.
 
 # API
 
@@ -15,7 +16,7 @@ Install via NPM: `npm install --save-dev next-router-mock`
 
 Simply drop-in the `next-router-mock` like this:
 
-```js
+```jsx
 jest.mock('next/router', () => require('next-router-mock'));
 // or this:
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
@@ -25,39 +26,73 @@ jest.mock('next/dist/client/router', () => require('next-router-mock'));
 
 Here's a full working example:
 
-```js
-import router, { useRouter } from 'next/router';
+```jsx
+import singletonRouter, { useRouter } from 'next/router';
 import NextLink from 'next/link';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import mockRouter from 'next-router-mock';
 
+// This is all you need:
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 
-describe('router', () => {
-  it('supports the `push` and `replace` methods', () => {
-    router.push('/foo?bar=baz');
-    expect(router).toMatchObject({
+describe('next-router-mock', () => {
+  beforeEach(() => {
+    mockRouter.setCurrentUrl("/initial");
+  });
+  
+  it('supports `push` and `replace` methods', () => {
+    singletonRouter.push('/foo?bar=baz');
+    expect(singletonRouter).toMatchObject({
       asPath: '/foo?bar=baz',
       pathname: '/foo',
       query: { bar: 'baz' },
     });
   });
   
-  it('supports url object routes too', () => {
-    router.push({
-      pathname: '/foo/[id]',
+  it('supports URL objects with templates', () => {
+    singletonRouter.push({
+      pathname: '/[id]/foo',
       query: { id: '123', bar: 'baz' },
     });
-    expect(router).toMatchObject({
-      asPath: '/foo/123?bar=baz',
-      pathname: '/foo/[id]',
+    expect(singletonRouter).toMatchObject({
+      asPath: '/123/foo?bar=baz',
+      pathname: '/[id]/foo',
       query: { bar: 'baz' },
     });
   });
 
-  it('next/link can be tested too', () => {
-    render(<NextLink href="/example?foo=bar">Example Link</NextLink>);
+  it('mocks useRouter', () => {
+    const { result } = renderHook(() => useRouter());
+    expect(result.current).toMatchObject({ asPath: "" });
+    act(() => {
+      result.current.push("/example");
+    });
+    expect(result.current).toMatchObject({ asPath: "/example" })
+  });
+
+  it('works with next/link', () => {
+    render(<NextLink href="/example?foo=bar"><a>Example Link</a></NextLink>);
     fireEvent.click(screen.getByText('Example Link'));
-    expect(router).toMatchObject({
+    expect(singletonRouter).toMatchObject({ asPath: '/example?foo=bar' });
+  });
+});
+```
+
+# Sync vs Async
+
+By default, `next-router-mock` handles route changes synchronously. This is convenient for testing, and works for most
+use-cases.  
+However, Next normally handles route changes asynchronously, and in certain cases you might actually rely on that
+behavior. If that's the case, you can use `next-router-mock/async`. Tests will need to account for the async behavior
+too; for example:
+
+```jsx
+it('next/link can be tested too', async () => {
+  render(<NextLink href="/example?foo=bar"><a>Example Link</a></NextLink>);
+  fireEvent.click(screen.getByText('Example Link'));
+  await waitFor(() => {
+    expect(singletonRouter).toMatchObject({
       asPath: '/example?foo=bar',
       pathname: '/example',
       query: { foo: 'bar' },
@@ -65,26 +100,6 @@ describe('router', () => {
   });
 });
 ```
-
-# Sync vs Async
-
-By default, `next-router-mock` handles route changes synchronously.  This is convenient for testing, and works for most use-cases.  
-However, Next normally handles route changes asynchronously, and in certain cases you might actually rely on that behavior.  If that's the case, you can use `next-router-mock/async`.  Tests will need to account for the async behavior too; for example:
-
-```jsx
-  it('next/link can be tested too', async () => {
-    render(<NextLink href="/example?foo=bar">Example Link</NextLink>);
-    fireEvent.click(screen.getByText('Example Link'));
-    await waitFor(() => {
-      expect(router).toMatchObject({
-        asPath: '/example?foo=bar',
-        pathname: '/example',
-        query: { foo: 'bar' },
-      });
-    });
-  });
-```
-
 
 # Supported Features
 
@@ -110,11 +125,11 @@ These fields have default values; these methods do nothing.
 - `router.route`
 - `router.basePath`
 - `router.isFallback`
-- `router.prefetch()` 
+- `router.prefetch()`
 - `router.back()`
 - `router.beforePopState(cb)`
 - `router.reload()`
-- `router.events` not implemented: 
+- `router.events` not implemented:
   - `routeChangeError`
   - `beforeHistoryChange`
   - `hashChangeStart`
