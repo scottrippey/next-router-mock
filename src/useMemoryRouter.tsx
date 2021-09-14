@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { MemoryRouter } from "./MemoryRouter";
 
 export type MemoryRouterEventHandlers = {
-  onRouteChange?: (url: string, options: { shallow: boolean }) => void;
   onRouteChangeStart?: (url: string, options: { shallow: boolean }) => void;
+  onRouteChangeComplete?: (url: string, options: { shallow: boolean }) => void;
   onPush?: (url: string, options: { shallow: boolean }) => void;
   onReplace?: (url: string, options: { shallow: boolean }) => void;
 };
@@ -23,25 +23,26 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
     return () => singletonRouter.events.off("routeChangeComplete", handleRouteChange);
   }, [singletonRouter]);
 
+  // Subscribe to any eventHandlers:
   useEffect(() => {
     if (!eventHandlers) return;
-    const { onRouteChange, onRouteChangeStart, onPush, onReplace } = eventHandlers;
-    if (!(onRouteChange || onRouteChangeStart || onPush || onReplace)) return;
+    const { onRouteChangeStart, onRouteChangeComplete, onPush, onReplace } = eventHandlers;
+    if (!(onRouteChangeStart || onRouteChangeComplete || onPush || onReplace)) return;
 
     if (onRouteChangeStart) singletonRouter.events.on("routeChangeStart", onRouteChangeStart);
-    if (onRouteChange) singletonRouter.events.on("routeChangeComplete", onRouteChange);
+    if (onRouteChangeComplete) singletonRouter.events.on("routeChangeComplete", onRouteChangeComplete);
     if (onPush) singletonRouter.events.on("NEXT_ROUTER_MOCK:push", onPush);
     if (onReplace) singletonRouter.events.on("NEXT_ROUTER_MOCK:replace", onReplace);
     return () => {
       if (onRouteChangeStart) singletonRouter.events.off("routeChangeStart", onRouteChangeStart);
-      if (onRouteChange) singletonRouter.events.off("routeChangeComplete", onRouteChange);
+      if (onRouteChangeComplete) singletonRouter.events.off("routeChangeComplete", onRouteChangeComplete);
       if (onPush) singletonRouter.events.off("NEXT_ROUTER_MOCK:push", onPush);
       if (onReplace) singletonRouter.events.off("NEXT_ROUTER_MOCK:replace", onReplace);
     };
   }, [
     singletonRouter.events,
-    eventHandlers?.onRouteChange,
     eventHandlers?.onRouteChangeStart,
+    eventHandlers?.onRouteChangeComplete,
     eventHandlers?.onPush,
     eventHandlers?.onReplace,
   ]);

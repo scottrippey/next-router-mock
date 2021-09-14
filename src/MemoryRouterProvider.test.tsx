@@ -15,7 +15,7 @@ const TestLink = (linkProps: Partial<LinkProps>) => {
 };
 
 describe("MemoryRouterProvider", () => {
-  it("should render", () => {
+  it("should mock the router", () => {
     render(
       <MemoryRouterProvider>
         <TestLink />
@@ -23,6 +23,7 @@ describe("MemoryRouterProvider", () => {
     );
     expect(screen.getByText(`Current route: ""`)).toBeDefined();
   });
+
   it("an initial URL can be supplied", () => {
     render(
       <MemoryRouterProvider url="/example">
@@ -31,6 +32,16 @@ describe("MemoryRouterProvider", () => {
     );
     expect(screen.getByText(`Current route: "/example"`)).toBeDefined();
   });
+
+  it("an initial URL Object can be supplied", () => {
+    render(
+      <MemoryRouterProvider url={{ pathname: "/example", query: { foo: "bar" } }}>
+        <TestLink />
+      </MemoryRouterProvider>
+    );
+    expect(screen.getByText(`Current route: "/example?foo=bar"`)).toBeDefined();
+  });
+
   it("clicking a link should navigate to a new page", () => {
     render(
       <MemoryRouterProvider>
@@ -43,7 +54,7 @@ describe("MemoryRouterProvider", () => {
   });
 
   describe("async", () => {
-    it.skip("clicking a link should navigate to a new page, asynchronously", async () => {
+    it("clicking a link should navigate to a new page, asynchronously", async () => {
       render(
         <MemoryRouterProvider async>
           <TestLink />
@@ -61,7 +72,7 @@ describe("MemoryRouterProvider", () => {
       onPush: jest.fn(),
       onReplace: jest.fn(),
       onRouteChangeStart: jest.fn(),
-      onRouteChange: jest.fn(),
+      onRouteChangeComplete: jest.fn(),
     };
     beforeEach(() => {
       jest.clearAllMocks();
@@ -77,7 +88,7 @@ describe("MemoryRouterProvider", () => {
       expect(eventHandlers.onPush).toHaveBeenCalledWith("/test", { shallow: false });
       expect(eventHandlers.onReplace).not.toHaveBeenCalled();
       expect(eventHandlers.onRouteChangeStart).toHaveBeenCalledWith("/test", { shallow: false });
-      expect(eventHandlers.onRouteChange).toHaveBeenCalledWith("/test", { shallow: false });
+      expect(eventHandlers.onRouteChangeComplete).toHaveBeenCalledWith("/test", { shallow: false });
     });
     it("a 'replace' link triggers the correct handlers too", () => {
       render(
@@ -90,7 +101,7 @@ describe("MemoryRouterProvider", () => {
       expect(eventHandlers.onPush).not.toHaveBeenCalledWith("/test", { shallow: false });
       expect(eventHandlers.onReplace).toHaveBeenCalled();
       expect(eventHandlers.onRouteChangeStart).toHaveBeenCalledWith("/test", { shallow: false });
-      expect(eventHandlers.onRouteChange).toHaveBeenCalledWith("/test", { shallow: false });
+      expect(eventHandlers.onRouteChangeComplete).toHaveBeenCalledWith("/test", { shallow: false });
     });
   });
 });
