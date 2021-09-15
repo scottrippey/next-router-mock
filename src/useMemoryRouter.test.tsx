@@ -134,7 +134,7 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
 }
 
 describe("useMemoryRouter", () => {
-  const router = new MemoryRouter();
-  const useRouter = () => useMemoryRouter(router);
-  useRouterTests(router, useRouter);
+  const singletonRouter = new MemoryRouter();
+  const useRouter = () => useMemoryRouter(singletonRouter);
+  useRouterTests(singletonRouter, useRouter);
 });

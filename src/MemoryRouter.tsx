@@ -31,7 +31,7 @@ type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
-type Url = string | UrlObject;
+export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
 interface TransitionOptions {
@@ -40,7 +40,11 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes = "routeChangeStart" | "routeChangeComplete";
+type SupportedEventTypes =
+  | "routeChangeStart"
+  | "routeChangeComplete"
+  | "NEXT_ROUTER_MOCK:push"
+  | "NEXT_ROUTER_MOCK:replace";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -81,6 +85,12 @@ export class MemoryRouter extends BaseRouter {
     return Object.assign(new MemoryRouter(), original);
   }
 
+  constructor(initialUrl?: Url, async?: boolean) {
+    super();
+    if (initialUrl) this.setCurrentUrl(initialUrl);
+    if (async) this.async = async;
+  }
+
   /**
    * When enabled, there will be a short delay between calling `push` and when the router is updated.
    * This is used to simulate Next's async behavior.
@@ -89,21 +99,24 @@ export class MemoryRouter extends BaseRouter {
   public async = false;
 
   push(url: Url, as?: Url, options?: TransitionOptions) {
-    return this._setCurrentUrl(url, as, options);
+    return this._setCurrentUrl(url, as, options, "push");
   }
 
   replace(url: Url, as?: Url, options?: TransitionOptions) {
-    return this._setCurrentUrl(url, as, options);
+    return this._setCurrentUrl(url, as, options, "replace");
   }
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
   public setCurrentUrl(url: Url) {
-    void this._setCurrentUrl(url, undefined, undefined, false); // (ignore the returned promise)
+    void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
   }
 
-  private _setCurrentUrl = async (url: Url, as?: Url, options?: TransitionOptions, async = this.async) => {
+  private _setCurrentUrl = async (url: Url, as?: Url, options?: TransitionOptions,
+                                  source?: "push" | "replace" | "set",
+
+                                  async = this.async) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 
@@ -125,6 +138,10 @@ export class MemoryRouter extends BaseRouter {
     }
 
     this.events.emit("routeChangeComplete", this.asPath, { shallow });
+
+    const eventName =
+      source === "push" ? "NEXT_ROUTER_MOCK:push" : source === "replace" ? "NEXT_ROUTER_MOCK:replace" : undefined;
+    if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
   };
