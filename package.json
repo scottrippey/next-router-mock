@@ -3,10 +3,6 @@
   "version": "0.4.0",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
-  "files": [
-    "dist",
-    "src"
-  ],
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
