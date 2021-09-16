@@ -10,6 +10,21 @@ Tested with NextJS v10 and v11.
 
 Install via NPM: `npm install --save-dev next-router-mock`
 
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Quick Start](#quick-start)
+- [Usage with Jest](#usage-with-jest)
+- [Usage with Storybook](#usage-with-storybook)
+    - [`MemoryRouterProvider` compatibility with Next 10](#memoryrouterprovider-compatibility-with-next-10)
+- [Sync vs Async](#sync-vs-async)
+- [Supported Features](#supported-features)
+  - [Not yet supported](#not-yet-supported)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Quick Start
 
 For unit tests, the `next-router-mock` module can be used as a drop-in replacement for `next/router`. It exports both a default (singleton) router and
@@ -23,22 +38,6 @@ For Storybook, you can use `<MemoryRouterProvider>` to wrap your stories.  Examp
 import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
 addDecorator(Story => <MemoryRouterProvider><Story /></MemoryRouterProvider>);
 ```
-
-
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Usage with Jest](#usage-with-jest)
-- [Usage with Storybook](#usage-with-storybook)
-    - [`MemoryRouterProvider` compatibility:](#memoryrouterprovider-compatibility)
-- [Sync vs Async](#sync-vs-async)
-- [Supported Features](#supported-features)
-  - [Not yet supported](#not-yet-supported)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 
 # Usage with Jest
 
@@ -156,16 +155,14 @@ export const ExampleStory = () => (
 );
 ```
 
-### `MemoryRouterProvider` compatibility:  
-The above `MemoryRouterProvider` has to import the `router-context` from Next, which is located in different locations depending on the Next version.  So it automatically detects the Next version.  
+### `MemoryRouterProvider` compatibility with Next 10
 
-If needed, you can explicitly import from any of these paths:  
+The above examples work with Next `v11.1.0` or higher.   
 
-| NextJS Version | Import Path |
-| ------------ | ----------- |
-| Auto-detect | `next-router-mock/MemoryRouterProvider` |
-| Next `>= 11.1.0` | `next-router-mock/MemoryRouterProvider/next-11` |
-| Next `10.* - 11.0.*` | `next-router-mock/MemoryRouterProvider/next-10` |
+If you are using Next `v10.*` or `v11.0.*`, simply use the following import instead:
+```js
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-10';
+```
 
 # Sync vs Async
 
