@@ -2,7 +2,7 @@ import mitt, { MittEmitter } from "./lib/mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
-import type { NextRouter } from "next/router";
+import type { NextRouter, RouterEvent } from "next/router";
 
 /**
  * Creates a URL from a pathname + query.
@@ -57,9 +57,11 @@ export abstract class BaseRouter implements NextRouter {
   asPath = "";
   basePath = "";
   isFallback = false;
-  events: MittEmitter<SupportedEventTypes> = mitt();
+  events: MittEmitter<SupportedEventTypes | RouterEvent> = mitt();
   locale: string | undefined = undefined;
   locales: string[] = [];
+  isLocaleDomain = false;
+  isPreview = false;
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
@@ -113,10 +115,14 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
   }
 
-  private _setCurrentUrl = async (url: Url, as?: Url, options?: TransitionOptions,
-                                  source?: "push" | "replace" | "set",
+  private _setCurrentUrl = async (
+    url: Url,
+    as?: Url,
+    options?: TransitionOptions,
+    source?: "push" | "replace" | "set",
 
-                                  async = this.async) => {
+    async = this.async
+  ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
 

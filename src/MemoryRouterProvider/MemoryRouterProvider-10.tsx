@@ -1,9 +1,10 @@
-// NOTE: this path works with Next v10; it is subject to change with Next v11.x:
+// NOTE: this path works with Next v10-v11.0.1
+// @ts-ignore
 import { RouterContext } from "next/dist/next-server/lib/router-context";
 import React, { FC, useMemo } from "react";
 
-import { useMemoryRouter, MemoryRouter, Url } from "./index";
-import { MemoryRouterEventHandlers } from "./useMemoryRouter";
+import { useMemoryRouter, MemoryRouter, Url } from "../index";
+import { MemoryRouterEventHandlers } from "../useMemoryRouter";
 
 export type MemoryRouterProviderProps = {
   /** The initial URL to render */
