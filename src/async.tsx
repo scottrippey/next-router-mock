@@ -1,6 +1,6 @@
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
-import { ComponentWithWrapper, withMemoryRouter } from "./withMemoryRouter";
+import { ComponentWithRouter, withMemoryRouter, WithRouterProps } from "./withMemoryRouter";
 
 export { useMemoryRouter } from "./useMemoryRouter";
 export { MemoryRouter, BaseRouter, Url } from "./MemoryRouter";
@@ -13,6 +13,6 @@ export const useRouter = () => {
   return useMemoryRouter(memoryRouter);
 };
 
-export const withRouter = (ComposedComponent: ComponentWithWrapper) => {
+export const withRouter = <TProps extends WithRouterProps>(ComposedComponent: ComponentWithRouter<TProps>) => {
   return withMemoryRouter(useRouter, ComposedComponent);
 };

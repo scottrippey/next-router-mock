@@ -5,16 +5,20 @@ import type { NextRouter } from "next/router";
 import { MemoryRouter } from "./MemoryRouter";
 
 // A simplified version of the official withRouter types:
-export type ComponentWithWrapper = NextComponentType<NextPageContext, any, { router: NextRouter }> & {
+export type WithRouterProps = { router: NextRouter };
+export type ComponentWithRouter<Props extends WithRouterProps> = NextComponentType<NextPageContext, any, Props> & {
   origGetInitialProps?: NextComponentType["getInitialProps"];
 };
 
 /**
- * This implementation copied from Next's source
+ * This implementation mostly copied from Next's source
  */
-export const withMemoryRouter = (useRouter: () => Readonly<MemoryRouter>, ComposedComponent: ComponentWithWrapper) => {
-  function WithRouterWrapper(props: unknown) {
-    return <ComposedComponent router={useRouter()} {...props} />;
+export const withMemoryRouter = <TProps extends WithRouterProps>(
+  useRouter: () => Readonly<MemoryRouter>,
+  ComposedComponent: ComponentWithRouter<TProps>
+) => {
+  function WithRouterWrapper(props: Omit<TProps, "router">) {
+    return <ComposedComponent router={useRouter()} {...(props as any)} />;
   }
   WithRouterWrapper.getInitialProps = ComposedComponent.getInitialProps;
   WithRouterWrapper.origGetInitialProps = ComposedComponent.origGetInitialProps;
