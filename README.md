@@ -43,30 +43,33 @@ addDecorator(Story => <MemoryRouterProvider><Story /></MemoryRouterProvider>);
 
 Simply drop-in the `next-router-mock` like this:
 
-```jsx
-jest.mock('next/router', () => require('next-router-mock'));
+file `./__mocks__/mock-next-router.ts`:
+
+```ts
+import * as MockRouter from 'next-router-mock';
+
+jest.mock('next/dist/client/router', () => MockRouter);
+
 // or this:
-jest.mock('next/dist/client/router', () => require('next-router-mock'));
+// jest.mock('next/router', () => MockRouter);
 ```
 
 > Note: it's better to mock `next/dist/client/router` instead of  `next/router`, because both `next/router` and `next/link` depend directly on this nested path. It's also perfectly fine to mock both.
 
 Here's a full working example:
 
-```jsx
+file `./link.ts`:
+```ts
+// import our mocked instance first
+import './__mocks__/mock-next-router';
+// then anything else
 import singletonRouter, { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import { render, act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import mockRouter from 'next-router-mock';
 
-// This is all you need:
-jest.mock('next/dist/client/router', () => require('next-router-mock'));
-
 describe('next-router-mock', () => {
-  beforeEach(() => {
-    mockRouter.setCurrentUrl("/initial");
-  });
 
   it('supports `push` and `replace` methods', () => {
     singletonRouter.push('/foo?bar=baz');
