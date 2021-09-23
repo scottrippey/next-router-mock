@@ -15,7 +15,7 @@ export type ExcludeRouterProps<P> = Pick<P, Exclude<keyof P, keyof WithRouterPro
 export function withMemoryRouter<P extends WithRouterProps, C = NextPageContext>(
   useRouter: () => Readonly<MemoryRouter>,
   ComposedComponent: NextComponentType<C, any, P>
-): React.ComponentType<ExcludeRouterProps<P>> {
+): NextComponentType<C, any, ExcludeRouterProps<P>> {
   function WithRouterWrapper(props: any): JSX.Element {
     return <ComposedComponent router={useRouter()} {...props} />;
   }
