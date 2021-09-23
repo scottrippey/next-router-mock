@@ -2,31 +2,31 @@ import React from "react";
 import type { NextComponentType, NextPageContext } from "next";
 import type { NextRouter } from "next/router";
 
+// This is a (very slightly) modified version of https://github.com/vercel/next.js/blob/canary/packages/next/client/with-router.tsx
+
 import { MemoryRouter } from "./MemoryRouter";
 
-// A simplified version of the official withRouter types:
-export type WithRouterProps = { router: NextRouter };
-export type ComponentWithRouter<Props extends WithRouterProps> = NextComponentType<NextPageContext, any, Props> & {
-  origGetInitialProps?: NextComponentType["getInitialProps"];
+export type WithRouterProps = {
+  router: NextRouter;
 };
 
-/**
- * This implementation mostly copied from Next's source
- */
-export const withMemoryRouter = <TProps extends WithRouterProps>(
-  useRouter: () => Readonly<MemoryRouter>,
-  ComposedComponent: ComponentWithRouter<TProps>
-) => {
-  function WithRouterWrapper(props: Omit<TProps, "router">) {
-    return <ComposedComponent router={useRouter()} {...(props as any)} />;
-  }
-  WithRouterWrapper.getInitialProps = ComposedComponent.getInitialProps;
-  WithRouterWrapper.origGetInitialProps = ComposedComponent.origGetInitialProps;
+export type ExcludeRouterProps<P> = Pick<P, Exclude<keyof P, keyof WithRouterProps>>;
 
+export function withMemoryRouter<P extends WithRouterProps, C = NextPageContext>(
+  useRouter: () => Readonly<MemoryRouter>,
+  ComposedComponent: NextComponentType<C, any, P>
+): React.ComponentType<ExcludeRouterProps<P>> {
+  function WithRouterWrapper(props: any): JSX.Element {
+    return <ComposedComponent router={useRouter()} {...props} />;
+  }
+
+  WithRouterWrapper.getInitialProps = ComposedComponent.getInitialProps;
+  // This is needed to allow checking for custom getInitialProps in _app
+  WithRouterWrapper.origGetInitialProps = (ComposedComponent as any).origGetInitialProps;
   if (process.env.NODE_ENV !== "production") {
     const name = ComposedComponent.displayName || ComposedComponent.name || "Unknown";
     WithRouterWrapper.displayName = `withRouter(${name})`;
   }
 
   return WithRouterWrapper;
-};
+}
