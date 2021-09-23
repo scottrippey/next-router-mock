@@ -189,6 +189,7 @@ it('next/link can be tested too', async () => {
 # Supported Features
 
 - `useRouter()`
+- `withRouter(Component)`
 - `router.push(url, as, options)`
 - `router.replace(url, as, options)`
 - `router.pathname`
