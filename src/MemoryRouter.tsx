@@ -53,15 +53,19 @@ export abstract class BaseRouter implements NextRouter {
   isReady = true;
   route = "";
   pathname = "";
-  query = {} as ParsedUrlQuery;
+  query: NextRouter["query"] = {};
   asPath = "";
   basePath = "";
   isFallback = false;
-  events: MittEmitter<SupportedEventTypes | RouterEvent> = mitt();
-  locale: string | undefined = undefined;
-  locales: string[] = [];
-  isLocaleDomain = false;
   isPreview = false;
+
+  isLocaleDomain = false;
+  locale: NextRouter["locale"] = undefined;
+  locales: NextRouter["locales"] = [];
+  defaultLocale?: NextRouter["defaultLocale"];
+  domainLocales?: NextRouter["domainLocales"];
+
+  events: MittEmitter<SupportedEventTypes | RouterEvent> = mitt();
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;

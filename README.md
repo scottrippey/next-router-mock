@@ -195,8 +195,6 @@ it('next/link can be tested too', async () => {
 - `router.pathname`
 - `router.asPath`
 - `router.query`
-- `router.locale`
-- `router.locales`
 - Works with `next/link` (see Jest notes)
 - `router.events` supports:
   - `routeChangeStart(url, { shallow })`
@@ -205,12 +203,17 @@ it('next/link can be tested too', async () => {
 ## Not yet supported
 
 PRs welcome!  
-These fields have default values; these methods do nothing.
+These fields just have default values; these methods do nothing.
 
 - `router.isReady`
 - `router.route`
 - `router.basePath`
 - `router.isFallback`
+- `router.isLocaleDomain`
+- `router.locale`
+- `router.locales`
+- `router.defaultLocale`
+- `router.domainLocales`
 - `router.prefetch()`
 - `router.back()`
 - `router.beforePopState(cb)`
