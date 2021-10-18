@@ -9,6 +9,27 @@ describe("next-overridable-hook", () => {
     expect(withRouter).toBeInstanceOf(Function);
   });
 
+  it("the router should have several default properties set", () => {
+    expect(router).toEqual({
+      // Ignore these:
+      events: expect.any(Object),
+      async: expect.any(Boolean),
+      _setCurrentUrl: expect.any(Function),
+      // Ensure the router has exactly these properties:
+      asPath: "",
+      basePath: "",
+      isFallback: false,
+      isLocaleDomain: false,
+      isPreview: false,
+      isReady: true,
+      locale: undefined,
+      locales: [],
+      pathname: "",
+      query: {},
+      route: "",
+    });
+  });
+
   describe("useRouter", () => {
     useRouterTests(router, useRouter);
   });
