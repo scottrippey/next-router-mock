@@ -58,6 +58,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
+  pathParser: (url: string) => ParsedUrlQuery = (url: string) => ({});
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -119,6 +120,15 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
   }
 
+  /**
+   * Provide a function to parse additional variables out of the URL path. These variables will be merged
+   * with any variables parsed from the query string, with query string variables taking precedence in the case
+   * of a collision.
+   */
+  public setPathParser(parser: (url: string) => ParsedUrlQuery) {
+    this.pathParser = parser;
+  }
+
   private _setCurrentUrl = async (
     url: Url,
     as?: Url,
@@ -129,6 +139,7 @@ export class MemoryRouter extends BaseRouter {
   ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
+    urlObject.query = {...this.pathParser(urlObject.pathname ?? ""), ...urlObject.query};
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
