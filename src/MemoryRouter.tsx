@@ -3,7 +3,9 @@ import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
-import {getRouteMatcher, getRouteRegex} from "next/dist/shared/lib/router/utils";
+import {getRouteMatcher, getRouteRegex, getSortedRoutes} from "next/dist/shared/lib/router/utils";
+import {RouteRegex} from "next/dist/shared/lib/router/utils/route-regex";
+import {normalizePagePath} from "next/dist/server/normalize-page-path";
 
 /**
  * Creates a URL from a pathname + query.
@@ -133,7 +135,9 @@ export class MemoryRouter extends BaseRouter {
   public registerPaths = (paths: string[]) => this.setPathParser(this._createPathParserFromPatterns(paths))
 
   private _createPathParserFromPatterns(paths: string[]) {
-    const matchers = paths.map(path => getRouteMatcher(getRouteRegex(path)))
+    const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
+      .map(path => getRouteMatcher(getRouteRegex(path)))
+
     return (url: string) => {
       const matcher = matchers.find(matcher => !!matcher(url))
       const match = matcher ? matcher(url) : false

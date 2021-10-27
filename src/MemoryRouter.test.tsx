@@ -298,6 +298,17 @@ describe("MemoryRouter", () => {
           query: {}
         });
       });
+
+      it("when both dynamic and static path matches, will use static path", async () => {
+        memoryRouter.registerPaths(["/entity/[id]", "/entity/list"])
+
+        await memoryRouter.push("/entity/list")
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/list",
+          asPath: "/entity/list",
+          query: {}
+        })
+      });
     });
   });
 });
