@@ -200,67 +200,6 @@ describe("MemoryRouter", () => {
         expect(await memoryRouter.prefetch()).toBeUndefined();
       });
 
-      it("should apply the pathParser function if provided", async () => {
-        memoryRouter.setPathParser((url) => {
-          const parts = url.split("/");
-          return {
-            one: parts[0],
-            two: parts[1],
-            three: parts[2]
-          }
-        });
-
-        await memoryRouter.push("first/second/third")
-        expect(memoryRouter).toMatchObject({
-          query: {
-            one: "first",
-            two: "second",
-            three: "third"
-          }
-        });
-      });
-
-      it("when query string is present, should merge with path parser output", async () => {
-        memoryRouter.setPathParser((url) => {
-          const parts = url.split("/");
-          return {
-            one: parts[0],
-            two: parts[1],
-            three: parts[2]
-          }
-        });
-
-        await memoryRouter.push("first/second/third?paramOne=true&paramTwo=false");
-        expect(memoryRouter).toMatchObject({
-          query: {
-            paramOne: "true",
-            paramTwo: "false",
-            one: "first",
-            two: "second",
-            three: "third"
-          }
-        });
-      });
-
-      it("when query string key collides with parsed key, will take query string value", async () => {
-        memoryRouter.setPathParser((url) => {
-          const parts = url.split("/")
-          return {
-            one: parts[0],
-            two: parts[1]
-          }
-        });
-
-        await memoryRouter.push("first/second?paramOne=true&two=false")
-        expect(memoryRouter).toMatchObject({
-          query: {
-            one: "first",
-            two: "false",
-            paramOne: "true"
-          }
-        });
-      });
-
       it("when dynamic path registered will parse variables from slug", async () =>  {
         memoryRouter.registerPaths(["/entity/[id]/attribute/[name]", "/[...slug]"]);
 
@@ -276,9 +215,9 @@ describe("MemoryRouter", () => {
       });
 
       it("when catch-all dynamic path registered will parse variables from slug", async () => {
-        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]", "/[...slug]"])
+        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]", "/[...slug]"]);
 
-        await memoryRouter.push("/one/two/three")
+        await memoryRouter.push("/one/two/three");
         expect(memoryRouter).toMatchObject({
           pathname: "/one/two/three",
           asPath: "/one/two/three",
@@ -289,9 +228,9 @@ describe("MemoryRouter", () => {
       });
 
       it("when no dynamic path matches, will not parse query from slug", async () => {
-        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]"])
+        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]"]);
 
-        await memoryRouter.push("/one/two/three")
+        await memoryRouter.push("/one/two/three");
         expect(memoryRouter).toMatchObject({
           pathname: "/one/two/three",
           asPath: "/one/two/three",
@@ -300,14 +239,14 @@ describe("MemoryRouter", () => {
       });
 
       it("when both dynamic and static path matches, will use static path", async () => {
-        memoryRouter.registerPaths(["/entity/[id]", "/entity/list"])
+        memoryRouter.registerPaths(["/entity/[id]", "/entity/list"]);
 
-        await memoryRouter.push("/entity/list")
+        await memoryRouter.push("/entity/list");
         expect(memoryRouter).toMatchObject({
           pathname: "/entity/list",
           asPath: "/entity/list",
           query: {}
-        })
+        });
       });
     });
   });

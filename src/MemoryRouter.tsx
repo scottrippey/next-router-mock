@@ -4,7 +4,6 @@ import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
 import {getRouteMatcher, getRouteRegex, getSortedRoutes} from "next/dist/shared/lib/router/utils";
-import {RouteRegex} from "next/dist/shared/lib/router/utils/route-regex";
 import {normalizePagePath} from "next/dist/server/normalize-page-path";
 
 /**
@@ -124,24 +123,24 @@ export class MemoryRouter extends BaseRouter {
   }
 
   /**
-   * Provide a function to parse additional variables out of the URL path. These variables will be merged
-   * with any variables parsed from the query string, with query string variables taking precedence in the case
-   * of a collision.
+   * Register URL paths with the router; this can include any static and dynamic paths your app might use.
+   * Any provided dynamic paths will have their slugs parsed and added to the ParsedUrlQuery on the router
+   * when a route is pushed.
    */
-  public setPathParser(parser: (url: string) => ParsedUrlQuery) {
+  public registerPaths = (paths: string[]) => this._setPathParser(this._createPathParserFromPatterns(paths))
+
+  private _setPathParser(parser: (url: string) => ParsedUrlQuery) {
     this.pathParser = parser;
   }
 
-  public registerPaths = (paths: string[]) => this.setPathParser(this._createPathParserFromPatterns(paths))
-
   private _createPathParserFromPatterns(paths: string[]) {
     const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
-      .map(path => getRouteMatcher(getRouteRegex(path)))
+      .map(path => getRouteMatcher(getRouteRegex(path)));
 
     return (url: string) => {
-      const matcher = matchers.find(matcher => !!matcher(url))
-      const match = matcher ? matcher(url) : false
-      return (match ? match : {})
+      const matcher = matchers.find(matcher => !!matcher(url));
+      const match = matcher ? matcher(url) : false;
+      return (match ? match : {});
     }
   }
 
