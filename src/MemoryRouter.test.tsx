@@ -260,6 +260,44 @@ describe("MemoryRouter", () => {
           }
         });
       });
+
+      it("when dynamic path registered will parse variables from slug", async () =>  {
+        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]", "/[...slug]"]);
+
+        await memoryRouter.push("/entity/101/attribute/everything");
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/101/attribute/everything",
+          asPath: "/entity/101/attribute/everything",
+          query: {
+            id: "101",
+            name: "everything"
+          }
+        });
+      });
+
+      it("when catch-all dynamic path registered will parse variables from slug", async () => {
+        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]", "/[...slug]"])
+
+        await memoryRouter.push("/one/two/three")
+        expect(memoryRouter).toMatchObject({
+          pathname: "/one/two/three",
+          asPath: "/one/two/three",
+          query: {
+            slug: ["one", "two", "three"]
+          }
+        });
+      });
+
+      it("when no dynamic path matches, will not parse query from slug", async () => {
+        memoryRouter.registerPaths(["/entity/[id]/attribute/[name]"])
+
+        await memoryRouter.push("/one/two/three")
+        expect(memoryRouter).toMatchObject({
+          pathname: "/one/two/three",
+          asPath: "/one/two/three",
+          query: {}
+        });
+      });
     });
   });
 });

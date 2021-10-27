@@ -3,6 +3,7 @@ import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
+import {getRouteMatcher, getRouteRegex} from "next/dist/shared/lib/router/utils";
 
 /**
  * Creates a URL from a pathname + query.
@@ -129,6 +130,17 @@ export class MemoryRouter extends BaseRouter {
     this.pathParser = parser;
   }
 
+  public registerPaths = (paths: string[]) => this.setPathParser(this._createPathParserFromPatterns(paths))
+
+  private _createPathParserFromPatterns(paths: string[]) {
+    const matchers = paths.map(path => getRouteMatcher(getRouteRegex(path)))
+    return (url: string) => {
+      const matcher = matchers.find(matcher => !!matcher(url))
+      const match = matcher ? matcher(url) : false
+      return (match ? match : {})
+    }
+  }
+
   private _setCurrentUrl = async (
     url: Url,
     as?: Url,
@@ -139,12 +151,13 @@ export class MemoryRouter extends BaseRouter {
   ) => {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
+    const baseQuery = urlObject.query || {};
     urlObject.query = {...this.pathParser(urlObject.pathname ?? ""), ...urlObject.query};
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
     const query = urlObject.query || {};
-    const asPath = getRouteAsPath(pathname, query);
+    const asPath = getRouteAsPath(pathname, baseQuery);
 
     this.events.emit("routeChangeStart", asPath, { shallow });
 
