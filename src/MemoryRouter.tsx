@@ -155,7 +155,7 @@ export class MemoryRouter extends BaseRouter {
     // Parse the URL if needed:
     const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = urlObject.query || {};
-    urlObject.query = {...this.pathParser(urlObject.pathname ?? ""), ...urlObject.query};
+    urlObject.query = {...urlObject.query, ...this.pathParser(urlObject.pathname ?? "")};
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";

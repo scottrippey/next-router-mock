@@ -248,6 +248,16 @@ describe("MemoryRouter", () => {
           query: {}
         });
       });
+
+      it("when query param matches path param, path param will take precedence", async () => {
+        memoryRouter.registerPaths(["/entity/[id]"])
+
+        await memoryRouter.push("/entity/100?id=500")
+
+        expect(memoryRouter).toMatchObject({
+          query: { id: "100" }
+        })
+      });
     });
   });
 });
