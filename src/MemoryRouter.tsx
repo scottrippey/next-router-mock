@@ -3,9 +3,9 @@ import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
-import {getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute} from "next/dist/shared/lib/router/utils";
-import {normalizePagePath} from "next/dist/server/normalize-page-path";
-import {interpolateAs} from "next/dist/shared/lib/router/router";
+import { getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute } from "next/dist/shared/lib/router/utils";
+import { normalizePagePath } from "next/dist/server/normalize-page-path";
+import { interpolateAs } from "next/dist/shared/lib/router/router";
 
 /**
  * Creates a URL from a pathname + query.
@@ -142,8 +142,8 @@ export class MemoryRouter extends BaseRouter {
     return (url: UrlObject) => {
       const pathname = url.pathname ?? "";
       const isDynamic = isDynamicRoute(pathname);
-      const matcher = matchers.find(matcher => !!matcher(url.pathname));
-      const match = matcher ? matcher(url.pathname) : false;
+      const matcher = matchers.find(matcher => !!matcher(pathname));
+      const match = matcher ? matcher(pathname) : false;
 
       // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
       // a query dictionary will be provided, so instead of using the match we interpolate the route from

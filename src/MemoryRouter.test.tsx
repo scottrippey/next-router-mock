@@ -1,4 +1,4 @@
-import {MemoryRouter} from "./MemoryRouter";
+import { MemoryRouter } from "./MemoryRouter";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {
@@ -280,8 +280,8 @@ describe("MemoryRouter", () => {
           pathname: "/[...slug]",
           asPath: "/one/two/three",
           query: { slug: ["one", "two", "three"] }
-        })
-      })
+        });
+      });
     });
   });
 });
