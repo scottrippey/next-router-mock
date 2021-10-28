@@ -60,7 +60,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: ((url: string) => UrlObject) | undefined = undefined;
+  pathParser: ((url: UrlObject) => UrlObject) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -129,7 +129,7 @@ export class MemoryRouter extends BaseRouter {
    */
   public registerPaths = (paths: string[]) => this._setPathParser(this._createPathParserFromPatterns(paths))
 
-  private _setPathParser(parser: (url: string) => UrlObject) {
+  private _setPathParser(parser: (url: UrlObject) => UrlObject) {
     this.pathParser = parser;
   }
 
@@ -137,13 +137,13 @@ export class MemoryRouter extends BaseRouter {
     const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
       .map(path => getRouteMatcher(getRouteRegex(path)));
 
-    return (url: string) => {
-      const matcher = matchers.find(matcher => !!matcher(url));
-      const match = matcher ? matcher(url) : false;
+    return (url: UrlObject) => {
+      const matcher = matchers.find(matcher => !!matcher(url.pathname));
+      const match = matcher ? matcher(url.pathname) : false;
       const parsedQuery = match ? match : {};
       return {
-        pathname: url,
-        query: parsedQuery
+        pathname: url.pathname,
+        query: {...url.query, ...parsedQuery}
       }
     }
   }
@@ -159,8 +159,7 @@ export class MemoryRouter extends BaseRouter {
     // Parse the URL if needed:
     const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = baseUrlObject.query || {};
-    const urlObject = this.pathParser ? this.pathParser(baseUrlObject.pathname ?? "") : baseUrlObject
-    urlObject.query = {...baseQuery, ...urlObject.query}
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
