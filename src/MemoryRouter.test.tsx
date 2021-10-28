@@ -1,4 +1,4 @@
-import { MemoryRouter } from "./MemoryRouter";
+import {MemoryRouter} from "./MemoryRouter";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {
@@ -256,7 +256,18 @@ describe("MemoryRouter", () => {
 
         expect(memoryRouter).toMatchObject({
           query: { id: "100" }
-        })
+        });
+      });
+
+      it("pathname should be set to original route request", async () => {
+        memoryRouter.registerPaths(["/entity/[id]"]);
+
+        await memoryRouter.push({pathname: "/entity/[id]", query: { id: "42" }});
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/[id]",
+          asPath: "/entity/42"
+        });
       });
     });
   });

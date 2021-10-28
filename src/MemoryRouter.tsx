@@ -10,7 +10,7 @@ import {normalizePagePath} from "next/dist/server/normalize-page-path";
  * Creates a URL from a pathname + query.
  * Injects query params into the URL slugs, the same way that next/router does.
  */
-function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
+export function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
@@ -60,7 +60,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: (url: string) => ParsedUrlQuery = (url: string) => ({});
+  pathParser: ((url: string) => UrlObject) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -129,7 +129,7 @@ export class MemoryRouter extends BaseRouter {
    */
   public registerPaths = (paths: string[]) => this._setPathParser(this._createPathParserFromPatterns(paths))
 
-  private _setPathParser(parser: (url: string) => ParsedUrlQuery) {
+  private _setPathParser(parser: (url: string) => UrlObject) {
     this.pathParser = parser;
   }
 
@@ -140,7 +140,11 @@ export class MemoryRouter extends BaseRouter {
     return (url: string) => {
       const matcher = matchers.find(matcher => !!matcher(url));
       const match = matcher ? matcher(url) : false;
-      return (match ? match : {});
+      const parsedQuery = match ? match : {};
+      return {
+        pathname: url,
+        query: parsedQuery
+      }
     }
   }
 
@@ -153,9 +157,10 @@ export class MemoryRouter extends BaseRouter {
     async = this.async
   ) => {
     // Parse the URL if needed:
-    const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
-    const baseQuery = urlObject.query || {};
-    urlObject.query = {...urlObject.query, ...this.pathParser(urlObject.pathname ?? "")};
+    const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
+    const baseQuery = baseUrlObject.query || {};
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject.pathname ?? "") : baseUrlObject
+    urlObject.query = {...baseQuery, ...urlObject.query}
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
