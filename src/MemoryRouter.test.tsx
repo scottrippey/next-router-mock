@@ -259,16 +259,29 @@ describe("MemoryRouter", () => {
         });
       });
 
-      it("pathname should be set to original route request", async () => {
+      it("when slug passed in pathname, pathname should be set to route and asPath interpolated from query", async () => {
         memoryRouter.registerPaths(["/entity/[id]"]);
 
         await memoryRouter.push({pathname: "/entity/[id]", query: { id: "42" }});
 
         expect(memoryRouter).toMatchObject({
           pathname: "/entity/[id]",
-          asPath: "/entity/42"
+          asPath: "/entity/42",
+          query: { id: "42" }
         });
       });
+
+      it("will properly interpolate catch-all routes from the pathname", async () => {
+        memoryRouter.registerPaths(["/[...slug]"])
+
+        await memoryRouter.push({pathname: "/[...slug]", query: { slug : ["one", "two", "three"]}})
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/[...slug]",
+          asPath: "/one/two/three",
+          query: { slug: ["one", "two", "three"] }
+        })
+      })
     });
   });
 });

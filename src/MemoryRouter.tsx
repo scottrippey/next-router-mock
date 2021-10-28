@@ -3,14 +3,15 @@ import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
-import {getRouteMatcher, getRouteRegex, getSortedRoutes} from "next/dist/shared/lib/router/utils";
+import {getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute} from "next/dist/shared/lib/router/utils";
 import {normalizePagePath} from "next/dist/server/normalize-page-path";
+import {interpolateAs} from "next/dist/shared/lib/router/router";
 
 /**
  * Creates a URL from a pathname + query.
  * Injects query params into the URL slugs, the same way that next/router does.
  */
-export function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
+function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
@@ -33,6 +34,7 @@ type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
+type UrlObjectWithPath = UrlObject & { asPath: string}
 export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
@@ -60,7 +62,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: ((url: UrlObject) => UrlObject) | undefined = undefined;
+  pathParser: ((url: UrlObject) => UrlObjectWithPath) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -129,7 +131,7 @@ export class MemoryRouter extends BaseRouter {
    */
   public registerPaths = (paths: string[]) => this._setPathParser(this._createPathParserFromPatterns(paths))
 
-  private _setPathParser(parser: (url: UrlObject) => UrlObject) {
+  private _setPathParser(parser: (url: UrlObject) => UrlObjectWithPath) {
     this.pathParser = parser;
   }
 
@@ -138,12 +140,21 @@ export class MemoryRouter extends BaseRouter {
       .map(path => getRouteMatcher(getRouteRegex(path)));
 
     return (url: UrlObject) => {
+      const pathname = url.pathname ?? "";
+      const isDynamic = isDynamicRoute(pathname);
       const matcher = matchers.find(matcher => !!matcher(url.pathname));
       const match = matcher ? matcher(url.pathname) : false;
-      const parsedQuery = match ? match : {};
+
+      // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
+      // a query dictionary will be provided, so instead of using the match we interpolate the route from
+      // the provided query
+      const parsedQuery = isDynamic ? url.query : (match ? match : {});
+      const asPath = isDynamic ? interpolateAs(pathname, pathname, url.query ?? {}).result : pathname
+
       return {
         pathname: url.pathname,
-        query: {...url.query, ...parsedQuery}
+        query: {...url.query, ...parsedQuery},
+        asPath: asPath
       }
     }
   }
@@ -159,12 +170,13 @@ export class MemoryRouter extends BaseRouter {
     // Parse the URL if needed:
     const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = baseUrlObject.query || {};
-    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) :
+      { ...baseUrlObject, asPath: getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery) }
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
     const query = urlObject.query || {};
-    const asPath = getRouteAsPath(pathname, baseQuery);
+    const asPath = urlObject.asPath;
 
     this.events.emit("routeChangeStart", asPath, { shallow });
 
