@@ -3,9 +3,6 @@ import { parse as parseUrl, UrlWithParsedQuery } from "url";
 import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
-import { getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute } from "next/dist/shared/lib/router/utils";
-import { normalizePagePath } from "next/dist/server/normalize-page-path";
-import { interpolateAs } from "next/dist/shared/lib/router/router";
 
 /**
  * Creates a URL from a pathname + query.
@@ -30,11 +27,11 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   return asPath;
 }
 
-type UrlObject = {
+export type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
-type UrlObjectWithPath = UrlObject & { asPath: string}
+export type UrlObjectWithPath = UrlObject & { asPath: string}
 export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
@@ -74,7 +71,8 @@ export abstract class BaseRouter implements NextRouter {
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
-  back() {
+
+    back() {
     // Do nothing
   }
   beforePopState() {
@@ -122,41 +120,6 @@ export class MemoryRouter extends BaseRouter {
    */
   public setCurrentUrl(url: Url) {
     void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
-  }
-
-  /**
-   * Register URL paths with the router; this can include any static and dynamic paths your app might use.
-   * Any provided dynamic paths will have their slugs parsed and added to the ParsedUrlQuery on the router
-   * when a route is pushed.
-   */
-  public registerPaths = (paths: string[]) => this._setPathParser(this._createPathParserFromPatterns(paths))
-
-  private _setPathParser(parser: (url: UrlObject) => UrlObjectWithPath) {
-    this.pathParser = parser;
-  }
-
-  private _createPathParserFromPatterns(paths: string[]) {
-    const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
-      .map(path => getRouteMatcher(getRouteRegex(path)));
-
-    return (url: UrlObject) => {
-      const pathname = url.pathname ?? "";
-      const isDynamic = isDynamicRoute(pathname);
-      const matcher = matchers.find(matcher => !!matcher(pathname));
-      const match = matcher ? matcher(pathname) : false;
-
-      // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
-      // a query dictionary will be provided, so instead of using the match we interpolate the route from
-      // the provided query
-      const parsedQuery = isDynamic ? url.query : (match ? match : {});
-      const asPath = isDynamic ? interpolateAs(pathname, pathname, url.query ?? {}).result : pathname
-
-      return {
-        pathname: url.pathname,
-        query: {...url.query, ...parsedQuery},
-        asPath: asPath
-      }
-    }
   }
 
   private _setCurrentUrl = async (
