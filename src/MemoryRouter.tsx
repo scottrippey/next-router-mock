@@ -71,8 +71,7 @@ export abstract class BaseRouter implements NextRouter {
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
-
-    back() {
+  back() {
     // Do nothing
   }
   beforePopState() {
