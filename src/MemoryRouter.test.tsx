@@ -206,7 +206,7 @@ describe("MemoryRouter", () => {
 
         await memoryRouter.push("/entity/101/attribute/everything");
         expect(memoryRouter).toMatchObject({
-          pathname: "/entity/101/attribute/everything",
+          pathname: "/entity/[id]/attribute/[name]",
           asPath: "/entity/101/attribute/everything",
           query: {
             id: "101",
@@ -220,7 +220,7 @@ describe("MemoryRouter", () => {
 
         await memoryRouter.push("/one/two/three");
         expect(memoryRouter).toMatchObject({
-          pathname: "/one/two/three",
+          pathname: "/[...slug]",
           asPath: "/one/two/three",
           query: {
             slug: ["one", "two", "three"]

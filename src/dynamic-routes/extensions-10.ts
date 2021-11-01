@@ -25,14 +25,14 @@ MemoryRouter.prototype.registerPaths = function(paths: string[]) {
 const createPathParserFromPaths = (paths: string[]) => {
   const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
     // @ts-ignore
-    .map(path => getRouteMatcher(getRouteRegex(path)));
+    .map(path => ({pathname: path, match: getRouteMatcher(getRouteRegex(path))}));
 
   return (url: UrlObject) => {
     const pathname = url.pathname ?? "";
     const isDynamic = isDynamicRoute(pathname);
     // @ts-ignore
-    const matcher = matchers.find(matcher => !!matcher(pathname));
-    const match = matcher ? matcher(pathname) : false;
+    const matcher = matchers.find(matcher => !!matcher.match(pathname));
+    const match = matcher ? matcher.match(pathname) : false;
 
     // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
     // a query dictionary will be provided, so instead of using the match we interpolate the route from
@@ -41,7 +41,7 @@ const createPathParserFromPaths = (paths: string[]) => {
     const asPath = isDynamic ? interpolateAs(pathname, pathname, url.query ?? {}).result : pathname
 
     return {
-      pathname: url.pathname,
+      pathname: matcher?.pathname ?? pathname,
       query: {...url.query, ...parsedQuery},
       asPath: asPath
     }
