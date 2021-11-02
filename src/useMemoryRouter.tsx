@@ -14,13 +14,21 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
 
   // Trigger updates on route changes:
   useEffect(() => {
+    // To ensure we don't call setRouter after unmounting:
+    let isMounted = true;
+
     const handleRouteChange = () => {
+      if (!isMounted) return;
+
       // Ensure the reference changes each render:
       setRouter(MemoryRouter.snapshot(singletonRouter));
     };
 
     singletonRouter.events.on("routeChangeComplete", handleRouteChange);
-    return () => singletonRouter.events.off("routeChangeComplete", handleRouteChange);
+    return () => {
+      isMounted = false;
+      singletonRouter.events.off("routeChangeComplete", handleRouteChange);
+    };
   }, [singletonRouter]);
 
   // Subscribe to any eventHandlers:
