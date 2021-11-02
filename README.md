@@ -164,6 +164,27 @@ If you are using Next `v10.*` or `v11.0.*`, simply use the following import inst
 import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-10';
 ```
 
+
+# Dynamic Routes
+
+To mock Next's dynamic routing behavior, you will need to import the optional extensions and register any static or dynamic routes you use in your application (or just those that are relevant for the code under test).
+
+```typescript
+import mockRouter from "next-router-mock";
+import "next-router-mock/dynamic-routes";
+
+mockRouter.registerPaths([
+  "/example/static/path",
+  "/example/[dynamic]/path",
+  "/example/[...catchAll]/path"
+]);
+```
+
+For Next 10 support, use
+```typescript
+import "next-router-mock/dynamic-routes/next-10";
+```
+
 # Sync vs Async
 
 By default, `next-router-mock` handles route changes synchronously. This is convenient for testing, and works for most

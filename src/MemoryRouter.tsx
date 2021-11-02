@@ -27,10 +27,11 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   return asPath;
 }
 
-type UrlObject = {
+export type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
+export type UrlObjectWithPath = UrlObject & { asPath: string}
 export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
@@ -58,6 +59,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
+  pathParser: ((url: UrlObject) => UrlObjectWithPath) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -128,12 +130,15 @@ export class MemoryRouter extends BaseRouter {
     async = this.async
   ) => {
     // Parse the URL if needed:
-    const urlObject = typeof url === "string" ? parseUrl(url, true) : url;
+    const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
+    const baseQuery = baseUrlObject.query || {};
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) :
+      { ...baseUrlObject, asPath: getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery) }
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
     const query = urlObject.query || {};
-    const asPath = getRouteAsPath(pathname, query);
+    const asPath = urlObject.asPath;
 
     this.events.emit("routeChangeStart", asPath, { shallow });
 
