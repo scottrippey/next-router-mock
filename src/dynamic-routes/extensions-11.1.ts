@@ -1,7 +1,6 @@
 import {UrlObject, MemoryRouter} from "../MemoryRouter";
 import {getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute} from "next/dist/shared/lib/router/utils";
 import {normalizePagePath} from "next/dist/server/normalize-page-path";
-import {interpolateAs} from "next/dist/shared/lib/router/router";
 import "./path-parser"
 
 declare module "../MemoryRouter" {
@@ -33,12 +32,10 @@ const createPathParserFromPaths = (paths: string[]) => {
     // a query dictionary will be provided, so instead of using the match we interpolate the route from
     // the provided query
     const parsedQuery = isDynamic ? url.query : (match ? match : {});
-    const asPath = isDynamic ? interpolateAs(pathname, pathname, url.query ?? {}).result : pathname
 
     return {
       pathname: matcher?.pathname ?? pathname,
       query: {...url.query, ...parsedQuery},
-      asPath: asPath
     }
   }
 }

@@ -1,12 +1,12 @@
-import {MemoryRouter, UrlObject, UrlObjectWithPath} from "../MemoryRouter";
+import {MemoryRouter, UrlObject} from "../MemoryRouter";
 
 declare module "../MemoryRouter" {
   interface MemoryRouter {
-    setPathParser(parser: (url: UrlObject) => UrlObjectWithPath): void
+    setPathParser(parser: (url: UrlObject) => UrlObject): void
   }
 }
 
-MemoryRouter.prototype.setPathParser = function(parser: (url: UrlObject) => UrlObjectWithPath) {
+MemoryRouter.prototype.setPathParser = function(parser: (url: UrlObject) => UrlObject) {
   this.pathParser = parser
 }
 
