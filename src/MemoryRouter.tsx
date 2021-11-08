@@ -12,7 +12,7 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(/\[(.+?)]/g, ($0, slug: keyof ParsedUrlQuery) => {
+  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: keyof ParsedUrlQuery) => {
     if (String(slug).startsWith("...")) slug = String(slug).replace("...", "")
 
     const value = remainingQuery[slug]!;
@@ -20,8 +20,11 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
     if (Array.isArray(value)) {
       return value.map(v => encodeURIComponent(v)).join("/")
     }
-    return encodeURIComponent(String(value));
+    return value !== undefined ? encodeURIComponent(String(value)) : "";
   });
+
+  // Remove any trailing slashes; this will occur if there is no match for a catch-all slug ([[...slug]])
+  asPath = asPath.replace(/\/$/, "");
 
   // Append remaining query as a querystring, if needed:
   const qs = stringifyQueryString(remainingQuery);
