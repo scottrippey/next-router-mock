@@ -183,6 +183,36 @@ describe("MemoryRouter", () => {
             id: "two",
           },
         });
+        await memoryRouter.push({
+          pathname: "/one/[...slug]",
+          query: { slug: ["two", "three", "four"], filter: "abc"}
+        });
+        expect(memoryRouter).toMatchObject({
+          asPath: "/one/two/three/four?filter=abc",
+          pathname: "/one/[...slug]",
+          query: {
+            slug: ["two", "three", "four"],
+            filter: "abc"
+          }
+        });
+        await memoryRouter.push({
+          pathname: "/one/two/[[...slug]]",
+          query: { slug: ["three", "four"] }
+        });
+        expect(memoryRouter).toMatchObject({
+          asPath: "/one/two/three/four",
+          pathname: "/one/two/[[...slug]]",
+          query: {}
+        });
+        await memoryRouter.push({
+          pathname: "/one/two/[[...slug]]",
+          query: {}
+        });
+        expect(memoryRouter).toMatchObject({
+          asPath: "/one/two",
+          pathname: "/one/two/[[...slug]]",
+          query: {}
+        });
       });
       it("push the locale", async () => {
         await memoryRouter.push("/", undefined, { locale: "en" });
@@ -251,12 +281,14 @@ describe("MemoryRouter", () => {
       });
 
       it("when query param matches path param, path param will take precedence", async () => {
-        memoryRouter.registerPaths(["/entity/[id]"])
+        memoryRouter.registerPaths(["/entity/[id]"]);
 
-        await memoryRouter.push("/entity/100?id=500")
+        await memoryRouter.push("/entity/100?id=500");
 
         expect(memoryRouter).toMatchObject({
-          query: { id: "100" }
+          pathname: "/entity/[id]",
+          query: { id: "100" },
+          asPath: "/entity/100?id=500"
         });
       });
 
@@ -272,15 +304,63 @@ describe("MemoryRouter", () => {
         });
       });
 
-      it("will properly interpolate catch-all routes from the pathname", async () => {
-        memoryRouter.registerPaths(["/[...slug]"])
+      it ("when slug passed in pathname with additional query params, asPath should have query string", async () => {
+        memoryRouter.registerPaths(["/entity/[id]"]);
 
-        await memoryRouter.push({pathname: "/[...slug]", query: { slug : ["one", "two", "three"]}})
+        await memoryRouter.push({pathname: "/entity/[id]", query: { id: "42", filter: "abc"}});
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/[id]",
+          asPath: "/entity/42?filter=abc",
+          query: { id: "42", filter: "abc"}
+        });
+      })
+
+      it("will properly interpolate catch-all routes from the pathname", async () => {
+        memoryRouter.registerPaths(["/[...slug]"]);
+
+        await memoryRouter.push({pathname: "/[...slug]", query: { slug : ["one", "two", "three"]}});
 
         expect(memoryRouter).toMatchObject({
           pathname: "/[...slug]",
           asPath: "/one/two/three",
           query: { slug: ["one", "two", "three"] }
+        });
+      });
+
+      it("with dynamic routes, will properly generate asPath when passed in query dictionary", async () => {
+        memoryRouter.registerPaths(["/entity/[id]"]);
+
+        await memoryRouter.push({pathname: "/entity/100", query: {filter: "abc", max: "1000"}})
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/[id]",
+          asPath: "/entity/100?filter=abc&max=1000",
+          query: { id: "100", filter: "abc", max: "1000" }
+        });
+      });
+
+      it("will properly interpolate optional catch-all routes from the pathname", async () => {
+        memoryRouter.registerPaths(["/one/two/[[...slug]]"]);
+
+        await memoryRouter.push("/one/two/three/four");
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/one/two/[[...slug]]",
+          asPath: "/one/two/three/four",
+          query: { slug: ["three", "four"] }
+        });
+      });
+
+      it("will match route with optional catch-all ommitted", async () => {
+        memoryRouter.registerPaths(["/entity/[id]/[[...slug]]"]);
+
+        await memoryRouter.push("/entity/42");
+
+        expect(memoryRouter).toMatchObject({
+          pathname: "/entity/[id]/[[...slug]]",
+          asPath: "/entity/42",
+          query: { id: "42" }
         });
       });
     });

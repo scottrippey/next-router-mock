@@ -12,12 +12,19 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(/\[(.+?)]/g, ($0, slug: keyof ParsedUrlQuery) => {
+  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: keyof ParsedUrlQuery) => {
+    if (String(slug).startsWith("...")) slug = String(slug).replace("...", "")
+
     const value = remainingQuery[slug]!;
     delete remainingQuery[slug];
-
-    return encodeURIComponent(String(value));
+    if (Array.isArray(value)) {
+      return value.map(v => encodeURIComponent(v)).join("/")
+    }
+    return value !== undefined ? encodeURIComponent(String(value)) : "";
   });
+
+  // Remove any trailing slashes; this will occur if there is no match for a catch-all slug ([[...slug]])
+  asPath = asPath.replace(/\/$/, "");
 
   // Append remaining query as a querystring, if needed:
   const qs = stringifyQueryString(remainingQuery);
@@ -31,7 +38,6 @@ export type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
 };
-export type UrlObjectWithPath = UrlObject & { asPath: string}
 export type Url = string | UrlObject;
 
 // interface not exported by the package next/router
@@ -59,7 +65,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: ((url: UrlObject) => UrlObjectWithPath) | undefined = undefined;
+  pathParser: ((url: UrlObject) => UrlObject) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -132,13 +138,12 @@ export class MemoryRouter extends BaseRouter {
     // Parse the URL if needed:
     const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = baseUrlObject.query || {};
-    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) :
-      { ...baseUrlObject, asPath: getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery) }
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";
     const query = urlObject.query || {};
-    const asPath = urlObject.asPath;
+    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery);
 
     this.events.emit("routeChangeStart", asPath, { shallow });
 
