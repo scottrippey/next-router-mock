@@ -33,7 +33,6 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
 
 export type UrlObject = {
   pathname: UrlWithParsedQuery["pathname"];
-  path?: UrlWithParsedQuery["path"];
   query?: UrlWithParsedQuery["query"];
 };
 export type Url = string | UrlObject;
