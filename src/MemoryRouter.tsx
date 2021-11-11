@@ -12,13 +12,13 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: keyof ParsedUrlQuery) => {
-    if (String(slug).startsWith("...")) slug = String(slug).replace("...", "")
+  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
+    if (slug.startsWith("...")) slug = slug.replace("...", "");
 
     const value = remainingQuery[slug]!;
     delete remainingQuery[slug];
     if (Array.isArray(value)) {
-      return value.map(v => encodeURIComponent(v)).join("/")
+      return value.map((v) => encodeURIComponent(v)).join("/");
     }
     return value !== undefined ? encodeURIComponent(String(value)) : "";
   });
@@ -138,7 +138,7 @@ export class MemoryRouter extends BaseRouter {
     // Parse the URL if needed:
     const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = baseUrlObject.query || {};
-    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject
+    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject;
 
     const shallow = options?.shallow || false;
     const pathname = urlObject.pathname || "";

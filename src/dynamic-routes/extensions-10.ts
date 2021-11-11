@@ -1,14 +1,19 @@
-// @ts-ignore
-import { getRouteMatcher, getRouteRegex, getSortedRoutes, isDynamicRoute } from "next/dist/next-server/lib/router/utils";
+import {
+  getRouteMatcher,
+  getRouteRegex,
+  getSortedRoutes,
+  isDynamicRoute,
+  // @ts-ignore
+} from "next/dist/next-server/lib/router/utils";
 // @ts-ignore
 import { normalizePagePath } from "next/dist/next-server/server/normalize-page-path";
 // @ts-ignore
-import {UrlObject, MemoryRouter} from "../MemoryRouter";
-import "./path-parser"
+import { UrlObject, MemoryRouter } from "../MemoryRouter";
+import "./path-parser";
 
 declare module "../MemoryRouter" {
   interface MemoryRouter {
-    registerPaths(paths: string[]): void
+    registerPaths(paths: string[]): void;
   }
 }
 
@@ -17,32 +22,34 @@ declare module "../MemoryRouter" {
  * Any provided dynamic paths will have their slugs parsed and added to the ParsedUrlQuery on the router
  * when a route is pushed.
  */
-MemoryRouter.prototype.registerPaths = function(paths: string[]) {
-  this.setPathParser(createPathParserFromPaths(paths))
-}
+MemoryRouter.prototype.registerPaths = function (paths: string[]) {
+  this.pathParser = createPathParserFromPaths(paths);
+};
 
 const createPathParserFromPaths = (paths: string[]) => {
-  const matchers = getSortedRoutes(paths.map(path => normalizePagePath(path)))
-    // @ts-ignore
-    .map(path => ({pathname: path, match: getRouteMatcher(getRouteRegex(path))}));
+  const matchers = getSortedRoutes(paths.map((path) => normalizePagePath(path))).map((path: string) => ({
+    pathname: path,
+    match: getRouteMatcher(getRouteRegex(path)),
+  }));
 
-  return (url: UrlObject) => {
+  return (url: UrlObject): UrlObject => {
     const pathname = url.pathname ?? "";
     const isDynamic = isDynamicRoute(pathname);
     // @ts-ignore
-    const matcher = matchers.find(matcher => !!matcher.match(pathname));
+    const matcher = matchers.find((matcher) => !!matcher.match(pathname));
     const match = matcher ? matcher.match(pathname) : false;
 
     // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
     // a query dictionary will be provided, so instead of using the match we interpolate the route from
     // the provided query
-    const parsedQuery = isDynamic ? url.query : (match ? match : {});
+    const parsedQuery = isDynamic ? url.query : match ? match : {};
 
     return {
+      ...url,
       pathname: matcher?.pathname ?? pathname,
-      query: {...url.query, ...parsedQuery},
-    }
-  }
-}
+      query: { ...url.query, ...parsedQuery },
+    };
+  };
+};
 
-export {}
+export {};
