@@ -21,11 +21,7 @@ describe("next/link", () => {
     });
 
     it("to a URL object", async () => {
-      render(
-        <NextLink href={{ pathname: "/example", query: { foo: "bar" } }}>
-          Example Link
-        </NextLink>
-      );
+      render(<NextLink href={{ pathname: "/example", query: { foo: "bar" } }}>Example Link</NextLink>);
       fireEvent.click(screen.getByText("Example Link"));
       await waitFor(() => {
         expect(MockRouter).toMatchObject({

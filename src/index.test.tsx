@@ -27,8 +27,8 @@ describe("next-overridable-hook", () => {
       pathname: "",
       query: {},
       route: "",
-      pathParser: undefined
-  });
+      pathParser: undefined,
+    });
   });
 
   describe("useRouter", () => {
