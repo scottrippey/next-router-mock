@@ -360,7 +360,44 @@ describe("MemoryRouter", () => {
         expect(memoryRouter).toMatchObject({
           pathname: "/entity/[id]/[[...slug]]",
           asPath: "/entity/42",
-          query: { id: "42" }
+          query: { id: "42" },
+        });
+      });
+
+      it("trailing slashes are removed", async () => {
+        memoryRouter.setCurrentUrl("/path/");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/path",
+          pathname: "/path",
+        });
+      });
+
+      it("a single slash is preserved", async () => {
+        memoryRouter.setCurrentUrl("/");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/",
+          pathname: "/",
+        });
+      });
+
+      it.each(["", "(with parser)"])("hashes are preserved %s", async (withParser) => {
+        if (withParser) {
+          memoryRouter.registerPaths(["/path"]);
+        } else {
+          memoryRouter.pathParser = undefined;
+        }
+
+        memoryRouter.setCurrentUrl("/path#hash");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/path#hash",
+          pathname: "/path",
+        });
+
+        memoryRouter.setCurrentUrl("/path?key=value#hash");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/path?key=value#hash",
+          pathname: "/path",
+          query: { key: "value" },
         });
       });
     });
