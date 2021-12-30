@@ -49,15 +49,15 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
     const { result } = renderHook(() => useRouter());
 
     await act(async () => {
-      await result.current.push("/foo?bar=baz");
+      await result.current.push("/foo?bar=baz2");
     });
 
     expect(result.current).not.toBe(singletonRouter);
     expect(result.current).toEqual(singletonRouter);
     expect(result.current).toMatchObject({
-      asPath: "/foo?bar=baz",
+      asPath: "/foo?bar=baz2",
       pathname: "/foo",
-      query: { bar: "baz" },
+      query: { bar: "baz2" },
     });
 
     // Ensure only 2 renders happened:
