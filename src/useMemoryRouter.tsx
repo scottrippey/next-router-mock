@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { MemoryRouter } from "./MemoryRouter";
 
 export type MemoryRouterEventHandlers = {
+  onHashChangeStart?: (url: string, options: { shallow: boolean }) => void;
+  onHashChangeComplete?: (url: string, options: { shallow: boolean }) => void;
   onRouteChangeStart?: (url: string, options: { shallow: boolean }) => void;
   onRouteChangeComplete?: (url: string, options: { shallow: boolean }) => void;
   onPush?: (url: string, options: { shallow: boolean }) => void;
@@ -34,16 +36,20 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
   // Subscribe to any eventHandlers:
   useEffect(() => {
     if (!eventHandlers) return;
-    const { onRouteChangeStart, onRouteChangeComplete, onPush, onReplace } = eventHandlers;
-    if (!(onRouteChangeStart || onRouteChangeComplete || onPush || onReplace)) return;
+    const { onRouteChangeStart, onRouteChangeComplete, onHashChangeComplete, onHashChangeStart, onPush, onReplace } = eventHandlers;
+    if (!(onRouteChangeStart || onRouteChangeComplete  || onHashChangeStart ||onHashChangeComplete || onPush || onReplace)) return;
 
     if (onRouteChangeStart) singletonRouter.events.on("routeChangeStart", onRouteChangeStart);
     if (onRouteChangeComplete) singletonRouter.events.on("routeChangeComplete", onRouteChangeComplete);
+    if (onHashChangeStart) singletonRouter.events.on("hashChangeStart", onHashChangeStart);
+    if (onRouteChangeComplete) singletonRouter.events.on("hashChangeComplete", onRouteChangeComplete);
     if (onPush) singletonRouter.events.on("NEXT_ROUTER_MOCK:push", onPush);
     if (onReplace) singletonRouter.events.on("NEXT_ROUTER_MOCK:replace", onReplace);
     return () => {
       if (onRouteChangeStart) singletonRouter.events.off("routeChangeStart", onRouteChangeStart);
       if (onRouteChangeComplete) singletonRouter.events.off("routeChangeComplete", onRouteChangeComplete);
+      if (onHashChangeStart) singletonRouter.events.off("hashChangeStart", onHashChangeStart);
+      if (onHashChangeComplete) singletonRouter.events.off("hashChangeComplete", onHashChangeComplete);
       if (onPush) singletonRouter.events.off("NEXT_ROUTER_MOCK:push", onPush);
       if (onReplace) singletonRouter.events.off("NEXT_ROUTER_MOCK:replace", onReplace);
     };
@@ -51,6 +57,8 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
     singletonRouter.events,
     eventHandlers?.onRouteChangeStart,
     eventHandlers?.onRouteChangeComplete,
+    eventHandlers?.onHashChangeStart,
+    eventHandlers?.onHashChangeComplete,
     eventHandlers?.onPush,
     eventHandlers?.onReplace,
   ]);

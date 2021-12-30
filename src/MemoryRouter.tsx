@@ -62,6 +62,7 @@ export abstract class BaseRouter implements NextRouter {
   isReady = true;
   route = "";
   pathname = "";
+  hash = "";
   query: NextRouter["query"] = {};
   asPath = "";
   basePath = "";
@@ -145,9 +146,20 @@ export class MemoryRouter extends BaseRouter {
     const shallow = options?.shallow || false;
     const pathname = removeTrailingSlash(urlObject.pathname || "");
     const query = urlObject.query || {};
-    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, urlObject.hash);
+    const hash = urlObject.hash;
+    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, hash);
 
-    this.events.emit("routeChangeStart", asPath, { shallow });
+    const isHashChange = this.hash !== hash;
+    const isQueryChange = stringifyQueryString(this.query) !== stringifyQueryString(query);
+    const isRouteChange = isQueryChange || this.pathname !== pathname;
+
+    if (isHashChange) {
+      this.events.emit("hashChangeStart", asPath, { shallow });
+    }
+
+    if (isRouteChange) {
+      this.events.emit("routeChangeStart", asPath, { shallow });
+    }
 
     // Simulate the async nature of this method
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
@@ -159,7 +171,13 @@ export class MemoryRouter extends BaseRouter {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeComplete", this.asPath, { shallow });
+    if (isHashChange) {
+      this.events.emit("hashChangeComplete", this.asPath, { shallow });
+    }
+
+    if (isRouteChange) {
+      this.events.emit("routeChangeComplete", this.asPath, { shallow });
+    }
 
     const eventName =
       source === "push" ? "NEXT_ROUTER_MOCK:push" : source === "replace" ? "NEXT_ROUTER_MOCK:replace" : undefined;
