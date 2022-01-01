@@ -146,18 +146,17 @@ export class MemoryRouter extends BaseRouter {
     const shallow = options?.shallow || false;
     const pathname = removeTrailingSlash(urlObject.pathname || "");
     const query = urlObject.query || {};
-    const hash = urlObject.hash;
+    const hash = urlObject.hash || "";
     const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, hash);
 
     const isHashChange = this.hash !== hash;
     const isQueryChange = stringifyQueryString(this.query) !== stringifyQueryString(query);
     const isRouteChange = isQueryChange || this.pathname !== pathname;
+    const isOnlyHashChange = isHashChange && !isRouteChange;
 
-    if (isHashChange) {
+    if (isOnlyHashChange) {
       this.events.emit("hashChangeStart", asPath, { shallow });
-    }
-
-    if (isRouteChange) {
+    } else {
       this.events.emit("routeChangeStart", asPath, { shallow });
     }
 
@@ -167,15 +166,14 @@ export class MemoryRouter extends BaseRouter {
     this.pathname = pathname;
     this.query = query;
     this.asPath = asPath;
+    this.hash = hash;
     if (options?.locale) {
       this.locale = options.locale;
     }
 
-    if (isHashChange) {
+    if (isOnlyHashChange) {
       this.events.emit("hashChangeComplete", this.asPath, { shallow });
-    }
-
-    if (isRouteChange) {
+    } else {
       this.events.emit("routeChangeComplete", this.asPath, { shallow });
     }
 

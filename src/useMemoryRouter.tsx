@@ -36,13 +36,18 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
   // Subscribe to any eventHandlers:
   useEffect(() => {
     if (!eventHandlers) return;
-    const { onRouteChangeStart, onRouteChangeComplete, onHashChangeComplete, onHashChangeStart, onPush, onReplace } = eventHandlers;
-    if (!(onRouteChangeStart || onRouteChangeComplete  || onHashChangeStart ||onHashChangeComplete || onPush || onReplace)) return;
-
+    const {
+      onRouteChangeStart,
+      onRouteChangeComplete,
+      onHashChangeComplete,
+      onHashChangeStart,
+      onPush,
+      onReplace,
+    } = eventHandlers;
     if (onRouteChangeStart) singletonRouter.events.on("routeChangeStart", onRouteChangeStart);
     if (onRouteChangeComplete) singletonRouter.events.on("routeChangeComplete", onRouteChangeComplete);
     if (onHashChangeStart) singletonRouter.events.on("hashChangeStart", onHashChangeStart);
-    if (onRouteChangeComplete) singletonRouter.events.on("hashChangeComplete", onRouteChangeComplete);
+    if (onHashChangeComplete) singletonRouter.events.on("hashChangeComplete", onHashChangeComplete);
     if (onPush) singletonRouter.events.on("NEXT_ROUTER_MOCK:push", onPush);
     if (onReplace) singletonRouter.events.on("NEXT_ROUTER_MOCK:replace", onReplace);
     return () => {

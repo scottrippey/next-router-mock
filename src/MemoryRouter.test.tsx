@@ -43,13 +43,19 @@ describe("MemoryRouter", () => {
       describe("routeChangeStart and routeChangeComplete events", () => {
         const routeChangeStart = jest.fn();
         const routeChangeComplete = jest.fn();
+        const hashChangeStart = jest.fn();
+        const hashChangeComplete = jest.fn();
         beforeAll(() => {
           memoryRouter.events.on("routeChangeStart", routeChangeStart);
           memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
+          memoryRouter.events.on("hashChangeStart", hashChangeStart);
+          memoryRouter.events.on("hashChangeComplete", hashChangeComplete);
         });
         afterAll(() => {
           memoryRouter.events.off("routeChangeStart", routeChangeStart);
           memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
+          memoryRouter.events.off("hashChangeStart", hashChangeStart);
+          memoryRouter.events.off("hashChangeComplete", hashChangeComplete);
         });
 
         it("should both be triggered when pushing a URL", async () => {
@@ -60,6 +66,19 @@ describe("MemoryRouter", () => {
           expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
             shallow: false,
           });
+        });
+
+        it("should trigger only hashEvents on a hash change event", async () => {
+          routeChangeStart.mockClear();
+          routeChangeComplete.mockClear();
+          hashChangeStart.mockClear();
+          hashChangeComplete.mockClear();
+
+          await memoryRouter.push(memoryRouter.asPath + "#foo");
+          expect(hashChangeStart).toHaveBeenCalledWith("/one#foo", { shallow: false });
+          expect(hashChangeStart).toHaveBeenCalledWith("/one#foo", { shallow: false });
+          expect(routeChangeStart).not.toHaveBeenCalled();
+          expect(routeChangeComplete).not.toHaveBeenCalled();
         });
 
         if (async) {
