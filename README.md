@@ -222,6 +222,8 @@ it('next/link can be tested too', async () => {
 - `router.events` supports:
   - `routeChangeStart(url, { shallow })`
   - `routeChangeComplete(url, { shallow })`
+  - `hashChangeStart(url, { shallow })`
+  - `hashChangeComplete(url, { shallow })`
 
 ## Not yet supported
 
