@@ -144,45 +144,33 @@ export class MemoryRouter extends BaseRouter {
     const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject;
 
     const shallow = options?.shallow || false;
-    const pathname = removeTrailingSlash(urlObject.pathname || "");
-    const query = urlObject.query || {};
-    const hash = urlObject.hash || "";
-    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, hash);
+    const newRoute = {
+      pathname: removeTrailingSlash(urlObject.pathname || ""),
+      query: urlObject.query || {},
+      hash: urlObject.hash || "",
+      asPath: getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, urlObject.hash),
+    };
 
-    const isHashChange = this.hash !== hash;
-    const isQueryChange = stringifyQueryString(this.query) !== stringifyQueryString(query);
-    const isRouteChange = isQueryChange || this.pathname !== pathname;
-
-    /**
-     * Try to replicate NextJs routing behaviour:
-     *
-     * /foo       -> routeChange
-     * /foo#baz   -> hashChange
-     * /foo#baz   -> hashChange
-     * /foo       -> hashChange
-     * /foo       -> routeChange
-     * /bar#fuz   -> routeChange
-     */
-    const triggersHashChange = !isRouteChange && (isHashChange || Boolean(hash));
-
-    if (triggersHashChange) {
-      this.events.emit("hashChangeStart", asPath, { shallow });
+    const triggerHashChange = shouldTriggerHashChange(this, newRoute);
+    if (triggerHashChange) {
+      this.events.emit("hashChangeStart", newRoute.asPath, { shallow });
     } else {
-      this.events.emit("routeChangeStart", asPath, { shallow });
+      this.events.emit("routeChangeStart", newRoute.asPath, { shallow });
     }
 
     // Simulate the async nature of this method
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
-    this.pathname = pathname;
-    this.query = query;
-    this.asPath = asPath;
-    this.hash = hash;
+    this.pathname = newRoute.pathname;
+    this.query = newRoute.query;
+    this.hash = newRoute.hash;
+    this.asPath = newRoute.asPath;
+
     if (options?.locale) {
       this.locale = options.locale;
     }
 
-    if (triggersHashChange) {
+    if (triggerHashChange) {
       this.events.emit("hashChangeComplete", this.asPath, { shallow });
     } else {
       this.events.emit("routeChangeComplete", this.asPath, { shallow });
@@ -198,4 +186,22 @@ export class MemoryRouter extends BaseRouter {
 
 function removeTrailingSlash(path: string) {
   return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path;
+}
+
+function shouldTriggerHashChange(current: MemoryRouter, newRoute: Pick<MemoryRouter, "hash" | "query" | "pathname">) {
+  const isHashChange = current.hash !== newRoute.hash;
+  const isQueryChange = stringifyQueryString(current.query) !== stringifyQueryString(newRoute.query);
+  const isRouteChange = isQueryChange || current.pathname !== newRoute.pathname;
+
+  /**
+   * Try to replicate NextJs routing behaviour:
+   *
+   * /foo       -> routeChange
+   * /foo#baz   -> hashChange
+   * /foo#baz   -> hashChange
+   * /foo       -> hashChange
+   * /foo       -> routeChange
+   * /bar#fuz   -> routeChange
+   */
+  return !isRouteChange && (isHashChange || newRoute.hash);
 }
