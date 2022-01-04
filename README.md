@@ -15,10 +15,12 @@ Install via NPM: `npm install --save-dev next-router-mock`
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [`next-router-mock`](#next-router-mock)
 - [Quick Start](#quick-start)
 - [Usage with Jest](#usage-with-jest)
 - [Usage with Storybook](#usage-with-storybook)
     - [`MemoryRouterProvider` compatibility with Next 10](#memoryrouterprovider-compatibility-with-next-10)
+- [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
   - [Not yet supported](#not-yet-supported)
@@ -220,6 +222,8 @@ it('next/link can be tested too', async () => {
 - `router.events` supports:
   - `routeChangeStart(url, { shallow })`
   - `routeChangeComplete(url, { shallow })`
+  - `hashChangeStart(url, { shallow })`
+  - `hashChangeComplete(url, { shallow })`
 
 ## Not yet supported
 
@@ -242,6 +246,4 @@ These fields just have default values; these methods do nothing.
 - `router.events` not implemented:
   - `routeChangeError`
   - `beforeHistoryChange`
-  - `hashChangeStart`
-  - `hashChangeComplete`
 

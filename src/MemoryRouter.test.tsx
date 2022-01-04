@@ -43,13 +43,25 @@ describe("MemoryRouter", () => {
       describe("routeChangeStart and routeChangeComplete events", () => {
         const routeChangeStart = jest.fn();
         const routeChangeComplete = jest.fn();
+        const hashChangeStart = jest.fn();
+        const hashChangeComplete = jest.fn();
+        const clearListenerMocks = () => {
+          routeChangeStart.mockClear();
+          routeChangeComplete.mockClear();
+          hashChangeStart.mockClear();
+          hashChangeComplete.mockClear();
+        };
         beforeAll(() => {
           memoryRouter.events.on("routeChangeStart", routeChangeStart);
           memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
+          memoryRouter.events.on("hashChangeStart", hashChangeStart);
+          memoryRouter.events.on("hashChangeComplete", hashChangeComplete);
         });
         afterAll(() => {
           memoryRouter.events.off("routeChangeStart", routeChangeStart);
           memoryRouter.events.off("routeChangeComplete", routeChangeComplete);
+          memoryRouter.events.off("hashChangeStart", hashChangeStart);
+          memoryRouter.events.off("hashChangeComplete", hashChangeComplete);
         });
 
         it("should both be triggered when pushing a URL", async () => {
@@ -60,6 +72,56 @@ describe("MemoryRouter", () => {
           expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
             shallow: false,
           });
+        });
+
+        it("should trigger only hashEvents for /baz -> /baz#foo", async () => {
+          await memoryRouter.push("/baz");
+          clearListenerMocks();
+          await memoryRouter.push("/baz#foo");
+          expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", { shallow: false });
+          expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", { shallow: false });
+          expect(routeChangeStart).not.toHaveBeenCalled();
+          expect(routeChangeComplete).not.toHaveBeenCalled();
+        });
+
+        it("should trigger only hashEvents for /baz#foo -> /baz#foo", async () => {
+          await memoryRouter.push("/baz#foo");
+          clearListenerMocks();
+          await memoryRouter.push("/baz#foo");
+          expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", { shallow: false });
+          expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", { shallow: false });
+          expect(routeChangeStart).not.toHaveBeenCalled();
+          expect(routeChangeComplete).not.toHaveBeenCalled();
+        });
+
+        it("should trigger only hashEvents for /baz#foo -> /baz", async () => {
+          await memoryRouter.push("/baz#foo");
+          clearListenerMocks();
+          await memoryRouter.push("/baz");
+          expect(hashChangeStart).toHaveBeenCalledWith("/baz", { shallow: false });
+          expect(hashChangeComplete).toHaveBeenCalledWith("/baz", { shallow: false });
+          expect(routeChangeStart).not.toHaveBeenCalled();
+          expect(routeChangeComplete).not.toHaveBeenCalled();
+        });
+
+        it("should trigger only routeEvents for /baz -> /baz", async () => {
+          await memoryRouter.push("/baz");
+          clearListenerMocks();
+          await memoryRouter.push("/baz");
+          expect(hashChangeStart).not.toHaveBeenCalled();
+          expect(hashChangeComplete).not.toHaveBeenCalled();
+          expect(routeChangeStart).toHaveBeenCalledWith("/baz", { shallow: false });
+          expect(routeChangeComplete).toHaveBeenCalledWith("/baz", { shallow: false });
+        });
+
+        it("should trigger only routeEvents for /baz -> /foo#baz", async () => {
+          await memoryRouter.push("/baz");
+          clearListenerMocks();
+          await memoryRouter.push("/foo#baz");
+          expect(hashChangeStart).not.toHaveBeenCalled();
+          expect(hashChangeComplete).not.toHaveBeenCalled();
+          expect(routeChangeStart).toHaveBeenCalledWith("/foo#baz", { shallow: false });
+          expect(routeChangeComplete).toHaveBeenCalledWith("/foo#baz", { shallow: false });
         });
 
         if (async) {

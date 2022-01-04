@@ -62,6 +62,7 @@ export abstract class BaseRouter implements NextRouter {
   isReady = true;
   route = "";
   pathname = "";
+  hash = "";
   query: NextRouter["query"] = {};
   asPath = "";
   basePath = "";
@@ -145,9 +146,30 @@ export class MemoryRouter extends BaseRouter {
     const shallow = options?.shallow || false;
     const pathname = removeTrailingSlash(urlObject.pathname || "");
     const query = urlObject.query || {};
-    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, urlObject.hash);
+    const hash = urlObject.hash || "";
+    const asPath = getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, hash);
 
-    this.events.emit("routeChangeStart", asPath, { shallow });
+    const isHashChange = this.hash !== hash;
+    const isQueryChange = stringifyQueryString(this.query) !== stringifyQueryString(query);
+    const isRouteChange = isQueryChange || this.pathname !== pathname;
+
+    /**
+     * Try to replicate NextJs routing behaviour:
+     *
+     * /foo       -> routeChange
+     * /foo#baz   -> hashChange
+     * /foo#baz   -> hashChange
+     * /foo       -> hashChange
+     * /foo       -> routeChange
+     * /bar#fuz   -> routeChange
+     */
+    const triggersHashChange = !isRouteChange && (isHashChange || Boolean(hash));
+
+    if (triggersHashChange) {
+      this.events.emit("hashChangeStart", asPath, { shallow });
+    } else {
+      this.events.emit("routeChangeStart", asPath, { shallow });
+    }
 
     // Simulate the async nature of this method
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
@@ -155,11 +177,16 @@ export class MemoryRouter extends BaseRouter {
     this.pathname = pathname;
     this.query = query;
     this.asPath = asPath;
+    this.hash = hash;
     if (options?.locale) {
       this.locale = options.locale;
     }
 
-    this.events.emit("routeChangeComplete", this.asPath, { shallow });
+    if (triggersHashChange) {
+      this.events.emit("hashChangeComplete", this.asPath, { shallow });
+    } else {
+      this.events.emit("routeChangeComplete", this.asPath, { shallow });
+    }
 
     const eventName =
       source === "push" ? "NEXT_ROUTER_MOCK:push" : source === "replace" ? "NEXT_ROUTER_MOCK:replace" : undefined;
