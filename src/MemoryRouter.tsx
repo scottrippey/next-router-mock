@@ -152,9 +152,20 @@ export class MemoryRouter extends BaseRouter {
     const isHashChange = this.hash !== hash;
     const isQueryChange = stringifyQueryString(this.query) !== stringifyQueryString(query);
     const isRouteChange = isQueryChange || this.pathname !== pathname;
-    const isOnlyHashChange = isHashChange && !isRouteChange;
 
-    if (isOnlyHashChange) {
+    /**
+     * Try to replicate NextJs routing behaviour:
+     *
+     * /foo       -> routeChange
+     * /foo#baz   -> hashChange
+     * /foo#baz   -> hashChange
+     * /foo       -> hashChange
+     * /foo       -> routeChange
+     * /bar#fuz   -> routeChange
+     */
+    const triggersHashChange = !isRouteChange && (isHashChange || Boolean(hash));
+
+    if (triggersHashChange) {
       this.events.emit("hashChangeStart", asPath, { shallow });
     } else {
       this.events.emit("routeChangeStart", asPath, { shallow });
@@ -171,7 +182,7 @@ export class MemoryRouter extends BaseRouter {
       this.locale = options.locale;
     }
 
-    if (isOnlyHashChange) {
+    if (triggersHashChange) {
       this.events.emit("hashChangeComplete", this.asPath, { shallow });
     } else {
       this.events.emit("routeChangeComplete", this.asPath, { shallow });
