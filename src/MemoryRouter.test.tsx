@@ -40,17 +40,11 @@ describe("MemoryRouter", () => {
         });
       });
 
-      describe("routeChangeStart and routeChangeComplete events", () => {
+      describe("events: routeChange and hashChange", () => {
         const routeChangeStart = jest.fn();
         const routeChangeComplete = jest.fn();
         const hashChangeStart = jest.fn();
         const hashChangeComplete = jest.fn();
-        const clearListenerMocks = () => {
-          routeChangeStart.mockClear();
-          routeChangeComplete.mockClear();
-          hashChangeStart.mockClear();
-          hashChangeComplete.mockClear();
-        };
         beforeAll(() => {
           memoryRouter.events.on("routeChangeStart", routeChangeStart);
           memoryRouter.events.on("routeChangeComplete", routeChangeComplete);
@@ -76,7 +70,7 @@ describe("MemoryRouter", () => {
 
         it("should trigger only hashEvents for /baz -> /baz#foo", async () => {
           await memoryRouter.push("/baz");
-          clearListenerMocks();
+          jest.clearAllMocks();
           await memoryRouter.push("/baz#foo");
           expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", { shallow: false });
           expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", { shallow: false });
@@ -86,7 +80,7 @@ describe("MemoryRouter", () => {
 
         it("should trigger only hashEvents for /baz#foo -> /baz#foo", async () => {
           await memoryRouter.push("/baz#foo");
-          clearListenerMocks();
+          jest.clearAllMocks();
           await memoryRouter.push("/baz#foo");
           expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", { shallow: false });
           expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", { shallow: false });
@@ -96,7 +90,7 @@ describe("MemoryRouter", () => {
 
         it("should trigger only hashEvents for /baz#foo -> /baz", async () => {
           await memoryRouter.push("/baz#foo");
-          clearListenerMocks();
+          jest.clearAllMocks();
           await memoryRouter.push("/baz");
           expect(hashChangeStart).toHaveBeenCalledWith("/baz", { shallow: false });
           expect(hashChangeComplete).toHaveBeenCalledWith("/baz", { shallow: false });
@@ -106,7 +100,7 @@ describe("MemoryRouter", () => {
 
         it("should trigger only routeEvents for /baz -> /baz", async () => {
           await memoryRouter.push("/baz");
-          clearListenerMocks();
+          jest.clearAllMocks();
           await memoryRouter.push("/baz");
           expect(hashChangeStart).not.toHaveBeenCalled();
           expect(hashChangeComplete).not.toHaveBeenCalled();
@@ -116,7 +110,7 @@ describe("MemoryRouter", () => {
 
         it("should trigger only routeEvents for /baz -> /foo#baz", async () => {
           await memoryRouter.push("/baz");
-          clearListenerMocks();
+          jest.clearAllMocks();
           await memoryRouter.push("/foo#baz");
           expect(hashChangeStart).not.toHaveBeenCalled();
           expect(hashChangeComplete).not.toHaveBeenCalled();
@@ -125,7 +119,7 @@ describe("MemoryRouter", () => {
         });
 
         if (async) {
-          it("should both be triggered in the correct async order", async () => {
+          it("routeChange events should be triggered in the correct async order", async () => {
             const promise = memoryRouter.push("/one/two/three");
             expect(routeChangeStart).toHaveBeenCalledWith("/one/two/three", {
               shallow: false,
@@ -133,6 +127,19 @@ describe("MemoryRouter", () => {
             expect(routeChangeComplete).not.toHaveBeenCalled();
             await promise;
             expect(routeChangeComplete).toHaveBeenCalledWith("/one/two/three", {
+              shallow: false,
+            });
+          });
+          it("hashChange events should be triggered in the correct async order", async () => {
+            await memoryRouter.push("/baz");
+            jest.clearAllMocks();
+            const promise = memoryRouter.push("/baz#foo");
+            expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", {
+              shallow: false,
+            });
+            expect(hashChangeComplete).not.toHaveBeenCalled();
+            await promise;
+            expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", {
               shallow: false,
             });
           });
