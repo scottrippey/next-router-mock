@@ -68,6 +68,17 @@ describe("MemoryRouter", () => {
           });
         });
 
+        it("should allow to deconstruct push", async () => {
+          const { push } = memoryRouter;
+          await push("/one");
+          expect(routeChangeStart).toHaveBeenCalledWith("/one", {
+            shallow: false,
+          });
+          expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
+            shallow: false,
+          });
+        });
+
         it("should trigger only hashEvents for /baz -> /baz#foo", async () => {
           await memoryRouter.push("/baz");
           jest.clearAllMocks();

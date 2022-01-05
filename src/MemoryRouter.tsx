@@ -106,6 +106,9 @@ export class MemoryRouter extends BaseRouter {
     super();
     if (initialUrl) this.setCurrentUrl(initialUrl);
     if (async) this.async = async;
+    this.push = this.push.bind(this);
+    this.replace = this.replace.bind(this);
+    this.setCurrentUrl = this.setCurrentUrl.bind(this);
   }
 
   /**
