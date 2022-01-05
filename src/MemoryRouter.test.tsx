@@ -68,17 +68,6 @@ describe("MemoryRouter", () => {
           });
         });
 
-        it("should allow to deconstruct push", async () => {
-          const { push } = memoryRouter;
-          await push("/one");
-          expect(routeChangeStart).toHaveBeenCalledWith("/one", {
-            shallow: false,
-          });
-          expect(routeChangeComplete).toHaveBeenCalledWith("/one", {
-            shallow: false,
-          });
-        });
-
         it("should trigger only hashEvents for /baz -> /baz#foo", async () => {
           await memoryRouter.push("/baz");
           jest.clearAllMocks();
@@ -460,8 +449,17 @@ describe("MemoryRouter", () => {
         });
       });
 
-      it.each(["", "(with parser)"])("hashes are preserved %s", async (withParser) => {
-        if (withParser) {
+      it("should allow deconstruction of push and replace", async () => {
+        const { push, replace } = memoryRouter;
+        await push("/one");
+        expect(memoryRouter.asPath).toEqual(`/one`);
+        await replace("/two");
+        expect(memoryRouter.asPath).toEqual(`/two`);
+      });
+
+      const testCases = ["(without parser)", "(with parser)"] as const;
+      it.each(testCases)("hashes are preserved %s", async (withParser) => {
+        if (withParser === "(with parser)") {
           memoryRouter.registerPaths(["/path"]);
         } else {
           memoryRouter.pathParser = undefined;
