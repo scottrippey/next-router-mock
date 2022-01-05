@@ -106,9 +106,6 @@ export class MemoryRouter extends BaseRouter {
     super();
     if (initialUrl) this.setCurrentUrl(initialUrl);
     if (async) this.async = async;
-    this.push = this.push.bind(this);
-    this.replace = this.replace.bind(this);
-    this.setCurrentUrl = this.setCurrentUrl.bind(this);
   }
 
   /**
@@ -118,29 +115,30 @@ export class MemoryRouter extends BaseRouter {
    */
   public async = false;
 
-  push(url: Url, as?: Url, options?: TransitionOptions) {
+  push = (url: Url, as?: Url, options?: TransitionOptions) => {
     return this._setCurrentUrl(url, as, options, "push");
-  }
+  };
 
-  replace(url: Url, as?: Url, options?: TransitionOptions) {
+  replace = (url: Url, as?: Url, options?: TransitionOptions) => {
     return this._setCurrentUrl(url, as, options, "replace");
-  }
+  };
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
-  public setCurrentUrl(url: Url) {
-    void this._setCurrentUrl(url, undefined, undefined, "set", false); // (ignore the returned promise)
-  }
+  public setCurrentUrl = (url: Url) => {
+    // (ignore the returned promise)
+    void this._setCurrentUrl(url, undefined, undefined, "set", false);
+  };
 
-  private _setCurrentUrl = async (
+  private async _setCurrentUrl(
     url: Url,
     as?: Url,
     options?: TransitionOptions,
     source?: "push" | "replace" | "set",
 
     async = this.async
-  ) => {
+  ) {
     // Parse the URL if needed:
     const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
     const baseQuery = baseUrlObject.query || {};
@@ -184,7 +182,7 @@ export class MemoryRouter extends BaseRouter {
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
-  };
+  }
 }
 
 function removeTrailingSlash(path: string) {

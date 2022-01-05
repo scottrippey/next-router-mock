@@ -14,7 +14,6 @@ describe("next-overridable-hook", () => {
       // Ignore these:
       events: expect.any(Object),
       async: expect.any(Boolean),
-      _setCurrentUrl: expect.any(Function),
       push: expect.any(Function),
       replace: expect.any(Function),
       setCurrentUrl: expect.any(Function),
