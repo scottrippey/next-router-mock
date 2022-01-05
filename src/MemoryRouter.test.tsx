@@ -452,9 +452,9 @@ describe("MemoryRouter", () => {
       it("should allow deconstruction of push and replace", async () => {
         const { push, replace } = memoryRouter;
         await push("/one");
-        expect(memoryRouter.asPath).toEqual(`/one`);
+        expect(memoryRouter).toMatchObject({ asPath: "/one" });
         await replace("/two");
-        expect(memoryRouter.asPath).toEqual(`/two`);
+        expect(memoryRouter).toMatchObject({ asPath: "/two" });
       });
 
       const testCases = ["(without parser)", "(with parser)"] as const;
