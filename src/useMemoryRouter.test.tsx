@@ -1,16 +1,13 @@
+import "@testing-library/jest-dom"
+import React from 'react';
 import { useEffect, useRef } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
 
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
+import { render } from "@testing-library/react";
 
 export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => Readonly<MemoryRouter>) {
-  it("the useRouter hook only returns a snapshot of the singleton router", async () => {
-    const { result } = renderHook(() => useRouter());
-
-    expect(result.current).not.toBe(singletonRouter);
-  });
-
   it("will allow capturing previous route values in hooks with routing events", async () => {
     // see: https://github.com/streamich/react-use/blob/master/src/usePrevious.ts
     const usePrevious = function <T>(value: T): T | undefined {
@@ -52,7 +49,6 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
       await result.current.push("/foo?bar=baz");
     });
 
-    expect(result.current).not.toBe(singletonRouter);
     expect(result.current).toEqual(singletonRouter);
     expect(result.current).toMatchObject({
       asPath: "/foo?bar=baz",
@@ -131,6 +127,27 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
     });
     expect(result.current.locale).toBe("en");
   });
+
+  it("should preserve the router's reference, but trigger a re-render", async () => {
+    singletonRouter.setCurrentUrl("/page");
+
+    function TestComponent() {
+      const router = useRouter();
+
+      // This should not result in an infinite loop
+      useEffect(() => {
+        router.replace("/page?foo=bar");
+      }, [router]);
+
+      return (
+        <div>{router.asPath}</div>
+      )
+    }
+
+    const { findByText } = render(<TestComponent />);
+
+    expect(await findByText('/page?foo=bar')).toBeInTheDocument();
+  })
 }
 
 describe("useMemoryRouter", () => {

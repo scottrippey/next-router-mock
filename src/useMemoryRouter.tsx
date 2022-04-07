@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTriggerRender } from "./utils/useTriggerRender";
 
 import { MemoryRouter } from "./MemoryRouter";
 
@@ -12,7 +13,7 @@ export type MemoryRouterEventHandlers = {
 };
 
 export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: MemoryRouterEventHandlers) => {
-  const [router, setRouter] = useState(() => MemoryRouter.snapshot(singletonRouter));
+  const triggerRender = useTriggerRender();
 
   // Trigger updates on route changes:
   useEffect(() => {
@@ -22,8 +23,7 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
     const handleRouteChange = () => {
       if (!isMounted) return;
 
-      // Ensure the reference changes each render:
-      setRouter(MemoryRouter.snapshot(singletonRouter));
+      triggerRender();
     };
 
     singletonRouter.events.on("routeChangeComplete", handleRouteChange);
@@ -68,5 +68,6 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
     eventHandlers?.onReplace,
   ]);
 
-  return router;
+  return singletonRouter;
 };
+
