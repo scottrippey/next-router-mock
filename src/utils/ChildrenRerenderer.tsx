@@ -5,9 +5,9 @@ interface Props {
   children: ReactNode;
 }
 
-const symbol = Symbol("ChildRerenderer");
+const symbol = Symbol("ChilChildrenRerendererdRerenderer");
 
-export function ChildRerenderer({ children }: Props) {
+export function ChildrenRerenderer({ children }: Props) {
   return (
     <>
       {React.Children.map(children, (element) => {
