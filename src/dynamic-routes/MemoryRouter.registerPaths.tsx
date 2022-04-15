@@ -1,4 +1,4 @@
-import { MemoryRouter, UrlObject } from "../MemoryRouter";
+import { MemoryRouter, UrlObjectComplete } from "../MemoryRouter";
 
 declare module "../MemoryRouter" {
   interface MemoryRouter {
@@ -44,7 +44,7 @@ export function defineRegisterPaths({
       match: getRouteMatcher(getRouteRegex(path)),
     }));
 
-    return (url: UrlObject): UrlObject => {
+    return (url: UrlObjectComplete): UrlObjectComplete => {
       const pathname = url.pathname ?? "";
       const isDynamic = isDynamicRoute(pathname);
       // @ts-ignore

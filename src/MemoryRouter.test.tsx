@@ -459,6 +459,14 @@ describe("MemoryRouter", () => {
         expect(memoryRouter).toMatchObject({ asPath: "/two" });
       });
 
+      it("should allow push with no path, just a query", async () => {
+        await memoryRouter.push("/path");
+
+        await memoryRouter.push({ query: { id: "42" } });
+
+        expect(memoryRouter.asPath).toEqual("/path?id=42");
+      });
+
       const testCases = ["(without parser)", "(with parser)"] as const;
       it.each(testCases)("hashes are preserved %s", async (withParser) => {
         if (withParser === "(with parser)") {
