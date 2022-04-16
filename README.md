@@ -169,20 +169,35 @@ import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next
 
 # Dynamic Routes
 
-To mock Next's dynamic routing behavior, you will need to import `next-router-mock/dynamic-routes` and register your static and dynamic routes from your `/pages/` folder.  Example:
+By default, `next-router-mock` does not know about dynamic routes (eg. files like` /pages/[id].js`).    
+To test code that uses dynamic routes:
 
+1. Add `import 'next-router-mock/dynamic-routes';` to your test.  
+2. Call `mockRouter.registerPaths([ ... ])` for any static or dynamic routes that will be tested.
+
+Example:
 ```typescript
 import mockRouter from "next-router-mock";
 import "next-router-mock/dynamic-routes";
 
 mockRouter.registerPaths([
-  "/example/static/path",
-  "/example/[dynamic]/path",
-  "/example/[...catchAll]/path"
+  // These paths should match those found in the `/pages` folder:
+  "/[id]",
+  "/static/path",
+  "/[dynamic]/path",
+  "/[...catchAll]/path"
 ]);
+
+it('should parse dynamic routes', () => {
+  mockRouter.push('/foo');
+  expect(mockRouter).toMatchObject({
+    pathname: '/[id]',
+    query: { id: 'foo' }
+  });
+})
 ```
 
-If you are using Next `v10.*` or `v11.0.*`, simply use the following import instead:
+If you are using Next `v10.*` or `v11.0.*`, use the following import instead:
 ```typescript
 import "next-router-mock/dynamic-routes/next-10";
 ```
