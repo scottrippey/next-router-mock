@@ -7,12 +7,15 @@ declare module "../MemoryRouter" {
      * so that static and dynamic routes are parsed correctly.
      *
      * @example
-     * import mockRouter from "next-router-mock/dynamic-routes";
+     * import mockRouter from "next-router-mock";
+     * import "next-router-mock/dynamic-routes";
      *
      * mockRouter.registerPaths([
-     *   "/example/static/path", // A static path, which bypasses the dynamic paths
-     *   "/example/[dynamic]/path", // Ensures [dynamic] gets parsed and added to `router.query.dynamic`
-     *   "/example/[...catchAll]/path",
+     *   // These paths should match those found in the `/pages` folder:
+     *   "/[id]",
+     *   "/static/path",
+     *   "/[dynamic]/path",
+     *   "/[...catchAll]/path"
      * ]);
      *
      */
