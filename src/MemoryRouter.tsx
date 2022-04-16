@@ -1,6 +1,6 @@
 import mitt, { MittEmitter } from "./lib/mitt";
 import { parse as parseUrl, UrlWithParsedQuery } from "url";
-import { stringify as stringifyQueryString, ParsedUrlQuery } from "querystring";
+import { ParsedUrlQuery, stringify as stringifyQueryString } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
 
@@ -35,12 +35,17 @@ function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | 
   return asPath;
 }
 
+export type Url = string | UrlObject;
 export type UrlObject = {
-  pathname: UrlWithParsedQuery["pathname"];
+  pathname?: UrlWithParsedQuery["pathname"];
   query?: UrlWithParsedQuery["query"];
   hash?: UrlWithParsedQuery["hash"];
 };
-export type Url = string | UrlObject;
+export type UrlObjectComplete = {
+  pathname: NonNullable<UrlWithParsedQuery["pathname"]>;
+  query: NonNullable<UrlWithParsedQuery["query"]>;
+  hash: NonNullable<UrlWithParsedQuery["hash"]>;
+};
 
 // interface not exported by the package next/router
 interface TransitionOptions {
@@ -68,7 +73,7 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: ((url: UrlObject) => UrlObject) | undefined = undefined;
+  pathParser: ((urlObject: UrlObjectComplete) => UrlObjectComplete) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -140,43 +145,50 @@ export class MemoryRouter extends BaseRouter {
     async = this.async
   ) {
     // Parse the URL if needed:
-    const baseUrlObject = typeof url === "string" ? parseUrl(url, true) : url;
-    const baseQuery = baseUrlObject.query || {};
-    const urlObject = this.pathParser ? this.pathParser(baseUrlObject) : baseUrlObject;
+    const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
+    let newRoute: UrlObjectComplete = {
+      pathname: removeTrailingSlash(parsedUrl.pathname ?? this.pathname),
+      query: parsedUrl.query || {},
+      hash: parsedUrl.hash || "",
+    };
+    const asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
+
+    // Optionally apply dynamic routes:
+    if (this.pathParser) {
+      newRoute = this.pathParser(newRoute);
+    }
 
     const shallow = options?.shallow || false;
-    const newRoute = {
-      pathname: removeTrailingSlash(urlObject.pathname || ""),
-      query: urlObject.query || {},
-      hash: urlObject.hash || "",
-      asPath: getRouteAsPath(baseUrlObject.pathname ?? "", baseQuery, urlObject.hash),
-    };
 
+    // Fire "start" event:
     const triggerHashChange = shouldTriggerHashChange(this, newRoute);
     if (triggerHashChange) {
-      this.events.emit("hashChangeStart", newRoute.asPath, { shallow });
+      this.events.emit("hashChangeStart", asPath, { shallow });
     } else {
-      this.events.emit("routeChangeStart", newRoute.asPath, { shallow });
+      this.events.emit("routeChangeStart", asPath, { shallow });
     }
 
     // Simulate the async nature of this method
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
+    // Update this instance:
     this.pathname = newRoute.pathname;
     this.query = newRoute.query;
     this.hash = newRoute.hash;
-    this.asPath = newRoute.asPath;
+    this.asPath = asPath;
 
     if (options?.locale) {
       this.locale = options.locale;
     }
 
+    // Fire "complete" event:
     if (triggerHashChange) {
       this.events.emit("hashChangeComplete", this.asPath, { shallow });
     } else {
       this.events.emit("routeChangeComplete", this.asPath, { shallow });
     }
 
+    // Fire internal events:
     const eventName =
       source === "push" ? "NEXT_ROUTER_MOCK:push" : source === "replace" ? "NEXT_ROUTER_MOCK:replace" : undefined;
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
