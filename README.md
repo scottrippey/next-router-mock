@@ -37,7 +37,7 @@ jest.mock('next/router', () => require('next-router-mock'))
 
 For Storybook, you can use `<MemoryRouterProvider>` to wrap your stories.  Example:
 ```jsx
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
 addDecorator(Story => <MemoryRouterProvider><Story /></MemoryRouterProvider>);
 ```
 
@@ -114,7 +114,7 @@ For Storybook, we use a Context-based approach to supply the mocks. You can glob
 
 ```jsx
 import { addDecorator } from "@storybook/react";
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
 
 addDecorator((Story) => <MemoryRouterProvider><Story/></MemoryRouterProvider>);
 ```
@@ -157,13 +157,14 @@ export const ExampleStory = () => (
 );
 ```
 
-### `MemoryRouterProvider` compatibility with Next 10
+### A note about Next versions 
+This feature depends on internal Next modules, which have changed paths between Next versions.
+Depending on your Next version, you should import the correct path:
 
-The above examples work with Next `v11.1.0` or higher.   
-
-If you are using Next `v10.*` or `v11.0.*`, simply use the following import instead:
 ```js
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-10';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-10'; // (use this for 11.0.x too)
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-11';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
 ```
 
 
@@ -172,13 +173,13 @@ import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next
 By default, `next-router-mock` does not know about dynamic routes (eg. files like` /pages/[id].js`).    
 To test code that uses dynamic routes:
 
-1. Add `import 'next-router-mock/dynamic-routes';` to your test.  
+1. Add `import 'next-router-mock/dynamic-routes/next-12';` to your test. (see below if you are using Next 11 or 10)  
 2. Call `mockRouter.registerPaths([ ... ])` for any static or dynamic routes that will be tested.
 
 Example:
 ```typescript
 import mockRouter from "next-router-mock";
-import "next-router-mock/dynamic-routes";
+import "next-router-mock/dynamic-routes/next-12";
 
 mockRouter.registerPaths([
   // These paths should match those found in the `/pages` folder:
@@ -197,9 +198,13 @@ it('should parse dynamic routes', () => {
 })
 ```
 
-If you are using Next `v10.*` or `v11.0.*`, use the following import instead:
+### A note about Next versions
+This feature depends on internal Next modules, which have changed paths between Next versions.
+Depending on your Next version, you should import the correct path:
 ```typescript
-import "next-router-mock/dynamic-routes/next-10";
+import "next-router-mock/dynamic-routes/next-10"; // (use this for 11.0.x too)
+import "next-router-mock/dynamic-routes/next-11";
+import "next-router-mock/dynamic-routes/next-12";
 ```
 
 # Sync vs Async
