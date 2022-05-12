@@ -4,13 +4,15 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
+    "checks": "npm run docs && npm run test && npm run build",
+    "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
-    "build": "npm run build:clean && tsc",
-    "build:clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
     "build:watch": "tsc --watch",
-    "prepublishOnly": "npm run test && npm run build",
-    "preversion": "npm run test && npm run build"
+    "prepublishOnly": "npm run checks",
+    "preversion": "npm run checks"
   },
   "repository": {
     "type": "git",
@@ -40,6 +42,7 @@
     "@testing-library/react": "^12.0.0",
     "@testing-library/react-hooks": "^4.0.0",
     "@types/jest": "^26.0.20",
+    "doctoc": "^2.2.0",
     "jest": "^26.6.3",
     "next": "11.1.0",
     "prettier": "^2.2.1",
@@ -49,6 +52,5 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
-  },
-  "dependencies": {}
+  }
 }

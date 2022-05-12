@@ -6,7 +6,7 @@ address bar).  Useful in **tests** and **Storybook**. Inspired
 by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)
 .
 
-Tested with NextJS v10 and v11.
+Works with NextJS v10, v11, and v12.
 
 Install via NPM: `npm install --save-dev next-router-mock`
 
@@ -15,54 +15,46 @@ Install via NPM: `npm install --save-dev next-router-mock`
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [`next-router-mock`](#next-router-mock)
-- [Quick Start](#quick-start)
 - [Usage with Jest](#usage-with-jest)
+    - [A fully working Jest example](#a-fully-working-jest-example)
 - [Usage with Storybook](#usage-with-storybook)
-    - [`MemoryRouterProvider` compatibility with Next 10](#memoryrouterprovider-compatibility-with-next-10)
+    - [A fully working Storybook example](#a-fully-working-storybook-example)
+    - [A note about Next versions](#a-note-about-next-versions)
 - [Dynamic Routes](#dynamic-routes)
+    - [A note about Next versions](#a-note-about-next-versions-1)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
   - [Not yet supported](#not-yet-supported)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Quick Start
-
-For unit tests, the `next-router-mock` module can be used as a drop-in replacement for `next/router`. It exports both a default (singleton) router and
-the `useRouter` hook.  Example:
-```jsx
-jest.mock('next/router', () => require('next-router-mock'))
-```
-
-For Storybook, you can use `<MemoryRouterProvider>` to wrap your stories.  Example:
-```jsx
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
-addDecorator(Story => <MemoryRouterProvider><Story /></MemoryRouterProvider>);
-```
-
 # Usage with Jest
 
-Simply drop-in the `next-router-mock` like this:
+For unit tests, the `next-router-mock` module can be used as a drop-in replacement for `next/router`:
 
-```jsx
+```js
 jest.mock('next/router', () => require('next-router-mock'));
-// or this:
+```
+
+If you want to mock `next/link`, you should also include this mock:
+
+```js
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 ```
 
-> Note: it's better to mock `next/dist/client/router` instead of  `next/router`, because both `next/router` and `next/link` depend directly on this nested path. It's also perfectly fine to mock both.
-
-Here's a full working example:
+### A fully working Jest example
 
 ```jsx
 import singletonRouter, { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import { render, act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+
 import mockRouter from 'next-router-mock';
 
-// This is all you need:
+
+jest.mock('next/router', () => require('next-router-mock'));
+// This is needed for mocking 'next/link':
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
 
 describe('next-router-mock', () => {
@@ -92,8 +84,10 @@ describe('next-router-mock', () => {
   });
 
   it('mocks useRouter', () => {
-    const { result } = renderHook(() => useRouter());
-    expect(result.current).toMatchObject({ asPath: "" });
+    const { result } = renderHook(() => {
+      return useRouter();
+    });
+    expect(result.current).toMatchObject({ asPath: "/initial" });
     act(() => {
       result.current.push("/example");
     });
@@ -101,16 +95,20 @@ describe('next-router-mock', () => {
   });
 
   it('works with next/link', () => {
-    render(<NextLink href="/example?foo=bar"><a>Example Link</a></NextLink>);
+    render(
+      <NextLink href="/example?foo=bar"><a>Example Link</a></NextLink>
+    );
     fireEvent.click(screen.getByText('Example Link'));
     expect(singletonRouter).toMatchObject({ asPath: '/example?foo=bar' });
   });
 });
 ```
 
+
 # Usage with Storybook
 
-For Storybook, we use a Context-based approach to supply the mocks. You can globally wrap all stories by adding this to `storybook/preview.js`:
+For Storybook, you can use `<MemoryRouterProvider>` to wrap your stories.
+You can **globally** wrap all stories by adding this to `storybook/preview.js`:
 
 ```jsx
 import { addDecorator } from "@storybook/react";
@@ -119,7 +117,7 @@ import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next
 addDecorator((Story) => <MemoryRouterProvider><Story/></MemoryRouterProvider>);
 ```
 
-You can also wrap individual stories with the provider, allowing you to customize the properties:
+You can also wrap **individual** stories with the `<MemoryRouterProvider>`, allowing you to customize the properties:
 
 ```jsx
 export const ExampleStory = () => (
@@ -140,9 +138,16 @@ The `MemoryRouterProvider` has the following optional properties:
   - `onRouteChangeStart(url, { shallow })`
   - `onRouteChangeComplete(url, { shallow })`
 
-Full Example:
+
+### A fully working Storybook example
 
 ```jsx
+// example.story.jsx
+import NextLink from 'next/link';
+import { action } from '@storybook/addon-actions';
+
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
+
 export const ExampleStory = () => (
   <MemoryRouterProvider
     url="/initial"
@@ -157,6 +162,7 @@ export const ExampleStory = () => (
 );
 ```
 
+
 ### A note about Next versions 
 This feature depends on internal Next modules, which have changed paths between Next versions.
 Depending on your Next version, you should import the correct path:
@@ -170,7 +176,7 @@ import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next
 
 # Dynamic Routes
 
-By default, `next-router-mock` does not know about dynamic routes (eg. files like` /pages/[id].js`).    
+By default, `next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).    
 To test code that uses dynamic routes:
 
 1. Add `import 'next-router-mock/dynamic-routes/next-12';` to your test. (see below if you are using Next 11 or 10)  
