@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "next": "canary"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}

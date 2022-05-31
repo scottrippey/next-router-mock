@@ -1,8 +1,7 @@
-import mockRouter from "../..";
-import "../../dynamic-routes/next-11";
-
-describe("dynamic-routes", () => {
-  it('should have a valid "registerPaths" method ', () => {
-    expect(mockRouter.registerPaths).toBeInstanceOf(Function);
+describe(`next version ${require("next/package.json").version}`, () => {
+  describe("dynamic-routes", () => {
+    it("paths are valid", () => {
+      require("../../dynamic-routes/next-11");
+    });
   });
 });
