@@ -28,7 +28,7 @@ type AbstractedNextDependencies = Pick<
   typeof import("next/dist/shared/lib/router/utils"),
   "getSortedRoutes" | "getRouteMatcher" | "getRouteRegex" | "isDynamicRoute"
 > &
-  Pick<typeof import("next/dist/server/normalize-page-path"), "normalizePagePath">;
+  Pick<typeof import("next/dist/shared/lib/page-path/normalize-page-path"), "normalizePagePath">;
 
 export function defineRegisterPaths(dependencies: AbstractedNextDependencies) {
   checkDependencies(dependencies);

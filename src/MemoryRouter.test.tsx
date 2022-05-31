@@ -1,5 +1,5 @@
 import { MemoryRouter } from "./MemoryRouter";
-import "./dynamic-routes/extensions-11.1";
+import "./dynamic-routes/extensions-12";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {

@@ -5,7 +5,7 @@ import {
   isDynamicRoute,
   //
 } from "next/dist/shared/lib/router/utils";
-//
+// @ts-expect-error
 import { normalizePagePath } from "next/dist/server/normalize-page-path";
 
 import { defineRegisterPaths } from "./MemoryRouter.registerPaths";

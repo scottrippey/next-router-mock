@@ -3,9 +3,9 @@ import {
   getRouteRegex,
   getSortedRoutes,
   isDynamicRoute,
-  // @ts-ignore
+  // @ts-expect-error
 } from "next/dist/next-server/lib/router/utils";
-// @ts-ignore
+// @ts-expect-error
 import { normalizePagePath } from "next/dist/next-server/server/normalize-page-path";
 
 import { defineRegisterPaths } from "./MemoryRouter.registerPaths";
