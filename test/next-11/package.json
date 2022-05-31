@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "next": "11.1.4"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}
