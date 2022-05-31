@@ -1,6 +1,6 @@
+import { getRouteMatcher } from "next/dist/shared/lib/router/utils/route-matcher";
+import { getRouteRegex } from "next/dist/shared/lib/router/utils/route-regex";
 import {
-  getRouteMatcher,
-  getRouteRegex,
   getSortedRoutes,
   isDynamicRoute,
   //
