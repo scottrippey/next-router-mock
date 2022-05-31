@@ -28,15 +28,19 @@ type AbstractedNextDependencies = Pick<
   typeof import("next/dist/shared/lib/router/utils"),
   "getSortedRoutes" | "getRouteMatcher" | "getRouteRegex" | "isDynamicRoute"
 > &
-  Pick<typeof import("next/dist/server/normalize-page-path"), "normalizePagePath">;
+  Pick<typeof import("next/dist/shared/lib/page-path/normalize-page-path"), "normalizePagePath">;
 
-export function defineRegisterPaths({
-  getSortedRoutes,
-  getRouteMatcher,
-  getRouteRegex,
-  isDynamicRoute,
-  normalizePagePath,
-}: AbstractedNextDependencies) {
+export function defineRegisterPaths(dependencies: AbstractedNextDependencies) {
+  checkDependencies(dependencies);
+  const {
+    //
+    getSortedRoutes,
+    getRouteMatcher,
+    getRouteRegex,
+    isDynamicRoute,
+    normalizePagePath,
+  } = dependencies;
+
   MemoryRouter.prototype.registerPaths = function (paths: string[]) {
     this.pathParser = createPathParserFromPaths(paths);
   };
@@ -66,4 +70,15 @@ export function defineRegisterPaths({
       };
     };
   };
+}
+
+function checkDependencies(dependencies: Record<string, unknown>) {
+  const missingDependencies = Object.keys(dependencies).filter((name) => {
+    return !dependencies[name];
+  });
+  if (missingDependencies.length) {
+    throw new Error(
+      `next-router-mock/dynamic-routes: the following dependencies are missing: ${JSON.stringify(missingDependencies)}`
+    );
+  }
 }

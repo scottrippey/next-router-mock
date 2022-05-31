@@ -1,11 +1,11 @@
+import { getRouteMatcher } from "next/dist/shared/lib/router/utils/route-matcher";
+import { getRouteRegex } from "next/dist/shared/lib/router/utils/route-regex";
 import {
-  getRouteMatcher,
-  getRouteRegex,
   getSortedRoutes,
   isDynamicRoute,
   //
 } from "next/dist/shared/lib/router/utils";
-//
+// @ts-expect-error
 import { normalizePagePath } from "next/dist/server/normalize-page-path";
 
 import { defineRegisterPaths } from "./MemoryRouter.registerPaths";
