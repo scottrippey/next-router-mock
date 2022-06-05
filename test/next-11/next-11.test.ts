@@ -1,5 +1,5 @@
 describe(`next version ${require("next/package.json").version}`, () => {
-  describe("import paths are valid", () => {
+  describe("automatic and explicit import paths are valid", () => {
     it("next-router-mock/dynamic-routes", () => {
       require("../../dynamic-routes");
     });
