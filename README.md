@@ -111,7 +111,7 @@ You can **globally** wrap all stories by adding this to `storybook/preview.js`:
 
 ```jsx
 import { addDecorator } from "@storybook/react";
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
 
 addDecorator((Story) => <MemoryRouterProvider><Story/></MemoryRouterProvider>);
 ```
@@ -145,7 +145,7 @@ The `MemoryRouterProvider` has the following optional properties:
 import NextLink from 'next/link';
 import { action } from '@storybook/addon-actions';
 
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
 
 export const ExampleStory = () => (
   <MemoryRouterProvider
@@ -180,7 +180,7 @@ To test code that uses dynamic routes, you must add the routes manually, like so
 
 ```typescript
 import mockRouter from "next-router-mock";
-import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-12";
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes";
 
 mockRouter.useParser(createDynamicRouteParser([
   // These paths should match those found in the `/pages` folder:
@@ -204,9 +204,9 @@ it('should parse dynamic routes', () => {
 This feature depends on internal Next modules, which have changed paths between Next versions.
 Depending on your Next version, you should import the correct path:
 ```typescript
-import "next-router-mock/dynamic-routes/next-10"; // (use this for 11.0.x too)
-import "next-router-mock/dynamic-routes/next-11";
-import "next-router-mock/dynamic-routes/next-12";
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-10"; // (use this for 11.0.x too)
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-11";
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-12";
 ```
 
 # Sync vs Async

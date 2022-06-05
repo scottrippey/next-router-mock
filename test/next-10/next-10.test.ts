@@ -6,6 +6,9 @@ describe(`next version ${require("next/package.json").version}`, () => {
     it("next-router-mock/dynamic-routes/next-10", () => {
       require("../../dynamic-routes/next-10");
     });
+    it("next-router-mock/MemoryRouterProvider", () => {
+      require("../../MemoryRouterProvider");
+    });
     it("next-router-mock/MemoryRouterProvider/next-10", () => {
       require("../../MemoryRouterProvider/next-10");
     });
