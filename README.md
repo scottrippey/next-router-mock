@@ -2,9 +2,8 @@
 # `next-router-mock`
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
-address bar).  Useful in **tests** and **Storybook**. Inspired
-by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)
-.
+address bar).  Useful in **tests** and **Storybook**. 
+Inspired by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md).
 
 Works with NextJS v10, v11, and v12.
 
@@ -176,30 +175,27 @@ import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next
 
 # Dynamic Routes
 
-By default, `next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).    
-To test code that uses dynamic routes:
+By default, `next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).
+To test code that uses dynamic routes, you must add the routes manually, like so:
 
-1. Add `import 'next-router-mock/dynamic-routes/next-12';` to your test. (see below if you are using Next 11 or 10)  
-2. Call `mockRouter.registerPaths([ ... ])` for any static or dynamic routes that will be tested.
-
-Example:
 ```typescript
 import mockRouter from "next-router-mock";
-import "next-router-mock/dynamic-routes/next-12";
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-12";
 
-mockRouter.registerPaths([
+mockRouter.useParser(createDynamicRouteParser([
   // These paths should match those found in the `/pages` folder:
   "/[id]",
   "/static/path",
   "/[dynamic]/path",
   "/[...catchAll]/path"
-]);
+]));
 
+// Example test:
 it('should parse dynamic routes', () => {
-  mockRouter.push('/foo');
+  mockRouter.push('/FOO');
   expect(mockRouter).toMatchObject({
     pathname: '/[id]',
-    query: { id: 'foo' }
+    query: { id: 'FOO' }
   });
 })
 ```
