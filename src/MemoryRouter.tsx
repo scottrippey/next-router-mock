@@ -54,11 +54,7 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type SupportedEventTypes =
-  | "routeChangeStart"
-  | "routeChangeComplete"
-  | "NEXT_ROUTER_MOCK:push"
-  | "NEXT_ROUTER_MOCK:replace";
+type InternalEventTypes = "NEXT_ROUTER_MOCK:parse" | "NEXT_ROUTER_MOCK:push" | "NEXT_ROUTER_MOCK:replace";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -73,7 +69,6 @@ export abstract class BaseRouter implements NextRouter {
   basePath = "";
   isFallback = false;
   isPreview = false;
-  pathParser: ((urlObject: UrlObjectComplete) => UrlObjectComplete) | undefined = undefined;
 
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
@@ -81,7 +76,7 @@ export abstract class BaseRouter implements NextRouter {
   defaultLocale?: NextRouter["defaultLocale"];
   domainLocales?: NextRouter["domainLocales"];
 
-  events: MittEmitter<SupportedEventTypes | RouterEvent> = mitt();
+  events: MittEmitter<RouterEvent | InternalEventTypes> = mitt();
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
@@ -120,6 +115,11 @@ export class MemoryRouter extends BaseRouter {
    */
   public async = false;
 
+  useParser(parser: (urlObject: UrlObjectComplete) => void) {
+    this.events.on("NEXT_ROUTER_MOCK:parse", parser);
+    return () => this.events.off("NEXT_ROUTER_MOCK:parse", parser);
+  }
+
   push = (url: Url, as?: Url, options?: TransitionOptions) => {
     return this._setCurrentUrl(url, as, options, "push");
   };
@@ -154,9 +154,7 @@ export class MemoryRouter extends BaseRouter {
     const asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
 
     // Optionally apply dynamic routes:
-    if (this.pathParser) {
-      newRoute = this.pathParser(newRoute);
-    }
+    this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
 
     const shallow = options?.shallow || false;
 
