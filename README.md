@@ -18,9 +18,7 @@ Install via NPM: `npm install --save-dev next-router-mock`
     - [A fully working Jest example](#a-fully-working-jest-example)
 - [Usage with Storybook](#usage-with-storybook)
     - [A fully working Storybook example](#a-fully-working-storybook-example)
-    - [A note about Next versions](#a-note-about-next-versions)
 - [Dynamic Routes](#dynamic-routes)
-    - [A note about Next versions](#a-note-about-next-versions-1)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
   - [Not yet supported](#not-yet-supported)
@@ -161,18 +159,6 @@ export const ExampleStory = () => (
 );
 ```
 
-
-### A note about Next versions 
-This feature depends on internal Next modules, which have changed paths between Next versions.
-Depending on your Next version, you should import the correct path:
-
-```js
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-10'; // (use this for 11.0.x too)
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-11';
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-12';
-```
-
-
 # Dynamic Routes
 
 By default, `next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).
@@ -198,15 +184,6 @@ it('should parse dynamic routes', () => {
     query: { id: 'FOO' }
   });
 })
-```
-
-### A note about Next versions
-This feature depends on internal Next modules, which have changed paths between Next versions.
-Depending on your Next version, you should import the correct path:
-```typescript
-import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-10"; // (use this for 11.0.x too)
-import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-11";
-import { createDynamicRouteParser } from "next-router-mock/dynamic-routes/next-12";
 ```
 
 # Sync vs Async
