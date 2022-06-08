@@ -17,10 +17,11 @@ describe("next-overridable-hook", () => {
       push: expect.any(Function),
       replace: expect.any(Function),
       setCurrentUrl: expect.any(Function),
-      hash: "",
+      registerPaths: expect.any(Function),
       // Ensure the router has exactly these properties:
       asPath: "",
       basePath: "",
+      hash: "",
       isFallback: false,
       isLocaleDomain: false,
       isPreview: false,
@@ -30,7 +31,6 @@ describe("next-overridable-hook", () => {
       pathname: "",
       query: {},
       route: "",
-      pathParser: undefined,
     });
   });
 
