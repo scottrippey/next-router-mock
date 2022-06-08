@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import NextLink, { LinkProps } from "next/link";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import { MemoryRouterProvider } from "./MemoryRouterProvider-11.1";
+import { MemoryRouterProvider } from "./next-11";
 
 const TestLink = (linkProps: Partial<LinkProps>) => {
   const router = useRouter();

@@ -8,9 +8,9 @@ import {
 // @ts-expect-error
 import { normalizePagePath } from "next/dist/next-server/server/normalize-page-path";
 
-import { defineRegisterPaths } from "./MemoryRouter.registerPaths";
+import { factory } from "./createDynamicRouteParser";
 
-defineRegisterPaths({
+export const createDynamicRouteParser = factory({
   getSortedRoutes,
   getRouteMatcher,
   getRouteRegex,

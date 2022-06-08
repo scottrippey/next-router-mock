@@ -1,6 +1,6 @@
 {
   "name": "next-router-mock",
-  "version": "0.6.10",
+  "version": "0.7.0",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
@@ -8,7 +8,7 @@
     "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:next": "npm run test:next-10 && npm run test:next-11 && npm run test:next-12 && npm run test:next-canary",
+    "test:next": "npm run build && npm run test:next-10 && npm run test:next-11 && npm run test:next-12 && npm run test:next-canary",
     "test:next-10": "cd test/next-10 && npm test",
     "test:next-11": "cd test/next-11 && npm test",
     "test:next-12": "cd test/next-12 && npm test",
