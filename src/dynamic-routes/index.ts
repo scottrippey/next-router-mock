@@ -1,3 +1,4 @@
+export type { createDynamicRouteParser } from "./next-12";
 // Automatically try to export the correct version:
 try {
   module.exports = require("./next-12");
