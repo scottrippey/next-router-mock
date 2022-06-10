@@ -1,6 +1,6 @@
 {
   "name": "next-router-mock",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
