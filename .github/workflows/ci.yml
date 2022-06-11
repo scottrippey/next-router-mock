@@ -19,7 +19,7 @@ on:
 
 jobs:
   test:
-    name: Run:
+    name: "Run:"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,5 +36,5 @@ jobs:
       - name: Installation
         run: npm ci
 
-      - name: Run: ${{ matrix.command }}
+      - name: "Run: ${{ matrix.command }}"
         run: ${{ matrix.command }}
