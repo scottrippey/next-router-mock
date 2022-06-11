@@ -19,7 +19,7 @@ on:
 
 jobs:
   test:
-    name: CI Checks
+    name: CI Checks for Node
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,14 +30,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Installation ${{ matrix.node-version }}
+      - name: Installation
         run: npm ci
 
-      - name: Unit Tests ${{ matrix.node-version }}
+      - name: Unit Tests
         run: npm run test
 
-      - name: Unit Tests for Next ${{ matrix.node-version }}
+      - name: Unit Tests for Next versions
         run: npm run test:next
 
-      - name: Build ${{ matrix.node-version }}
+      - name: TypeCheck and Build
         run: npm run build
