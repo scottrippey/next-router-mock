@@ -14,11 +14,11 @@ on:
 
 jobs:
   test:
-    name: "${{ matrix.command }}"
+    name: "${{ matrix.npm-script }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        scripts:
+        npm-script:
           - test
           - build
           - test:next
@@ -31,5 +31,5 @@ jobs:
       - name: Installation
         run: npm ci
 
-      - name: "npm run ${{ matrix.command }}"
-        run: npm run ${{ matrix.command }}
+      - name: "npm run ${{ matrix.npm-script }}"
+        run: npm run ${{ matrix.npm-script }}
