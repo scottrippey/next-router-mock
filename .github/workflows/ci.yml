@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
         command:
           - npm run test
           - npm run build
@@ -32,7 +31,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18.x
+
+      - name: Installation
+        run: npm ci
 
       - name: Run ${{ matrix.command }}
         run: ${{ matrix.command }}
