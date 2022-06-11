@@ -23,21 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [18.x]
+        command:
+          - npm run test
+          - npm run build
+          - npm run test:next
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Installation
-        run: npm ci
-
-      - name: Unit Tests
-        run: npm run test
-
-      - name: TypeCheck
-        run: npm run build
-
-      - name: Unit Tests for Next versions
-        run: npm run test:next
+      - name: Run ${{ matrix.command }}
+        run: ${{ matrix.command }}
