@@ -1,3 +1,5 @@
+name: "CI"
+
 on:
   push:
     branches:
@@ -12,14 +14,14 @@ on:
 
 jobs:
   test:
-    name: "CI"
+    name: "${{ matrix.command }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        command:
-          - npm run test
-          - npm run build
-          - npm run test:next
+        scripts:
+          - test
+          - build
+          - test:next
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -29,5 +31,5 @@ jobs:
       - name: Installation
         run: npm ci
 
-      - name: "Run: ${{ matrix.command }}"
-        run: ${{ matrix.command }}
+      - name: "npm run ${{ matrix.command }}"
+        run: npm run ${{ matrix.command }}
