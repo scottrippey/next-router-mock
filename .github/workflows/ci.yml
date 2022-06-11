@@ -1,8 +1,5 @@
 name: CI
 
-# Runs build and test on:
-#   every push to main that has a change in a file not in the docs folder
-#   every pull request with main branch as the base that has a change in a file not in the docs folder
 on:
   push:
     branches:
@@ -11,15 +8,12 @@ on:
       - '**'
       - '!README.md'
   pull_request:
-    branches:
-      - main
     paths:
       - '**'
       - '!README.md'
 
 jobs:
   test:
-    name: "Run:"
     runs-on: ubuntu-latest
     strategy:
       matrix:
