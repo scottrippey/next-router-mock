@@ -1,0 +1,43 @@
+name: CI
+
+# Runs build and test on:
+#   every push to main that has a change in a file not in the docs folder
+#   every pull request with main branch as the base that has a change in a file not in the docs folder
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**'
+      - '!README.md'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**'
+      - '!README.md'
+
+jobs:
+  test:
+    name: CI Checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Installation ${{ matrix.node-version }}
+        run: npm ci
+
+      - name: Unit Tests ${{ matrix.node-version }}
+        run: npm run test
+
+      - name: Unit Tests for Next ${{ matrix.node-version }}
+        run: npm run test:next
+
+      - name: Build ${{ matrix.node-version }}
+        run: npm run build
