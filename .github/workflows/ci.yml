@@ -36,8 +36,8 @@ jobs:
       - name: Unit Tests
         run: npm run test
 
+      - name: TypeCheck
+        run: npm run build
+
       - name: Unit Tests for Next versions
         run: npm run test:next
-
-      - name: TypeCheck and Build
-        run: npm run build
