@@ -4,7 +4,7 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
-    "postinstall": "(cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i)",
+    "postinstall": "(cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i); (cd test/next-canary && npm i)",
     "checks": "npm run docs && npm run test && npm run build && npm run test:next",
     "docs": "doctoc README.md",
     "test": "jest",
