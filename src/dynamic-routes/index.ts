@@ -1,4 +1,4 @@
-export type { createDynamicRouteParser } from "./next-12";
+export declare const createDynamicRouteParser: typeof import("./next-12").createDynamicRouteParser;
 // Automatically try to export the correct version:
 try {
   module.exports = require("./next-12");
