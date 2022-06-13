@@ -21,7 +21,7 @@ jobs:
         command:
           - npm run test
           - npm run build
-          - npm run test:integration
+          - npm run test:integration:ci
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

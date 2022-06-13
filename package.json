@@ -1,14 +1,15 @@
 {
   "name": "next-router-mock",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
-    "postinstall": "(cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i); (cd test/next-canary && npm i)",
     "checks": "npm run docs && npm run test && npm run build && npm run test:integration",
     "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:integration:ci": "npm run test:integration:install && npm run test:integration",
+    "test:integration:install": "(cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i); (cd test/next-canary && npm i)",
     "test:integration": "npm run build && npm run test:next-10 && npm run test:next-11 && npm run test:next-12 && npm run test:next-canary && npm run test:exports",
     "test:next-10": "cd test/next-10 && npm test",
     "test:next-11": "cd test/next-11 && npm test",
@@ -18,7 +19,7 @@
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "build:watch": "tsc --watch",
-    "prepublishOnly": "npm run checks",
+    "prepublishOnly": "npm run build",
     "preversion": "npm run checks"
   },
   "repository": {
