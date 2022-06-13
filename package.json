@@ -19,7 +19,7 @@
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "build:watch": "tsc --watch",
-    "prepublishOnly": "npm run checks",
+    "prepublishOnly": "npm run build",
     "preversion": "npm run checks"
   },
   "repository": {
