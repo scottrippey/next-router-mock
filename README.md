@@ -45,7 +45,7 @@ jest.mock('next/dist/client/router', () => require('next-router-mock'));
 import singletonRouter, { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import { render, act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import mockRouter from 'next-router-mock';
 
