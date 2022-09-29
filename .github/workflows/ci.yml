@@ -21,7 +21,7 @@ jobs:
         command:
           - npm run test
           - npm run build
-          - npm run test:integration:ci
+          - npm run test:integration
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -31,6 +31,8 @@ jobs:
 
       - name: Installation
         run: npm ci
+      - name: Installation (for Integration Tests)
+        run: npm run test:integration:install
 
       - name: "${{ matrix.command }}"
         run: ${{ matrix.command }}
