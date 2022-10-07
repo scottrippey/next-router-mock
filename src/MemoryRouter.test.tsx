@@ -315,6 +315,24 @@ describe("MemoryRouter", () => {
         });
       });
 
+      it("correctly uses default as param", async () => {
+        memoryRouter.setCurrentUrl("/path?queryParam=123");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/path?queryParam=123",
+          pathname: "/path",
+          query: { queryParam: "123" },
+        });
+      });
+
+      it("supports as param", async () => {
+        memoryRouter.setCurrentUrl("/path?queryParam=123", "/path");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/path",
+          pathname: "/path",
+          query: { queryParam: "123" },
+        });
+      });
+
       it("should allow deconstruction of push and replace", async () => {
         const { push, replace } = memoryRouter;
         await push("/one");

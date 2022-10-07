@@ -145,9 +145,9 @@ export class MemoryRouter extends BaseRouter {
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
-  public setCurrentUrl = (url: Url) => {
+  public setCurrentUrl = (url: Url, as?: Url) => {
     // (ignore the returned promise)
-    void this._setCurrentUrl(url, undefined, undefined, "set", false);
+    void this._setCurrentUrl(url, as, undefined, "set", false);
   };
 
   private async _setCurrentUrl(
@@ -165,7 +165,19 @@ export class MemoryRouter extends BaseRouter {
       query: parsedUrl.query || {},
       hash: parsedUrl.hash || "",
     };
-    const asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
+
+    let asPath: string;
+    if (as === undefined) {
+      asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
+    } else {
+      const parsedAsUrl = typeof as === "object" ? as : parseUrl(as, true);
+      let asRoute: UrlObjectComplete = {
+        pathname: removeTrailingSlash(parsedAsUrl.pathname ?? this.pathname),
+        query: parsedAsUrl.query || {},
+        hash: parsedAsUrl.hash || "",
+      };
+      asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
+    }
 
     // Optionally apply dynamic routes:
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
