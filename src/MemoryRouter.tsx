@@ -150,37 +150,42 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, as, undefined, "set", false);
   };
 
+  private parseUrlToCompleteUrl(url: Url): UrlObjectComplete {
+    const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
+    return {
+      pathname: removeTrailingSlash(parsedUrl.pathname ?? this.pathname),
+      query: parsedUrl.query || {},
+      hash: parsedUrl.hash || "",
+    };
+  }
+
   private async _setCurrentUrl(
     url: Url,
     as?: Url,
     options?: TransitionOptions,
     source?: "push" | "replace" | "set",
-
     async = this.async
   ) {
     // Parse the URL if needed:
-    const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
-    let newRoute: UrlObjectComplete = {
-      pathname: removeTrailingSlash(parsedUrl.pathname ?? this.pathname),
-      query: parsedUrl.query || {},
-      hash: parsedUrl.hash || "",
-    };
+    const newRoute = this.parseUrlToCompleteUrl(url);
 
     let asPath: string;
+    let asRoute: UrlObjectComplete | undefined = undefined;
     if (as === undefined) {
       asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
     } else {
-      const parsedAsUrl = typeof as === "object" ? as : parseUrl(as, true);
-      let asRoute: UrlObjectComplete = {
-        pathname: removeTrailingSlash(parsedAsUrl.pathname ?? this.pathname),
-        query: parsedAsUrl.query || {},
-        hash: parsedAsUrl.hash || "",
-      };
+      asRoute = this.parseUrlToCompleteUrl(as);
       asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
     }
 
-    // Optionally apply dynamic routes:
+    // Check equality of raw pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
+    const rawPathnamesDiffer = asRoute?.pathname !== newRoute.pathname;
+
+    // Optionally apply dynamic routes
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
+    if (asRoute) {
+      this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
+    }
 
     const shallow = options?.shallow || false;
 
@@ -196,10 +201,13 @@ export class MemoryRouter extends BaseRouter {
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Update this instance:
-    this.pathname = newRoute.pathname;
-    this.query = newRoute.query;
-    this.hash = newRoute.hash;
     this.asPath = asPath;
+    // If asURL has a different path name than hrefURL, asURL takes precedence
+    this.pathname = asRoute ? asRoute.pathname : newRoute.pathname;
+    // If asURL and hrefURL have different paths, we use query of asURL, otherwise from hrefURL
+    this.query = asRoute && rawPathnamesDiffer ? asRoute.query : newRoute.query;
+    // asURL hash always takes precedence over hrefURL
+    this.hash = asRoute ? asRoute.hash : newRoute.hash;
 
     if (options?.locale) {
       this.locale = options.locale;
