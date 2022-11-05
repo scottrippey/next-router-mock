@@ -139,10 +139,10 @@ export class MemoryRouter extends BaseRouter {
       asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
     }
 
-    // Check equality of raw pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
+    // Compare pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
     const rawPathnamesDiffer = asRoute?.pathname !== newRoute.pathname;
 
-    // Optionally apply dynamic routes
+    // Optionally apply dynamic routes (can mutate routes)
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
     if (asRoute) {
       this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
@@ -163,13 +163,15 @@ export class MemoryRouter extends BaseRouter {
 
     // Update this instance:
     this.asPath = asPath;
-    // If asURL has a different path name than hrefURL, asURL takes precedence
-    this.pathname = asRoute ? asRoute.pathname : newRoute.pathname;
-    // If asURL and hrefURL have different paths, we use query of asURL, otherwise from hrefURL
-    this.query = asRoute && rawPathnamesDiffer ? asRoute.query : newRoute.query;
-    // asURL hash always takes precedence over hrefURL
-    this.hash = asRoute ? asRoute.hash : newRoute.hash;
-
+    if (asRoute) {
+      this.pathname = asRoute.pathname;
+      this.query = rawPathnamesDiffer ? asRoute.query : newRoute.query;
+      this.hash = asRoute.hash;
+    } else {
+      this.pathname = newRoute.pathname;
+      this.query = newRoute.query;
+      this.hash = newRoute.hash;
+    }
     if (options?.locale) {
       this.locale = options.locale;
     }
