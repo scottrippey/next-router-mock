@@ -4,37 +4,6 @@ import { ParsedUrlQuery, stringify as stringifyQueryString } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
 
-/**
- * Creates a URL from a pathname + query.
- * Injects query params into the URL slugs, the same way that next/router does.
- */
-function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | null | undefined) {
-  const remainingQuery = { ...query };
-
-  // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
-    if (slug.startsWith("...")) slug = slug.replace("...", "");
-
-    const value = remainingQuery[slug]!;
-    delete remainingQuery[slug];
-    if (Array.isArray(value)) {
-      return value.map((v) => encodeURIComponent(v)).join("/");
-    }
-    return value !== undefined ? encodeURIComponent(String(value)) : "";
-  });
-
-  // Remove any trailing slashes; this can occur if there is no match for a catch-all slug ([[...slug]])
-  asPath = removeTrailingSlash(asPath);
-
-  // Append remaining query as a querystring, if needed:
-  const qs = stringifyQueryString(remainingQuery);
-
-  if (qs) asPath += `?${qs}`;
-  if (hash) asPath += hash;
-
-  return asPath;
-}
-
 export type Url = string | UrlObject;
 export type UrlObject = {
   pathname?: UrlWithParsedQuery["pathname"];
@@ -150,15 +119,6 @@ export class MemoryRouter extends BaseRouter {
     void this._setCurrentUrl(url, as, undefined, "set", false);
   };
 
-  private parseUrlToCompleteUrl(url: Url): UrlObjectComplete {
-    const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
-    return {
-      pathname: removeTrailingSlash(parsedUrl.pathname ?? this.pathname),
-      query: parsedUrl.query || {},
-      hash: parsedUrl.hash || "",
-    };
-  }
-
   private async _setCurrentUrl(
     url: Url,
     as?: Url,
@@ -167,14 +127,15 @@ export class MemoryRouter extends BaseRouter {
     async = this.async
   ) {
     // Parse the URL if needed:
-    const newRoute = this.parseUrlToCompleteUrl(url);
+    const newRoute = parseUrlToCompleteUrl(url, this.pathname);
 
     let asPath: string;
-    let asRoute: UrlObjectComplete | undefined = undefined;
+    let asRoute: UrlObjectComplete | undefined;
     if (as === undefined) {
+      asRoute = undefined;
       asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
     } else {
-      asRoute = this.parseUrlToCompleteUrl(as);
+      asRoute = parseUrlToCompleteUrl(as, this.pathname);
       asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
     }
 
@@ -227,6 +188,49 @@ export class MemoryRouter extends BaseRouter {
 
     return true;
   }
+}
+
+/**
+ * Normalizes the url or urlObject into a UrlObjectComplete.
+ */
+function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
+  const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
+  return {
+    pathname: removeTrailingSlash(parsedUrl.pathname ?? currentPathname),
+    query: parsedUrl.query || {},
+    hash: parsedUrl.hash || "",
+  };
+}
+
+/**
+ * Creates a URL from a pathname + query.
+ * Injects query params into the URL slugs, the same way that next/router does.
+ */
+function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | null | undefined) {
+  const remainingQuery = { ...query };
+
+  // Replace slugs, and remove them from the `query`
+  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
+    if (slug.startsWith("...")) slug = slug.replace("...", "");
+
+    const value = remainingQuery[slug]!;
+    delete remainingQuery[slug];
+    if (Array.isArray(value)) {
+      return value.map((v) => encodeURIComponent(v)).join("/");
+    }
+    return value !== undefined ? encodeURIComponent(String(value)) : "";
+  });
+
+  // Remove any trailing slashes; this can occur if there is no match for a catch-all slug ([[...slug]])
+  asPath = removeTrailingSlash(asPath);
+
+  // Append remaining query as a querystring, if needed:
+  const qs = stringifyQueryString(remainingQuery);
+
+  if (qs) asPath += `?${qs}`;
+  if (hash) asPath += hash;
+
+  return asPath;
 }
 
 function removeTrailingSlash(path: string) {
