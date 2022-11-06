@@ -326,88 +326,87 @@ describe("MemoryRouter", () => {
           });
         });
 
-        describe(`if as path matches href path, href query is used`, () => {
-          it.each([
-            ["/path?queryParam=123", "/path", { asPath: "/path", pathname: "/path", query: { queryParam: "123" } }],
-            [
-              "/path?queryParam=123",
-              { pathname: "/path" },
-              { asPath: "/path", pathname: "/path", query: { queryParam: "123" } },
-            ],
-            [
-              "/path?queryParam=123",
-              "/path?differentQueryParam=456",
-              { asPath: "/path?differentQueryParam=456", pathname: "/path", query: { queryParam: "123" } },
-            ],
-            [
-              "/path?queryParam=123",
-              { pathname: "/path", query: { differentQueryParam: "456" } },
-              { asPath: "/path?differentQueryParam=456", pathname: "/path", query: { queryParam: "123" } },
-            ],
-          ])("url: %s, as: %s, expected: %s", async (url, as, expected) => {
-            await memoryRouter.push(url, as);
-            expect(memoryRouter).toMatchObject(expected);
+        it(`if as path matches href path, href query is used`, async () => {
+          await memoryRouter.push("/path?queryParam=123", "/path");
+          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", query: { queryParam: "123" } });
+
+          await memoryRouter.push("/path?queryParam=123", { pathname: "/path" });
+          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", query: { queryParam: "123" } });
+
+          await memoryRouter.push("/path?queryParam=123", "/path?differentQueryParam=456");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/path?differentQueryParam=456",
+            pathname: "/path",
+            query: { queryParam: "123" },
+          });
+
+          await memoryRouter.push("/path?queryParam=123", {
+            pathname: "/path",
+            query: { differentQueryParam: "456" },
+          });
+          expect(memoryRouter).toMatchObject({
+            asPath: "/path?differentQueryParam=456",
+            pathname: "/path",
+            query: { queryParam: "123" },
           });
         });
 
-        describe("if as path does not match href path, as query is used", () => {
-          it.each([
-            [
-              "/path?queryParam=123",
-              "/differentPath?differentQueryParam=456",
-              {
-                asPath: "/differentPath?differentQueryParam=456",
-                pathname: "/differentPath",
-                query: { differentQueryParam: "456" },
-              },
-            ],
-            [
-              "/path?queryParam=123",
-              { pathname: "/differentPath", query: { differentQueryParam: "456" } },
-              {
-                asPath: "/differentPath?differentQueryParam=456",
-                pathname: "/differentPath",
-                query: { differentQueryParam: "456" },
-              },
-            ],
-          ])("url: %s, as: %s, expected: %s", async (url, as, expected) => {
-            await memoryRouter.push(url, as);
-            expect(memoryRouter).toMatchObject(expected);
+        it("if as path does not match href path, as query is used", async () => {
+          await memoryRouter.push("/path?queryParam=123", "/differentPath?differentQueryParam=456");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/differentPath?differentQueryParam=456",
+            pathname: "/differentPath",
+            query: { differentQueryParam: "456" },
+          });
+
+          await memoryRouter.push("/path?queryParam=123", {
+            pathname: "/differentPath",
+            query: { differentQueryParam: "456" },
+          });
+          expect(memoryRouter).toMatchObject({
+            asPath: "/differentPath?differentQueryParam=456",
+            pathname: "/differentPath",
+            query: { differentQueryParam: "456" },
           });
         });
 
-        describe("as param hash overrides href hash", () => {
-          it.each([
-            ["/path", "/path#hash", { asPath: "/path#hash", pathname: "/path", hash: "#hash" }],
-            ["/path", { pathname: "/path", hash: "#hash" }, { asPath: "/path#hash", pathname: "/path", hash: "#hash" }],
-            ["/path#originalHash", "/path#hash", { asPath: "/path#hash", pathname: "/path", hash: "#hash" }],
-            ["/path", { pathname: "/path", hash: "#hash" }, { asPath: "/path#hash", pathname: "/path", hash: "#hash" }],
-            ["/path#originalHash", "/path", { asPath: "/path", pathname: "/path", hash: "" }],
-            ["/path", { pathname: "/path" }, { asPath: "/path", pathname: "/path", hash: "" }],
-            [
-              "/path#originalHash",
-              "/differentPath",
-              { asPath: "/differentPath", pathname: "/differentPath", hash: "" },
-            ],
-            [
-              "/path",
-              { pathname: "/differentPath" },
-              { asPath: "/differentPath", pathname: "/differentPath", hash: "" },
-            ],
-            [
-              "/path#originalHash",
-              "/differentPath#hash",
-              { asPath: "/differentPath#hash", pathname: "/differentPath", hash: "#hash" },
-            ],
-            [
-              "/path",
-              { pathname: "/differentPath", hash: "#hash" },
-              { asPath: "/differentPath#hash", pathname: "/differentPath", hash: "#hash" },
-            ],
-          ])("url: %s, as: %s, expected: %s", async (url, as, expectedResult) => {
-            await memoryRouter.push(url, as);
+        it("as param hash overrides href hash", async () => {
+          await memoryRouter.push("/path", "/path#hash");
+          expect(memoryRouter).toMatchObject({ asPath: "/path#hash", pathname: "/path", hash: "#hash" });
 
-            expect(memoryRouter).toMatchObject(expectedResult);
+          await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
+          expect(memoryRouter).toMatchObject({ asPath: "/path#hash", pathname: "/path", hash: "#hash" });
+
+          await memoryRouter.push("/path#originalHash", "/path#hash");
+          expect(memoryRouter).toMatchObject({ asPath: "/path#hash", pathname: "/path", hash: "#hash" });
+
+          await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
+          expect(memoryRouter).toMatchObject({ asPath: "/path#hash", pathname: "/path", hash: "#hash" });
+
+          await memoryRouter.push("/path#originalHash", "/path");
+          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", hash: "" });
+
+          await memoryRouter.push("/path", { pathname: "/path" });
+          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", hash: "" });
+
+          await memoryRouter.push("/path#originalHash", "/differentPath");
+          expect(memoryRouter).toMatchObject({ asPath: "/differentPath", pathname: "/differentPath", hash: "" });
+
+          await memoryRouter.push("/path", { pathname: "/differentPath" });
+          expect(memoryRouter).toMatchObject({ asPath: "/differentPath", pathname: "/differentPath", hash: "" });
+
+          await memoryRouter.push("/path#originalHash", "/differentPath#hash");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/differentPath#hash",
+            pathname: "/differentPath",
+            hash: "#hash",
+          });
+
+          await memoryRouter.push("/path", { pathname: "/differentPath", hash: "#hash" });
+          expect(memoryRouter).toMatchObject({
+            asPath: "/differentPath#hash",
+            pathname: "/differentPath",
+            hash: "#hash",
           });
         });
       });
