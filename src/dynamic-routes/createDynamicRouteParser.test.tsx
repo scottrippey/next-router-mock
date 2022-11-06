@@ -140,6 +140,21 @@ describe("dynamic routes", () => {
     });
   });
 
+  describe('the "as" parameter', () => {
+    it("uses as path param over href path param", async () => {
+      memoryRouter.useParser(createDynamicRouteParser(["/path/[testParam]"]));
+
+      memoryRouter.push("/path/123", "/path/456");
+      expect(memoryRouter).toMatchObject({
+        asPath: "/path/456",
+        pathname: "/path/[testParam]",
+        query: {
+          testParam: "456",
+        },
+      });
+    });
+  });
+
   it("hashes are preserved", async () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]"]));
 
