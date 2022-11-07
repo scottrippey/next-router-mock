@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { act, renderHook } from "@testing-library/react-hooks";
 
-import { MemoryRouter } from "./MemoryRouter";
+import { MemoryRouter, MemoryRouterSnapshot } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 
-export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => Readonly<MemoryRouter>) {
+export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => MemoryRouterSnapshot) {
   it("the useRouter hook only returns a snapshot of the singleton router", async () => {
     const { result } = renderHook(() => useRouter());
 

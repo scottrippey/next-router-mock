@@ -2,6 +2,7 @@ import React, { FC, ReactNode, useMemo } from "react";
 
 import { useMemoryRouter, MemoryRouter, Url } from "../index";
 import { MemoryRouterEventHandlers } from "../useMemoryRouter";
+import { MemoryRouterContext } from "../MemoryRouterContext";
 
 type AbstractedNextDependencies = {
   RouterContext: typeof import("next/dist/shared/lib/router-context").RouterContext;
@@ -20,7 +21,11 @@ export function factory(dependencies: AbstractedNextDependencies) {
   const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, ...eventHandlers }) => {
     const memoryRouter = useMemo(() => new MemoryRouter(url, async), []);
     const router = useMemoryRouter(memoryRouter, eventHandlers);
-    return <RouterContext.Provider value={router}>{children}</RouterContext.Provider>;
+    return (
+      <MemoryRouterContext.Provider value={router}>
+        <RouterContext.Provider value={router}>{children}</RouterContext.Provider>
+      </MemoryRouterContext.Provider>
+    );
   };
 
   return MemoryRouterProvider;

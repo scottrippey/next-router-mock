@@ -4,7 +4,7 @@ import type { NextRouter } from "next/router";
 
 // This is a (very slightly) modified version of https://github.com/vercel/next.js/blob/canary/packages/next/client/with-router.tsx
 
-import { MemoryRouter } from "./MemoryRouter";
+import type { MemoryRouterSnapshot } from "./MemoryRouter";
 
 export type WithRouterProps = {
   router: NextRouter;
@@ -13,7 +13,7 @@ export type WithRouterProps = {
 export type ExcludeRouterProps<P> = Pick<P, Exclude<keyof P, keyof WithRouterProps>>;
 
 export function withMemoryRouter<P extends WithRouterProps, C = NextPageContext>(
-  useRouter: () => Readonly<MemoryRouter>,
+  useRouter: () => MemoryRouterSnapshot,
   ComposedComponent: NextComponentType<C, any, P>
 ): NextComponentType<C, any, ExcludeRouterProps<P>> {
   function WithRouterWrapper(props: any): JSX.Element {

@@ -1,8 +1,9 @@
 import React from "react";
+import { NextComponentType, NextPageContext } from "next";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 import { withMemoryRouter, WithRouterProps } from "./withMemoryRouter";
-import { NextComponentType, NextPageContext } from "next";
+import { MemoryRouterContext } from "./MemoryRouterContext";
 
 // Export extra mock APIs:
 export { useMemoryRouter } from "./useMemoryRouter";
@@ -13,7 +14,7 @@ memoryRouter.async = true;
 export default memoryRouter;
 
 export const useRouter = () => {
-  return React.useContext(RouterContext) || useMemoryRouter(memoryRouter);
+  return React.useContext(MemoryRouterContext) || useMemoryRouter(memoryRouter);
 };
 
 export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
@@ -21,8 +22,3 @@ export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
 ) => {
   return withMemoryRouter(useRouter, ComposedComponent);
 };
-
-// Export the same interface as `next/dist/shared/lib/router-context`
-// This is a workaround for `next/link` v12.2, since it no longer uses the `useRouter` hook.
-// Instead, we can use a context that has the default value set to our mock:
-export const RouterContext = React.createContext(memoryRouter);

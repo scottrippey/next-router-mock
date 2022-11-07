@@ -63,11 +63,13 @@ export abstract class BaseRouter implements NextRouter {
   }
 }
 
+export type MemoryRouterSnapshot = Readonly<MemoryRouter>;
+
 /**
  * An implementation of NextRouter that does not change the URL, but just stores the current route in memory.
  */
 export class MemoryRouter extends BaseRouter {
-  static snapshot(original: MemoryRouter): Readonly<MemoryRouter> {
+  static snapshot(original: MemoryRouter): MemoryRouterSnapshot {
     return Object.assign(new MemoryRouter(), original);
   }
 
