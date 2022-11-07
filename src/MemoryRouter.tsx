@@ -4,37 +4,6 @@ import { ParsedUrlQuery, stringify as stringifyQueryString } from "querystring";
 
 import type { NextRouter, RouterEvent } from "next/router";
 
-/**
- * Creates a URL from a pathname + query.
- * Injects query params into the URL slugs, the same way that next/router does.
- */
-function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | null | undefined) {
-  const remainingQuery = { ...query };
-
-  // Replace slugs, and remove them from the `query`
-  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
-    if (slug.startsWith("...")) slug = slug.replace("...", "");
-
-    const value = remainingQuery[slug]!;
-    delete remainingQuery[slug];
-    if (Array.isArray(value)) {
-      return value.map((v) => encodeURIComponent(v)).join("/");
-    }
-    return value !== undefined ? encodeURIComponent(String(value)) : "";
-  });
-
-  // Remove any trailing slashes; this can occur if there is no match for a catch-all slug ([[...slug]])
-  asPath = removeTrailingSlash(asPath);
-
-  // Append remaining query as a querystring, if needed:
-  const qs = stringifyQueryString(remainingQuery);
-
-  if (qs) asPath += `?${qs}`;
-  if (hash) asPath += hash;
-
-  return asPath;
-}
-
 export type Url = string | UrlObject;
 export type UrlObject = {
   pathname?: UrlWithParsedQuery["pathname"];
@@ -145,9 +114,9 @@ export class MemoryRouter extends BaseRouter {
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
-  public setCurrentUrl = (url: Url) => {
+  public setCurrentUrl = (url: Url, as?: Url) => {
     // (ignore the returned promise)
-    void this._setCurrentUrl(url, undefined, undefined, "set", false);
+    void this._setCurrentUrl(url, as, undefined, "set", false);
   };
 
   private async _setCurrentUrl(
@@ -155,20 +124,29 @@ export class MemoryRouter extends BaseRouter {
     as?: Url,
     options?: TransitionOptions,
     source?: "push" | "replace" | "set",
-
     async = this.async
   ) {
     // Parse the URL if needed:
-    const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
-    let newRoute: UrlObjectComplete = {
-      pathname: removeTrailingSlash(parsedUrl.pathname ?? this.pathname),
-      query: parsedUrl.query || {},
-      hash: parsedUrl.hash || "",
-    };
-    const asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
+    const newRoute = parseUrlToCompleteUrl(url, this.pathname);
 
-    // Optionally apply dynamic routes:
+    let asPath: string;
+    let asRoute: UrlObjectComplete | undefined;
+    if (as === undefined) {
+      asRoute = undefined;
+      asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
+    } else {
+      asRoute = parseUrlToCompleteUrl(as, this.pathname);
+      asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
+    }
+
+    // Compare pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
+    const rawPathnamesDiffer = asRoute?.pathname !== newRoute.pathname;
+
+    // Optionally apply dynamic routes (can mutate routes)
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
+    if (asRoute) {
+      this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
+    }
 
     const shallow = options?.shallow || false;
 
@@ -184,11 +162,16 @@ export class MemoryRouter extends BaseRouter {
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Update this instance:
-    this.pathname = newRoute.pathname;
-    this.query = newRoute.query;
-    this.hash = newRoute.hash;
     this.asPath = asPath;
-
+    if (asRoute) {
+      this.pathname = asRoute.pathname;
+      this.query = rawPathnamesDiffer ? asRoute.query : newRoute.query;
+      this.hash = asRoute.hash;
+    } else {
+      this.pathname = newRoute.pathname;
+      this.query = newRoute.query;
+      this.hash = newRoute.hash;
+    }
     if (options?.locale) {
       this.locale = options.locale;
     }
@@ -207,6 +190,49 @@ export class MemoryRouter extends BaseRouter {
 
     return true;
   }
+}
+
+/**
+ * Normalizes the url or urlObject into a UrlObjectComplete.
+ */
+function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
+  const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
+  return {
+    pathname: removeTrailingSlash(parsedUrl.pathname ?? currentPathname),
+    query: parsedUrl.query || {},
+    hash: parsedUrl.hash || "",
+  };
+}
+
+/**
+ * Creates a URL from a pathname + query.
+ * Injects query params into the URL slugs, the same way that next/router does.
+ */
+function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | null | undefined) {
+  const remainingQuery = { ...query };
+
+  // Replace slugs, and remove them from the `query`
+  let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
+    if (slug.startsWith("...")) slug = slug.replace("...", "");
+
+    const value = remainingQuery[slug]!;
+    delete remainingQuery[slug];
+    if (Array.isArray(value)) {
+      return value.map((v) => encodeURIComponent(v)).join("/");
+    }
+    return value !== undefined ? encodeURIComponent(String(value)) : "";
+  });
+
+  // Remove any trailing slashes; this can occur if there is no match for a catch-all slug ([[...slug]])
+  asPath = removeTrailingSlash(asPath);
+
+  // Append remaining query as a querystring, if needed:
+  const qs = stringifyQueryString(remainingQuery);
+
+  if (qs) asPath += `?${qs}`;
+  if (hash) asPath += hash;
+
+  return asPath;
 }
 
 function removeTrailingSlash(path: string) {
