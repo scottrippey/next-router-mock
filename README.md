@@ -36,7 +36,10 @@ jest.mock('next/router', () => require('next-router-mock'));
 If you want to mock `next/link`, you should also include this mock:
 
 ```js
+// Needed for mocking 'next/link':
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
+// Needed for mocking 'next/link' with Next >= 12.2
+jest.mock('next/dist/shared/lib/router-context', () => require('next-router-mock'));
 ```
 
 ### A fully working Jest example
@@ -51,8 +54,10 @@ import mockRouter from 'next-router-mock';
 
 
 jest.mock('next/router', () => require('next-router-mock'));
-// This is needed for mocking 'next/link':
+// Needed for mocking 'next/link':
 jest.mock('next/dist/client/router', () => require('next-router-mock'));
+// Needed for mocking 'next/link' with Next >= 12.2
+jest.mock('next/dist/shared/lib/router-context', () => require('next-router-mock'));
 
 describe('next-router-mock', () => {
   beforeEach(() => {
@@ -104,25 +109,52 @@ describe('next-router-mock', () => {
 
 # Usage with Storybook
 
-For Storybook, you can use `<MemoryRouterProvider>` to wrap your stories.
-You can **globally** wrap all stories by adding this to `storybook/preview.js`:
+### Configuration
+Globally enable `next-router-mock` by adding the following webpack aliases to your Storybook configuration.
 
-```jsx
-import { addDecorator } from "@storybook/react";
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
-
-addDecorator((Story) => <MemoryRouterProvider><Story/></MemoryRouterProvider>);
+In `.storybook/main.js` add:
+```js
+module.exports = {
+  webpackFinal: async (config, { configType }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "next/router": "next-router-mock",
+      // Needed for mocking 'next/link':
+      "next/dist/client/router": "next-router-mock",
+      // Needed for mocking 'next/link' with Next >= 12.2
+      "next/dist/shared/lib/router-context": "next-router-mock"
+    };
+    return config;
+  },
+};
 ```
 
-You can also wrap **individual** stories with the `<MemoryRouterProvider>`, allowing you to customize the properties:
+### Mocking the current URL
+
+In your individual stories, you might want to mock the current URL (eg. for testing "active" links), or you might want to log `push/replace` actions.  You can do this by wrapping your stories with the `<MemoryRouterProvider>` component like so:
 
 ```jsx
+// example.story.jsx
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+
 export const ExampleStory = () => (
   <MemoryRouterProvider url="/initial-url">
     <NextLink href="/example"><a>Example Link</a></NextLink>
   </MemoryRouterProvider>
 );
 ```
+
+
+You could also **globally** wrap all stories by adding this to your Storybook configuration  in `.storybook/preview.js`:
+    
+```jsx
+// .storybook/preview.js
+import { addDecorator } from '@storybook/react';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+
+addDecorator((Story) => <MemoryRouterProvider onPush={action('push')}><Story/></MemoryRouterProvider>);
+```
+
 
 
 The `MemoryRouterProvider` has the following optional properties:
