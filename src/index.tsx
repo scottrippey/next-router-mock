@@ -13,7 +13,7 @@ memoryRouter.async = false;
 export default memoryRouter;
 
 export const useRouter = () => {
-  return useMemoryRouter(memoryRouter);
+  return React.useContext(RouterContext) || useMemoryRouter(memoryRouter);
 };
 
 export const withRouter = <P extends WithRouterProps, C = NextPageContext>(

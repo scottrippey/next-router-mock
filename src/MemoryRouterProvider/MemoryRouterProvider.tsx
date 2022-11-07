@@ -18,8 +18,8 @@ export function factory(dependencies: AbstractedNextDependencies) {
   const { RouterContext } = dependencies;
 
   const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, ...eventHandlers }) => {
-    const singletonRouter = useMemo(() => new MemoryRouter(url, async), []);
-    const router = useMemoryRouter(singletonRouter, eventHandlers);
+    const memoryRouter = useMemo(() => new MemoryRouter(url, async), []);
+    const router = useMemoryRouter(memoryRouter, eventHandlers);
     return <RouterContext.Provider value={router}>{children}</RouterContext.Provider>;
   };
 
