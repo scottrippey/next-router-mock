@@ -17,6 +17,8 @@ Install via NPM: `npm install --save-dev next-router-mock`
 - [Usage with Jest](#usage-with-jest)
     - [A fully working Jest example](#a-fully-working-jest-example)
 - [Usage with Storybook](#usage-with-storybook)
+    - [Configuration](#configuration)
+    - [Mocking the current URL](#mocking-the-current-url)
     - [A fully working Storybook example](#a-fully-working-storybook-example)
 - [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
