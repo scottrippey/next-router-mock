@@ -4,7 +4,7 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
-    "checks": "npm run docs && npm run test && npm run build && npm run test:integration",
+    "checks": "npm run docs && npm run test && npm run typecheck && npm run build && npm run test:integration",
     "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -18,9 +18,10 @@
     "test:next-12.2": "cd test/next-12.2+ && npm test",
     "test:next-12.latest": "cd test/next-12.latest && npm test",
     "test:next-13": "cd test/next-13 && npm test",
-    "build": "npm run clean && tsc",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run clean && tsc --project tsconfig.build.json",
     "clean": "rimraf dist",
-    "build:watch": "tsc --watch",
+    "build:watch": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
     "preversion": "npm run checks"
   },
