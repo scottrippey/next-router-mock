@@ -4,9 +4,7 @@ import { useMemoryRouter, MemoryRouter, Url } from "../index";
 import { MemoryRouterEventHandlers } from "../useMemoryRouter";
 import { MemoryRouterContext } from "../MemoryRouterContext";
 
-type AbstractedNextDependencies = {
-  RouterContext: typeof import("next/dist/shared/lib/router-context").RouterContext;
-};
+type AbstractedNextDependencies = Pick<typeof import("next/dist/shared/lib/router-context"), "RouterContext">;
 
 export type MemoryRouterProviderProps = {
   /** The initial URL to render */
