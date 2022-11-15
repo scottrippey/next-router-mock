@@ -14,7 +14,10 @@ memoryRouter.async = true;
 export default memoryRouter;
 
 export const useRouter = () => {
-  return React.useContext(MemoryRouterContext) || useMemoryRouter(memoryRouter);
+  return (
+    React.useContext(MemoryRouterContext) || // Allow <MemoryRouterProvider> to override the singleton, if needed
+    useMemoryRouter(memoryRouter)
+  );
 };
 
 export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
