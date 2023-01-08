@@ -1,9 +1,10 @@
 import React from "react";
 import { useRouter } from "next/router";
 import NextLink, { LinkProps } from "next/link";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { MemoryRouterProvider } from "./next-11";
+import { default as singletonRouter } from '../index';
 
 const TestLink = (linkProps: Partial<LinkProps>) => {
   const router = useRouter();
@@ -15,53 +16,74 @@ const TestLink = (linkProps: Partial<LinkProps>) => {
 };
 
 describe("MemoryRouterProvider", () => {
-  it("should mock the router", () => {
+  beforeEach(() => {
+    singletonRouter.setCurrentUrl("/initial");
+  });
+
+  it("should provide a router", () => {
     render(
       <MemoryRouterProvider>
         <TestLink />
       </MemoryRouterProvider>
     );
-    expect(screen.getByText(`Current route: ""`)).toBeDefined();
+    expect(screen.getByText(`Current route: "/initial"`)).toBeDefined();
   });
 
-  it("an initial URL can be supplied", () => {
-    render(
-      <MemoryRouterProvider url="/example">
-        <TestLink />
-      </MemoryRouterProvider>
-    );
-    expect(screen.getByText(`Current route: "/example"`)).toBeDefined();
-  });
-
-  it("an initial URL Object can be supplied", () => {
-    render(
-      <MemoryRouterProvider url={{ pathname: "/example", query: { foo: "bar" } }}>
-        <TestLink />
-      </MemoryRouterProvider>
-    );
-    expect(screen.getByText(`Current route: "/example?foo=bar"`)).toBeDefined();
-  });
-
-  it("clicking a link should navigate to a new page", () => {
+  it("using the singleton router should update the URL", () => {
     render(
       <MemoryRouterProvider>
         <TestLink />
       </MemoryRouterProvider>
     );
-    expect(screen.getByText(`Current route: ""`)).toBeDefined();
-    fireEvent.click(screen.getByText(`Current route: ""`));
+
+    // Navigate:
+    expect(screen.getByText(`Current route: "/initial"`)).toBeDefined();
+    act(() => {
+      singletonRouter.push("/new-route");
+    });
+    expect(screen.getByText(`Current route: "/new-route"`)).toBeDefined();
+  });
+
+  it("clicking a link should navigate to the new URL", () => {
+    render(
+      <MemoryRouterProvider>
+        <TestLink />
+      </MemoryRouterProvider>
+    );
+    expect(screen.getByText(`Current route: "/initial"`)).toBeDefined();
+    fireEvent.click(screen.getByText(`Current route: "/initial"`));
     expect(screen.getByText(`Current route: "/test"`)).toBeDefined();
   });
 
-  describe("async", () => {
-    it("clicking a link should navigate to a new page, asynchronously", async () => {
+  describe("url", () => {
+    it("an initial URL can be supplied", () => {
       render(
-        <MemoryRouterProvider async>
+        <MemoryRouterProvider url="/example">
           <TestLink />
         </MemoryRouterProvider>
       );
-      expect(screen.getByText(`Current route: ""`)).toBeDefined();
-      fireEvent.click(screen.getByText(`Current route: ""`));
+      expect(screen.getByText(`Current route: "/example"`)).toBeDefined();
+    });
+
+    it("an initial URL Object can be supplied", () => {
+      render(
+        <MemoryRouterProvider url={{ pathname: "/example", query: { foo: "bar" } }}>
+          <TestLink />
+        </MemoryRouterProvider>
+      );
+      expect(screen.getByText(`Current route: "/example?foo=bar"`)).toBeDefined();
+    });
+  });
+
+  describe("async", () => {
+    it("clicking a link should navigate to the new URL, asynchronously", async () => {
+      render(
+        <MemoryRouterProvider url="/initial" async>
+          <TestLink />
+        </MemoryRouterProvider>
+      );
+      expect(screen.getByText(`Current route: "/initial"`)).toBeDefined();
+      fireEvent.click(screen.getByText(`Current route: "/initial"`));
       expect(screen.queryByText(`Current route: "/test"`)).toBeNull();
       await waitFor(() => expect(screen.queryByText(`Current route: "/test"`)).not.toBeNull());
     });
@@ -79,11 +101,11 @@ describe("MemoryRouterProvider", () => {
     });
     it("clicking a link should trigger the correct event handlers", () => {
       render(
-        <MemoryRouterProvider {...eventHandlers}>
+        <MemoryRouterProvider url="/initial" {...eventHandlers}>
           <TestLink />
         </MemoryRouterProvider>
       );
-      fireEvent.click(screen.getByText(`Current route: ""`));
+      fireEvent.click(screen.getByText(`Current route: "/initial"`));
       expect(screen.getByText(`Current route: "/test"`)).not.toBeNull();
       expect(eventHandlers.onPush).toHaveBeenCalledWith("/test", { shallow: false });
       expect(eventHandlers.onReplace).not.toHaveBeenCalled();
@@ -92,11 +114,11 @@ describe("MemoryRouterProvider", () => {
     });
     it("a 'replace' link triggers the correct handlers too", () => {
       render(
-        <MemoryRouterProvider {...eventHandlers}>
+        <MemoryRouterProvider url="/initial" {...eventHandlers}>
           <TestLink replace />
         </MemoryRouterProvider>
       );
-      fireEvent.click(screen.getByText(`Current route: ""`));
+      fireEvent.click(screen.getByText(`Current route: "/initial"`));
       expect(screen.getByText(`Current route: "/test"`)).not.toBeNull();
       expect(eventHandlers.onPush).not.toHaveBeenCalledWith("/test", { shallow: false });
       expect(eventHandlers.onReplace).toHaveBeenCalled();

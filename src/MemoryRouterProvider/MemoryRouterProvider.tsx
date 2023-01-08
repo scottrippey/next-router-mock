@@ -20,7 +20,7 @@ export function factory(dependencies: AbstractedNextDependencies) {
 
   const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, ...eventHandlers }) => {
     const memoryRouter = useMemo(() => {
-      if (url) {
+      if (typeof url !== "undefined") {
         // If the `url` was specified, we'll use an "isolated router" instead of the singleton.
         return new MemoryRouter(url, async);
       }
