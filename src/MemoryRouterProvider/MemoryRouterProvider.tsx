@@ -1,13 +1,15 @@
 import React, { FC, ReactNode, useMemo } from "react";
 
-import { useMemoryRouter, MemoryRouter, Url } from "../index";
+import { useMemoryRouter, MemoryRouter, Url, default as singletonRouter } from "../index";
 import { MemoryRouterEventHandlers } from "../useMemoryRouter";
 import { MemoryRouterContext } from "../MemoryRouterContext";
 
 type AbstractedNextDependencies = Pick<typeof import("next/dist/shared/lib/router-context"), "RouterContext">;
 
 export type MemoryRouterProviderProps = {
-  /** The initial URL to render */
+  /**
+   * The initial URL to render.
+   */
   url?: Url;
   async?: boolean;
   children?: ReactNode;
@@ -17,11 +19,22 @@ export function factory(dependencies: AbstractedNextDependencies) {
   const { RouterContext } = dependencies;
 
   const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, ...eventHandlers }) => {
-    const memoryRouter = useMemo(() => new MemoryRouter(url, async), []);
-    const router = useMemoryRouter(memoryRouter, eventHandlers);
+    const memoryRouter = useMemo(() => {
+      if (url) {
+        // If the `url` was specified, we'll use an "isolated router" instead of the singleton.
+        return new MemoryRouter(url, async);
+      }
+      // Normally we'll just use the singleton:
+      return singletonRouter;
+    }, [url, async]);
+
+    const routerSnapshot = useMemoryRouter(memoryRouter, eventHandlers);
+
     return (
-      <MemoryRouterContext.Provider value={router}>
-        <RouterContext.Provider value={router}>{children}</RouterContext.Provider>
+      <MemoryRouterContext.Provider value={routerSnapshot}>
+        <RouterContext.Provider value={routerSnapshot}>
+          {children}
+        </RouterContext.Provider>
       </MemoryRouterContext.Provider>
     );
   };
