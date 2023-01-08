@@ -23,7 +23,13 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type InternalEventTypes = "NEXT_ROUTER_MOCK:parse" | "NEXT_ROUTER_MOCK:push" | "NEXT_ROUTER_MOCK:replace";
+type InternalEventTypes =
+  /** Allows custom parsing logic */
+  | "NEXT_ROUTER_MOCK:parse"
+  /** Emitted when 'router.push' is called */
+  | "NEXT_ROUTER_MOCK:push"
+  /** Emitted when 'router.replace' is called */
+  | "NEXT_ROUTER_MOCK:replace";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.

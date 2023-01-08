@@ -9,10 +9,12 @@ import { MemoryRouterContext } from "./MemoryRouterContext";
 export { useMemoryRouter } from "./useMemoryRouter";
 export { MemoryRouter, BaseRouter, Url } from "./MemoryRouter";
 
+// Export the singleton:
 export const memoryRouter = new MemoryRouter();
 memoryRouter.async = true;
 export default memoryRouter;
 
+// Export the `useRouter` hook:
 export const useRouter = () => {
   return (
     React.useContext(MemoryRouterContext) || // Allow <MemoryRouterProvider> to override the singleton, if needed
@@ -20,6 +22,7 @@ export const useRouter = () => {
   );
 };
 
+// Export the `withRouter` HOC:
 export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
   ComposedComponent: NextComponentType<C, any, P>
 ) => {
