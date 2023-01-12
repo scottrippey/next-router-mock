@@ -32,9 +32,7 @@ export function factory(dependencies: AbstractedNextDependencies) {
 
     return (
       <MemoryRouterContext.Provider value={routerSnapshot}>
-        <RouterContext.Provider value={routerSnapshot}>
-          {children}
-        </RouterContext.Provider>
+        <RouterContext.Provider value={routerSnapshot}>{children}</RouterContext.Provider>
       </MemoryRouterContext.Provider>
     );
   };

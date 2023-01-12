@@ -4,7 +4,9 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "scripts": {
-    "checks": "npm run docs && npm run test && npm run build && npm run typecheck && npm run test:integration",
+    "checks": "npm run docs && npm run lint && npm run test && npm run build && npm run typecheck && npm run test:integration",
+    "lint": "prettier --list-different src",
+    "lint:fix": "prettier --write src",
     "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",

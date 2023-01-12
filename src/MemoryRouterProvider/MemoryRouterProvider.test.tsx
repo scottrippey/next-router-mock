@@ -1,10 +1,10 @@
 import React from "react";
 import { useRouter } from "next/router";
 import NextLink, { LinkProps } from "next/link";
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { MemoryRouterProvider } from "./next-11";
-import { default as singletonRouter } from '../index';
+import { default as singletonRouter } from "../index";
 
 const TestLink = (linkProps: Partial<LinkProps>) => {
   const router = useRouter();
