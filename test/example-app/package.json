@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "checks": "npm run test && npm run typecheck",
+    "test": "",
+    "typecheck": "tsc --noEmit",
+    "dev": "next dev"
   },
   "dependencies": {
     "@types/node": "18.11.9",
@@ -12,5 +16,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "4.8.4"
+  },
+  "devDependencies": {
   }
 }
