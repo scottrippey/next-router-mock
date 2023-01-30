@@ -19,8 +19,9 @@ jobs:
     strategy:
       matrix:
         command:
-          - npm run test
           - npm run build
+          - npm run lint
+          - npm run test
           - npm run test:integration
     steps:
       - uses: actions/checkout@v3
@@ -29,10 +30,12 @@ jobs:
           node-version: 18.x
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
-          
+
       - name: Installation
         run: npm ci
+
       - name: Installation (for Integration Tests)
+        if: contains(matrix.command, 'integration')
         run: npm run test:integration:install
 
       - name: "${{ matrix.command }}"

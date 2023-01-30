@@ -1,19 +1,28 @@
+import React from "react";
+import { NextComponentType, NextPageContext } from "next";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 import { withMemoryRouter, WithRouterProps } from "./withMemoryRouter";
-import { NextComponentType, NextPageContext } from "next";
+import { MemoryRouterContext } from "./MemoryRouterContext";
 
+// Export extra mock APIs:
 export { useMemoryRouter } from "./useMemoryRouter";
 export { MemoryRouter, BaseRouter, Url } from "./MemoryRouter";
 
+// Export the singleton:
 export const memoryRouter = new MemoryRouter();
 memoryRouter.async = true;
 export default memoryRouter;
 
+// Export the `useRouter` hook:
 export const useRouter = () => {
-  return useMemoryRouter(memoryRouter);
+  return (
+    React.useContext(MemoryRouterContext) || // Allow <MemoryRouterProvider> to override the singleton, if needed
+    useMemoryRouter(memoryRouter)
+  );
 };
 
+// Export the `withRouter` HOC:
 export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
   ComposedComponent: NextComponentType<C, any, P>
 ) => {

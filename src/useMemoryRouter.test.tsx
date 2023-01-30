@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { act, renderHook } from "@testing-library/react-hooks";
+import { act, renderHook } from "@testing-library/react";
 
-import { MemoryRouter } from "./MemoryRouter";
+import { MemoryRouter, MemoryRouterSnapshot } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 
-export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => Readonly<MemoryRouter>) {
+export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => MemoryRouterSnapshot) {
   it("the useRouter hook only returns a snapshot of the singleton router", async () => {
     const { result } = renderHook(() => useRouter());
 
@@ -42,7 +42,6 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
     });
 
     expect(result.current).toEqual(["/foo", "/foo?bar=baz"]);
-    expect(result.all).toHaveLength(2);
   });
 
   it('"push" will cause a rerender with the new route', async () => {
@@ -59,9 +58,6 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => R
       pathname: "/foo",
       query: { bar: "baz" },
     });
-
-    // Ensure only 2 renders happened:
-    expect(result.all).toHaveLength(2);
   });
 
   it('calling "push" multiple times will rerender with the correct route', async () => {

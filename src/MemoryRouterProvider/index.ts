@@ -1,15 +1,19 @@
-export declare const MemoryRouterProvider: typeof import("./next-12").MemoryRouterProvider;
+export declare const MemoryRouterProvider: typeof import("./next-13").MemoryRouterProvider;
 // Automatically try to export the correct version:
 try {
-  module.exports = require("./next-12");
+  module.exports = require("./next-13");
 } catch (firstErr) {
   try {
-    module.exports = require("./next-11");
+    module.exports = require("./next-12");
   } catch {
     try {
-      module.exports = require("./next-10");
+      module.exports = require("./next-11");
     } catch {
-      throw firstErr;
+      try {
+        module.exports = require("./next-10");
+      } catch {
+        throw firstErr;
+      }
     }
   }
 }

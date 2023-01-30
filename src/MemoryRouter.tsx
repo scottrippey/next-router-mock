@@ -23,7 +23,13 @@ interface TransitionOptions {
   scroll?: boolean;
 }
 
-type InternalEventTypes = "NEXT_ROUTER_MOCK:parse" | "NEXT_ROUTER_MOCK:push" | "NEXT_ROUTER_MOCK:replace";
+type InternalEventTypes =
+  /** Allows custom parsing logic */
+  | "NEXT_ROUTER_MOCK:parse"
+  /** Emitted when 'router.push' is called */
+  | "NEXT_ROUTER_MOCK:push"
+  /** Emitted when 'router.replace' is called */
+  | "NEXT_ROUTER_MOCK:replace";
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -50,7 +56,10 @@ export abstract class BaseRouter implements NextRouter {
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
   back() {
-    // Do nothing
+    // Not implemented
+  }
+  forward() {
+    // Not implemented
   }
   beforePopState() {
     // Do nothing
@@ -63,11 +72,13 @@ export abstract class BaseRouter implements NextRouter {
   }
 }
 
+export type MemoryRouterSnapshot = Readonly<MemoryRouter>;
+
 /**
  * An implementation of NextRouter that does not change the URL, but just stores the current route in memory.
  */
 export class MemoryRouter extends BaseRouter {
-  static snapshot(original: MemoryRouter): Readonly<MemoryRouter> {
+  static snapshot(original: MemoryRouter): MemoryRouterSnapshot {
     return Object.assign(new MemoryRouter(), original);
   }
 
