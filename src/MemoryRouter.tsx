@@ -142,7 +142,7 @@ export class MemoryRouter extends BaseRouter {
 
     let asPath: string;
     let asRoute: UrlObjectComplete | undefined;
-    if (as === undefined) {
+    if (as === undefined || as === null) {
       asRoute = undefined;
       asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
     } else {
