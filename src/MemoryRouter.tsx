@@ -36,7 +36,6 @@ type InternalEventTypes =
  */
 export abstract class BaseRouter implements NextRouter {
   isReady = true;
-  route = "";
   pathname = "";
   hash = "";
   query: NextRouter["query"] = {};
@@ -69,6 +68,11 @@ export abstract class BaseRouter implements NextRouter {
   }
   reload() {
     // Do nothing
+  }
+
+  // Keep route and pathname values in sync
+  get route() {
+    return this.pathname;
   }
 }
 

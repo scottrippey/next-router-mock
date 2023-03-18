@@ -55,6 +55,7 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => M
     expect(result.current).toEqual(singletonRouter);
     expect(result.current).toMatchObject({
       asPath: "/foo?bar=baz",
+      route: "/foo",
       pathname: "/foo",
       query: { bar: "baz" },
     });
