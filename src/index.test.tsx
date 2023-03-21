@@ -30,7 +30,6 @@ describe("next-overridable-hook", () => {
       locales: [],
       pathname: "",
       query: {},
-      route: "",
     });
   });
 

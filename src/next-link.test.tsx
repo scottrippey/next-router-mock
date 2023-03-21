@@ -17,6 +17,7 @@ describe("next/link", () => {
       await waitFor(() => {
         expect(memoryRouter).toMatchObject({
           asPath: "/example?foo=bar",
+          route: "/example",
           pathname: "/example",
           query: { foo: "bar" },
         });
@@ -29,6 +30,7 @@ describe("next/link", () => {
       await waitFor(() => {
         expect(memoryRouter).toMatchObject({
           asPath: "/example?foo=bar",
+          route: "/example",
           pathname: "/example",
           query: { foo: "bar" },
         });
