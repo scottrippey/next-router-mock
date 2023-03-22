@@ -15,6 +15,7 @@ describe("MemoryRouter", () => {
         expect(memoryRouter).toMatchObject({
           asPath: "",
           pathname: "",
+          route: "",
           query: {},
           locale: undefined,
         });
@@ -25,6 +26,7 @@ describe("MemoryRouter", () => {
         expect(memoryRouter).toMatchObject({
           asPath: "/one/two/three",
           pathname: "/one/two/three",
+          route: "/one/two/three",
           query: {},
         });
 
