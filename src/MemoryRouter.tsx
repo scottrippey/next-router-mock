@@ -1,20 +1,14 @@
-import mitt, { MittEmitter } from "./lib/mitt";
-import { parse as parseUrl, UrlWithParsedQuery } from "url";
-import { ParsedUrlQuery, stringify as stringifyQueryString } from "querystring";
-
 import type { NextRouter, RouterEvent } from "next/router";
+import mitt, { MittEmitter } from "./lib/mitt";
+import { parseUrl, stringifyQueryString } from "./urls";
 
 export type Url = string | UrlObject;
 export type UrlObject = {
-  pathname?: UrlWithParsedQuery["pathname"];
-  query?: UrlWithParsedQuery["query"];
-  hash?: UrlWithParsedQuery["hash"];
+  pathname?: string;
+  query?: NextRouter["query"];
+  hash?: string;
 };
-export type UrlObjectComplete = {
-  pathname: NonNullable<UrlWithParsedQuery["pathname"]>;
-  query: NonNullable<UrlWithParsedQuery["query"]>;
-  hash: NonNullable<UrlWithParsedQuery["hash"]>;
-};
+export type UrlObjectComplete = Required<UrlObject>;
 
 // interface not exported by the package next/router
 interface TransitionOptions {
@@ -211,7 +205,7 @@ export class MemoryRouter extends BaseRouter {
  * Normalizes the url or urlObject into a UrlObjectComplete.
  */
 function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
-  const parsedUrl = typeof url === "object" ? url : parseUrl(url, true);
+  const parsedUrl = typeof url === "object" ? url : parseUrl(url);
   return {
     pathname: removeTrailingSlash(parsedUrl.pathname ?? currentPathname),
     query: parsedUrl.query || {},
@@ -223,7 +217,7 @@ function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComp
  * Creates a URL from a pathname + query.
  * Injects query params into the URL slugs, the same way that next/router does.
  */
-function getRouteAsPath(pathname: string, query: ParsedUrlQuery, hash: string | null | undefined) {
+function getRouteAsPath(pathname: string, query: NextRouter["query"], hash: string | null | undefined) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
