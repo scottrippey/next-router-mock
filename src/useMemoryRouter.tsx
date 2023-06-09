@@ -27,9 +27,11 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
     };
 
     singletonRouter.events.on("routeChangeComplete", handleRouteChange);
+    singletonRouter.events.on("hashChangeComplete", handleRouteChange);
     return () => {
       isMounted = false;
       singletonRouter.events.off("routeChangeComplete", handleRouteChange);
+      singletonRouter.events.off("hashChangeComplete", handleRouteChange);
     };
   }, [singletonRouter]);
 

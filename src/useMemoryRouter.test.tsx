@@ -60,6 +60,22 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => M
     });
   });
 
+  it('changing just the "hash" will cause a rerender', async () => {
+    const { result } = renderHook(() => useRouter());
+
+    await act(async () => {
+      await result.current.push("/foo");
+      await result.current.push("/foo#bar");
+    });
+    const expected = {
+      asPath: "/foo#bar",
+      pathname: "/foo",
+      hash: "#bar",
+    };
+    expect(singletonRouter).toMatchObject(expected);
+    expect(result.current).toMatchObject(expected);
+  });
+
   it('calling "push" multiple times will rerender with the correct route', async () => {
     const { result } = renderHook(() => useRouter());
 
