@@ -30,10 +30,10 @@ type InternalEventTypes =
  */
 export abstract class BaseRouter implements NextRouter {
   isReady = true;
-  pathname = "";
+  pathname = "/";
   hash = "";
   query: NextRouter["query"] = {};
-  asPath = "";
+  asPath = "/";
   basePath = "";
   isFallback = false;
   isPreview = false;
@@ -207,7 +207,7 @@ export class MemoryRouter extends BaseRouter {
 function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
   const parsedUrl = typeof url === "object" ? url : parseUrl(url);
   return {
-    pathname: removeTrailingSlash(parsedUrl.pathname ?? currentPathname),
+    pathname: normalizeTrailingSlash(parsedUrl.pathname ?? currentPathname),
     query: parsedUrl.query || {},
     hash: parsedUrl.hash || "",
   };
@@ -233,7 +233,7 @@ function getRouteAsPath(pathname: string, query: NextRouter["query"], hash: stri
   });
 
   // Remove any trailing slashes; this can occur if there is no match for a catch-all slug ([[...slug]])
-  asPath = removeTrailingSlash(asPath);
+  asPath = normalizeTrailingSlash(asPath);
 
   // Append remaining query as a querystring, if needed:
   const qs = stringifyQueryString(remainingQuery);
@@ -244,8 +244,8 @@ function getRouteAsPath(pathname: string, query: NextRouter["query"], hash: stri
   return asPath;
 }
 
-function removeTrailingSlash(path: string) {
-  return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path;
+function normalizeTrailingSlash(path: string) {
+  return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path || "/";
 }
 
 function shouldTriggerHashChange(current: MemoryRouter, newRoute: Pick<MemoryRouter, "hash" | "query" | "pathname">) {
