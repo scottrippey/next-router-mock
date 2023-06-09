@@ -19,7 +19,7 @@ describe("next-overridable-hook", () => {
       setCurrentUrl: expect.any(Function),
       registerPaths: expect.any(Function),
       // Ensure the router has exactly these properties:
-      asPath: "",
+      asPath: "/",
       basePath: "",
       hash: "",
       isFallback: false,
@@ -28,7 +28,7 @@ describe("next-overridable-hook", () => {
       isReady: true,
       locale: undefined,
       locales: [],
-      pathname: "",
+      pathname: "/",
       query: {},
     });
   });

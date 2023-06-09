@@ -1,5 +1,4 @@
 import { MemoryRouter } from "./MemoryRouter";
-import { createDynamicRouteParser } from "./dynamic-routes/next-12";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {
@@ -13,15 +12,15 @@ describe("MemoryRouter", () => {
 
       it("should start empty", async () => {
         expect(memoryRouter).toMatchObject({
-          asPath: "",
-          pathname: "",
-          route: "",
+          asPath: "/",
+          pathname: "/",
+          route: "/",
           query: {},
           locale: undefined,
         });
       });
       it("pushing URLs should update the route", async () => {
-        await memoryRouter.push(`/one/two/three`);
+        await memoryRouter.push("/one/two/three");
 
         expect(memoryRouter).toMatchObject({
           asPath: "/one/two/three",
@@ -30,7 +29,7 @@ describe("MemoryRouter", () => {
           query: {},
         });
 
-        await memoryRouter.push(`/one/two/three?four=4&five=`);
+        await memoryRouter.push("/one/two/three?four=4&five=");
 
         expect(memoryRouter).toMatchObject({
           asPath: "/one/two/three?four=4&five=",
@@ -86,6 +85,16 @@ describe("MemoryRouter", () => {
           await memoryRouter.push("/baz#foo");
           expect(hashChangeStart).toHaveBeenCalledWith("/baz#foo", { shallow: false });
           expect(hashChangeComplete).toHaveBeenCalledWith("/baz#foo", { shallow: false });
+          expect(routeChangeStart).not.toHaveBeenCalled();
+          expect(routeChangeComplete).not.toHaveBeenCalled();
+        });
+
+        it("should trigger only hashEvents for /baz#foo -> /baz#bar", async () => {
+          await memoryRouter.push("/baz#foo");
+          jest.clearAllMocks();
+          await memoryRouter.push("/baz#bar");
+          expect(hashChangeStart).toHaveBeenCalledWith("/baz#bar", { shallow: false });
+          expect(hashChangeComplete).toHaveBeenCalledWith("/baz#bar", { shallow: false });
           expect(routeChangeStart).not.toHaveBeenCalled();
           expect(routeChangeComplete).not.toHaveBeenCalled();
         });
@@ -172,7 +181,7 @@ describe("MemoryRouter", () => {
           });
         });
 
-        it("should provide the 'shallow' value", async () => {
+        it('should provide the "shallow" value', async () => {
           await memoryRouter.push("/test", undefined, { shallow: true });
           expect(routeChangeStart).toHaveBeenCalled();
           expect(routeChangeStart).toHaveBeenCalledWith("/test", {
@@ -302,15 +311,27 @@ describe("MemoryRouter", () => {
         expect(await memoryRouter.prefetch()).toBeUndefined();
       });
 
-      it("trailing slashes are removed", async () => {
+      it("trailing slashes are normalized", async () => {
         memoryRouter.setCurrentUrl("/path/");
         expect(memoryRouter).toMatchObject({
           asPath: "/path",
           pathname: "/path",
         });
+
+        memoryRouter.setCurrentUrl("");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/",
+          pathname: "/",
+        });
       });
 
       it("a single slash is preserved", async () => {
+        memoryRouter.setCurrentUrl("");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/",
+          pathname: "/",
+        });
+
         memoryRouter.setCurrentUrl("/");
         expect(memoryRouter).toMatchObject({
           asPath: "/",
@@ -328,7 +349,30 @@ describe("MemoryRouter", () => {
           });
         });
 
-        it(`if as path matches href path, href query is used`, async () => {
+        it('works with the "as" param', async () => {
+          await memoryRouter.push("/real-path", "/as-path");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/as-path",
+            pathname: "/as-path",
+            query: {},
+          });
+
+          await memoryRouter.push("/real-path?param=real", "/as-path?param=as");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/as-path?param=as",
+            pathname: "/as-path",
+            query: { param: "as" },
+          });
+
+          await memoryRouter.push("/real-path", "");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/",
+            pathname: "/",
+            query: {},
+          });
+        });
+
+        it("if as path matches href path, href query is used", async () => {
           await memoryRouter.push("/path?queryParam=123", "/path");
           expect(memoryRouter).toMatchObject({
             asPath: "/path",
@@ -357,6 +401,13 @@ describe("MemoryRouter", () => {
           expect(memoryRouter).toMatchObject({
             asPath: "/path?differentQueryParam=456",
             pathname: "/path",
+            query: { queryParam: "123" },
+          });
+
+          await memoryRouter.push({ pathname: "", query: { queryParam: "123" } }, "");
+          expect(memoryRouter).toMatchObject({
+            asPath: "/",
+            pathname: "/",
             query: { queryParam: "123" },
           });
         });
