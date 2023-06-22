@@ -34,5 +34,19 @@ describe("next/link", () => {
         });
       });
     });
+
+    it("supports multivalued query properties", async () => {
+      render(<NextLink href={{ pathname: "/example", query: { foo: ["bar", "baz"] } }}>Next Link</NextLink>, {
+        wrapper,
+      });
+      fireEvent.click(screen.getByText("Next Link"));
+      await waitFor(() => {
+        expect(memoryRouter).toMatchObject({
+          asPath: "/example?foo=bar&foo=baz",
+          pathname: "/example",
+          query: { foo: ["bar", "baz"] },
+        });
+      });
+    });
   });
 });

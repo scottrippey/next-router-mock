@@ -339,6 +339,22 @@ describe("MemoryRouter", () => {
         });
       });
 
+      it("multiple values can be specified for a query parameter", () => {
+        memoryRouter.setCurrentUrl("/url?foo=FOO&foo=BAR");
+        expect(memoryRouter).toMatchObject({
+          asPath: "/url?foo=FOO&foo=BAR",
+          query: {
+            foo: ["FOO", "BAR"],
+          },
+        });
+
+        memoryRouter.setCurrentUrl({ pathname: "/object-notation", query: { foo: ["BAR", "BAZ"] } });
+        expect(memoryRouter).toMatchObject({
+          asPath: "/object-notation?foo=BAR&foo=BAZ",
+          query: { foo: ["BAR", "BAZ"] },
+        });
+      });
+
       describe('the "as" parameter', () => {
         it('works fine without "as" param', async () => {
           await memoryRouter.push("/path?queryParam=123");
