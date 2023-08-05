@@ -271,6 +271,7 @@ it('next/link can be tested too', async () => {
 - `withRouter(Component)`
 - `router.push(url, as?, options?)`
 - `router.replace(url, as?, options?)`
+- `router.route`
 - `router.pathname`
 - `router.asPath`
 - `router.query`
@@ -287,7 +288,6 @@ PRs welcome!
 These fields just have default values; these methods do nothing.
 
 - `router.isReady`
-- `router.route`
 - `router.basePath`
 - `router.isFallback`
 - `router.isLocaleDomain`
