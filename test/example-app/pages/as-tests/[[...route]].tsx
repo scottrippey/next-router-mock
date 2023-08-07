@@ -1,5 +1,5 @@
-import React, { CSSProperties, FC, PropsWithChildren, ReactEventHandler, useEffect, useState } from "react";
-import NextLink from "next/link";
+import React, { FC, PropsWithChildren, ReactEventHandler, useState } from "react";
+import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { Router, useRouter } from "next/router";
 
 const root = "/as-tests";
@@ -34,6 +34,7 @@ const Page = () => {
     "router.query": router.query,
     "expected.query": expectedValues.query,
   };
+  const pathname = "/[[...route]]";
 
   return (
     <>
@@ -45,7 +46,7 @@ const Page = () => {
           as="/"
           {...expected({
             asPath: "",
-            pathname: "/[[...route]]",
+            pathname,
             query: {},
           })}
         >
@@ -57,7 +58,7 @@ const Page = () => {
           as="/path?query=as"
           {...expected({
             asPath: "/path?query=as",
-            pathname: "/[[...route]]",
+            pathname,
             query: { query: "real", route: ["path"] },
           })}
         >
@@ -69,7 +70,7 @@ const Page = () => {
           as="/path?bar=as"
           {...expected({
             asPath: "/path?bar=as",
-            pathname: "/[[...route]]",
+            pathname,
             query: { foo: "real", route: ["path"] },
           })}
         >
@@ -81,21 +82,59 @@ const Page = () => {
           as="/path#as-hash"
           {...expected({
             asPath: "/path#as-hash",
-            pathname: "/[[...route]]",
+            pathname,
             query: { route: ["path"] },
           })}
         >
           Different hash
         </TestLink>
 
-        <br />
-        <div>The following URLs have different paths, so they behave strangely</div>
+        <TestLink
+          href={pathname}
+          as="/one/two/three"
+          {...expected({
+            asPath: "/one/two/three",
+            pathname,
+            query: { route: ["one", "two", "three"] },
+          })}
+        >
+          Dynamic path
+        </TestLink>
+      </fieldset>
+      <fieldset style={{ display: "flex", flexDirection: "column" }}>
+        <legend>Using objects for URLs</legend>
+        <TestLink
+          href={{ pathname, query: { param: "href" } }}
+          as="/one/two/three"
+          {...expected({
+            asPath: "/one/two/three",
+            pathname,
+            query: { param: "href", route: ["one", "two", "three"] },
+          })}
+        >
+          Dynamic path
+        </TestLink>
+
+        <TestLink
+          href={{ pathname, query: { hrefParam: "href" } }}
+          as={{ pathname: "/one/two/three", query: { asParam: "as" } }}
+          {...expected({
+            asPath: "/",
+            pathname,
+            query: { hrefParam: "href", route: ["one", "two", "three"] },
+          })}
+        >
+          Dynamic path
+        </TestLink>
+      </fieldset>
+      <fieldset style={{ display: "flex", flexDirection: "column" }}>
+        <legend>The following URLs have mismatched paths, so they behave strangely</legend>
         <TestLink
           href="/real-path"
           as="/as-path"
           {...expected({
             asPath: "/as-path",
-            pathname: "/[[...route]]",
+            pathname,
             query: { route: ["as-path"] },
           })}
         >
@@ -107,7 +146,7 @@ const Page = () => {
           as="/path-one/path-three"
           {...expected({
             asPath: "/path-one/path-three",
-            pathname: "/[[...route]]",
+            pathname,
             query: { route: ["path-one", "path-three"] },
           })}
         >
@@ -122,17 +161,27 @@ const Page = () => {
   );
 };
 const TestLink: FC<
-  PropsWithChildren<{
-    href: string;
-    as: string;
-    active: boolean;
-    onClick: ReactEventHandler;
-  }>
+  PropsWithChildren<
+    Pick<NextLinkProps, "href" | "as"> & {
+      active: boolean;
+      onClick: ReactEventHandler;
+    }
+  >
 > = ({ href, as, children, active, onClick }) => {
+  const normalizeUrl = (url: typeof as) => {
+    // Prepend the 'root' URL:
+    if (typeof url === "string") {
+      return root + url;
+    }
+    if (typeof url === "object") {
+      url = { ...url, pathname: root + (url.pathname || "") };
+    }
+    return url;
+  };
   return (
     <NextLink
-      href={root + href}
-      as={root + as}
+      href={normalizeUrl(href)!}
+      as={normalizeUrl(as)}
       style={{
         color: active ? "lightblue" : undefined,
       }}
