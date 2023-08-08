@@ -357,8 +357,9 @@ describe("MemoryRouter", () => {
 
       describe('the "as" parameter', () => {
         it('works fine without "as" param', async () => {
+          // Just a sanity check
           await memoryRouter.push("/path?queryParam=123");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path?queryParam=123",
             pathname: "/path",
             query: { queryParam: "123" },
@@ -367,21 +368,21 @@ describe("MemoryRouter", () => {
 
         it('works with the "as" param', async () => {
           await memoryRouter.push("/real-path", "/as-path");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/as-path",
             pathname: "/as-path",
             query: {},
           });
 
           await memoryRouter.push("/real-path?param=real", "/as-path?param=as");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/as-path?param=as",
             pathname: "/as-path",
             query: { param: "as" },
           });
 
           await memoryRouter.push("/real-path", "");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/",
             pathname: "/",
             query: {},
@@ -390,21 +391,21 @@ describe("MemoryRouter", () => {
 
         it("if as path matches href path, href query is used", async () => {
           await memoryRouter.push("/path?queryParam=123", "/path");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path",
             pathname: "/path",
             query: { queryParam: "123" },
           });
 
           await memoryRouter.push("/path?queryParam=123", { pathname: "/path" });
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path",
             pathname: "/path",
             query: { queryParam: "123" },
           });
 
           await memoryRouter.push("/path?queryParam=123", "/path?differentQueryParam=456");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path?differentQueryParam=456",
             pathname: "/path",
             query: { queryParam: "123" },
@@ -414,93 +415,95 @@ describe("MemoryRouter", () => {
             pathname: "/path",
             query: { differentQueryParam: "456" },
           });
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path?differentQueryParam=456",
             pathname: "/path",
             query: { queryParam: "123" },
           });
 
           await memoryRouter.push({ pathname: "", query: { queryParam: "123" } }, "");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/",
             pathname: "/",
             query: { queryParam: "123" },
           });
         });
 
-        it("if as path does not match href path, as query is used", async () => {
-          await memoryRouter.push("/path?queryParam=123", "/differentPath?differentQueryParam=456");
-          expect(memoryRouter).toMatchObject({
-            asPath: "/differentPath?differentQueryParam=456",
-            pathname: "/differentPath",
-            query: { differentQueryParam: "456" },
-          });
+        describe("when the paths don't match", () => {
+          it("as path and query is used", async () => {
+            await memoryRouter.push("/path?queryParam=123", "/differentPath?differentQueryParam=456");
+            expectMatch(memoryRouter, {
+              asPath: "/differentPath?differentQueryParam=456",
+              pathname: "/differentPath",
+              query: { differentQueryParam: "456" },
+            });
 
-          await memoryRouter.push("/path?queryParam=123", {
-            pathname: "/differentPath",
-            query: { differentQueryParam: "456" },
-          });
-          expect(memoryRouter).toMatchObject({
-            asPath: "/differentPath?differentQueryParam=456",
-            pathname: "/differentPath",
-            query: { differentQueryParam: "456" },
+            await memoryRouter.push("/path?queryParam=123", {
+              pathname: "/differentPath",
+              query: { differentQueryParam: "456" },
+            });
+            expectMatch(memoryRouter, {
+              asPath: "/differentPath?differentQueryParam=456",
+              pathname: "/differentPath",
+              query: { differentQueryParam: "456" },
+            });
           });
         });
 
         it("as param hash overrides href hash", async () => {
           await memoryRouter.push("/path", "/path#hash");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path#hash",
             pathname: "/path",
             hash: "#hash",
           });
 
           await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path#hash",
             pathname: "/path",
             hash: "#hash",
           });
 
           await memoryRouter.push("/path#originalHash", "/path#hash");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/path#hash",
             pathname: "/path",
             hash: "#hash",
           });
 
           await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
-          expect(memoryRouter).toMatchObject({ asPath: "/path#hash", pathname: "/path", hash: "#hash" });
+          expectMatch(memoryRouter, { asPath: "/path#hash", pathname: "/path", hash: "#hash" });
 
           await memoryRouter.push("/path#originalHash", "/path");
-          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", hash: "" });
+          expectMatch(memoryRouter, { asPath: "/path", pathname: "/path", hash: "" });
 
           await memoryRouter.push("/path", { pathname: "/path" });
-          expect(memoryRouter).toMatchObject({ asPath: "/path", pathname: "/path", hash: "" });
+          expectMatch(memoryRouter, { asPath: "/path", pathname: "/path", hash: "" });
 
           await memoryRouter.push("/path#originalHash", "/differentPath");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/differentPath",
             pathname: "/differentPath",
             hash: "",
           });
 
           await memoryRouter.push("/path", { pathname: "/differentPath" });
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/differentPath",
             pathname: "/differentPath",
             hash: "",
           });
 
           await memoryRouter.push("/path#originalHash", "/differentPath#hash");
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/differentPath#hash",
             pathname: "/differentPath",
             hash: "#hash",
           });
 
           await memoryRouter.push("/path", { pathname: "/differentPath", hash: "#hash" });
-          expect(memoryRouter).toMatchObject({
+          expectMatch(memoryRouter, {
             asPath: "/differentPath#hash",
             pathname: "/differentPath",
             hash: "#hash",
@@ -550,3 +553,20 @@ describe("MemoryRouter", () => {
     });
   });
 });
+
+/**
+ * Performs a partial equality comparison.
+ *
+ * This is similar to using `toMatchObject`, but doesn't ignore missing `query: { ... }` values!
+ */
+function expectMatch(memoryRouter: MemoryRouter, expected: Partial<MemoryRouter>): void {
+  const picked = pick(memoryRouter, Object.keys(expected) as Array<keyof MemoryRouter>);
+  expect(picked).toEqual(expected);
+}
+function pick<T extends object>(obj: T, keys: Array<keyof T>): T {
+  const result = {} as T;
+  keys.forEach((key) => {
+    result[key] = obj[key];
+  });
+  return result;
+}
