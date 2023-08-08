@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "checks": "npm run test && npm run typecheck",
-    "test": "",
+    "test": "echo TODO add tests",
     "typecheck": "tsc --noEmit",
-    "dev": "next dev",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "dev": "next dev"
   },
   "dependencies": {
     "next": "^13.1.2",
