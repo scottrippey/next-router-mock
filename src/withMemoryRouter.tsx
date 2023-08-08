@@ -1,5 +1,6 @@
 import React from "react";
 import type { NextComponentType, NextPageContext } from "next";
+import type { BaseContext } from "next/dist/shared/lib/utils";
 import type { NextRouter } from "next/router";
 
 // This is a (very slightly) modified version of https://github.com/vercel/next.js/blob/canary/packages/next/client/with-router.tsx
@@ -12,7 +13,7 @@ export type WithRouterProps = {
 
 export type ExcludeRouterProps<P> = Pick<P, Exclude<keyof P, keyof WithRouterProps>>;
 
-export function withMemoryRouter<P extends WithRouterProps, C = NextPageContext>(
+export function withMemoryRouter<P extends WithRouterProps, C extends BaseContext = NextPageContext>(
   useRouter: () => MemoryRouterSnapshot,
   ComposedComponent: NextComponentType<C, any, P>
 ): NextComponentType<C, any, ExcludeRouterProps<P>> {
