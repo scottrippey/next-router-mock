@@ -3,6 +3,13 @@
   "version": "0.9.7",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
+  "files": [
+    "dist",
+    "async",
+    "dynamic-routes",
+    "MemoryRouterProvider",
+    "src"
+  ],
   "scripts": {
     "checks": "npm run docs && npm run lint && npm run test && npm run build && npm run typecheck && npm run test:integration",
     "lint": "prettier --list-different src",
@@ -11,8 +18,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:integration:ci": "npm run test:integration:install && npm run test:integration",
-    "test:integration:install": "(cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i); (cd test/next-12.2+ && npm i); (cd test/next-12.latest && npm i); (cd test/next-13 && npm i)",
-    "test:integration": "npm run build && npm run test:exports && npm run test:next-10 && npm run test:next-11 && npm run test:next-12 && npm run test:next-12.2 && npm run test:next-12.latest && npm run test:next-13",
+    "test:integration:install": "(cd test/example-app && npm i); (cd test/next-10 && npm i); (cd test/next-11 && npm i); (cd test/next-12 && npm i); (cd test/next-12.2+ && npm i); (cd test/next-12.latest && npm i); (cd test/next-13 && npm i)",
+    "test:integration": "npm run build && npm run test:exports && npm run test:example-app && npm run test:next-10 && npm run test:next-11 && npm run test:next-12 && npm run test:next-12.2 && npm run test:next-12.latest && npm run test:next-13",
+    "test:example-app": "cd test/example-app && npm test",
     "test:exports": "cd test/test-exports && npm test",
     "test:next-10": "cd test/next-10 && npm test",
     "test:next-11": "cd test/next-11 && npm test",
@@ -63,6 +71,6 @@
     "react-test-renderer": "^18.2.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
-    "typescript": "^4.1.3"
+    "typescript": "^4.9.5"
   }
 }

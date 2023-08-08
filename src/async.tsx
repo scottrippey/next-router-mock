@@ -1,5 +1,6 @@
 import React from "react";
-import { NextComponentType, NextPageContext } from "next";
+import type { NextComponentType, NextPageContext } from "next";
+import type { BaseContext } from "next/dist/shared/lib/utils";
 import { MemoryRouter } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
 import { withMemoryRouter, WithRouterProps } from "./withMemoryRouter";
@@ -23,7 +24,7 @@ export const useRouter = () => {
 };
 
 // Export the `withRouter` HOC:
-export const withRouter = <P extends WithRouterProps, C = NextPageContext>(
+export const withRouter = <P extends WithRouterProps, C extends BaseContext = NextPageContext>(
   ComposedComponent: NextComponentType<C, any, P>
 ) => {
   return withMemoryRouter(useRouter, ComposedComponent);
