@@ -11,7 +11,7 @@ describe("MemoryRouter", () => {
       memoryRouter.async = async;
 
       it("should start empty", async () => {
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/",
           pathname: "/",
           route: "/",
@@ -22,7 +22,7 @@ describe("MemoryRouter", () => {
       it("pushing URLs should update the route", async () => {
         await memoryRouter.push("/one/two/three");
 
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three",
           pathname: "/one/two/three",
           route: "/one/two/three",
@@ -31,7 +31,7 @@ describe("MemoryRouter", () => {
 
         await memoryRouter.push("/one/two/three?four=4&five=");
 
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three?four=4&five=",
           pathname: "/one/two/three",
           query: {
@@ -195,7 +195,7 @@ describe("MemoryRouter", () => {
 
       it("pushing UrlObjects should update the route", async () => {
         await memoryRouter.push({ pathname: "/one" });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one",
           pathname: "/one",
           query: {},
@@ -205,7 +205,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/two/three",
           query: { four: "4", five: "" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three?four=4&five=",
           pathname: "/one/two/three",
           query: {
@@ -219,7 +219,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/[id]",
           query: { id: "two" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two",
           pathname: "/one/[id]",
           query: {
@@ -231,7 +231,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/[id]/three",
           query: { id: "two" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three",
           pathname: "/one/[id]/three",
           query: {
@@ -243,7 +243,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/[id]/three",
           query: { id: "two", four: "4" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three?four=4",
           pathname: "/one/[id]/three",
           query: {
@@ -255,7 +255,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/[id]/three/[four]",
           query: { id: "two", four: "4" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three/4",
           pathname: "/one/[id]/three/[four]",
           query: {
@@ -267,7 +267,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/[...slug]",
           query: { slug: ["two", "three", "four"], filter: "abc" },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three/four?filter=abc",
           pathname: "/one/[...slug]",
           query: {
@@ -279,7 +279,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/two/[[...slug]]",
           query: { slug: ["three", "four"] },
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two/three/four",
           pathname: "/one/two/[[...slug]]",
           query: {},
@@ -288,7 +288,7 @@ describe("MemoryRouter", () => {
           pathname: "/one/two/[[...slug]]",
           query: {},
         });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/one/two",
           pathname: "/one/two/[[...slug]]",
           query: {},
@@ -296,7 +296,7 @@ describe("MemoryRouter", () => {
       });
       it("push the locale", async () => {
         await memoryRouter.push("/", undefined, { locale: "en" });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           locale: "en",
         });
       });
@@ -313,13 +313,13 @@ describe("MemoryRouter", () => {
 
       it("trailing slashes are normalized", async () => {
         memoryRouter.setCurrentUrl("/path/");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/path",
           pathname: "/path",
         });
 
         memoryRouter.setCurrentUrl("");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/",
           pathname: "/",
         });
@@ -327,13 +327,13 @@ describe("MemoryRouter", () => {
 
       it("a single slash is preserved", async () => {
         memoryRouter.setCurrentUrl("");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/",
           pathname: "/",
         });
 
         memoryRouter.setCurrentUrl("/");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/",
           pathname: "/",
         });
@@ -341,7 +341,7 @@ describe("MemoryRouter", () => {
 
       it("multiple values can be specified for a query parameter", () => {
         memoryRouter.setCurrentUrl("/url?foo=FOO&foo=BAR");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/url?foo=FOO&foo=BAR",
           query: {
             foo: ["FOO", "BAR"],
@@ -349,7 +349,7 @@ describe("MemoryRouter", () => {
         });
 
         memoryRouter.setCurrentUrl({ pathname: "/object-notation", query: { foo: ["BAR", "BAZ"] } });
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/object-notation?foo=BAR&foo=BAZ",
           query: { foo: ["BAR", "BAZ"] },
         });
@@ -514,9 +514,9 @@ describe("MemoryRouter", () => {
       it("should allow deconstruction of push and replace", async () => {
         const { push, replace } = memoryRouter;
         await push("/one");
-        expect(memoryRouter).toMatchObject({ asPath: "/one" });
+        expectMatch(memoryRouter, { asPath: "/one" });
         await replace("/two");
-        expect(memoryRouter).toMatchObject({ asPath: "/two" });
+        expectMatch(memoryRouter, { asPath: "/two" });
       });
 
       it("should allow push with no path, just a query", async () => {
@@ -529,14 +529,14 @@ describe("MemoryRouter", () => {
 
       it("hashes are preserved", async () => {
         memoryRouter.setCurrentUrl("/path#hash");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/path#hash",
           pathname: "/path",
           hash: "#hash",
         });
 
         memoryRouter.setCurrentUrl("/path?key=value#hash");
-        expect(memoryRouter).toMatchObject({
+        expectMatch(memoryRouter, {
           asPath: "/path?key=value#hash",
           pathname: "/path",
           query: { key: "value" },
@@ -561,7 +561,13 @@ describe("MemoryRouter", () => {
  */
 function expectMatch(memoryRouter: MemoryRouter, expected: Partial<MemoryRouter>): void {
   const picked = pick(memoryRouter, Object.keys(expected) as Array<keyof MemoryRouter>);
-  expect(picked).toEqual(expected);
+  try {
+    expect(picked).toEqual(expected);
+  } catch (err: any) {
+    // Ensure stack trace is accurate:
+    Error.captureStackTrace(err, expectMatch);
+    throw err;
+  }
 }
 function pick<T extends object>(obj: T, keys: Array<keyof T>): T {
   const result = {} as T;
