@@ -5,7 +5,11 @@ describe("MemoryRouter", () => {
     jest.clearAllMocks();
   });
 
-  [{ async: false }, { async: true }].forEach(({ async }) => {
+  [
+    // Test in both sync and async modes:
+    { async: false },
+    { async: true },
+  ].forEach(({ async }) => {
     describe(async ? "async mode" : "sync mode", () => {
       const memoryRouter = new MemoryRouter();
       memoryRouter.async = async;
@@ -282,7 +286,7 @@ describe("MemoryRouter", () => {
         expectMatch(memoryRouter, {
           asPath: "/one/two/three/four",
           pathname: "/one/two/[[...slug]]",
-          query: {},
+          query: { slug: ["three", "four"] },
         });
         await memoryRouter.push({
           pathname: "/one/two/[[...slug]]",
