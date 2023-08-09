@@ -34,6 +34,7 @@
     "build:watch": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
     "preversion": "npm run checks",
+    "prerelease": "npm run build",
     "release": "changeset publish"
   },
   "repository": {
