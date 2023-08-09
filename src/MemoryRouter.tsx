@@ -29,15 +29,20 @@ type InternalEventTypes =
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
 export abstract class BaseRouter implements NextRouter {
-  isReady = true;
   pathname = "/";
-  hash = "";
   query: NextRouter["query"] = {};
   asPath = "/";
+  /**
+   * The `hash` property is NOT part of NextRouter.
+   * It is only supplied as part of next-router-mock, for the sake of testing
+   */
+  hash = "";
+
+  // These are constant:
+  isReady = true;
   basePath = "";
   isFallback = false;
   isPreview = false;
-
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
   locales: NextRouter["locales"] = [];
@@ -139,23 +144,17 @@ export class MemoryRouter extends BaseRouter {
     const newRoute = parseUrlToCompleteUrl(url, this.pathname);
 
     let asPath: string;
-    let asRoute: UrlObjectComplete | undefined;
     if (as === undefined || as === null) {
-      asRoute = undefined;
       asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
     } else {
-      asRoute = parseUrlToCompleteUrl(as, this.pathname);
+      const asRoute = parseUrlToCompleteUrl(as, this.pathname);
       asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
+      // "as" hash always takes precedence:
+      newRoute.hash = asRoute.hash;
     }
-
-    // Compare pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
-    const rawPathnamesDiffer = asRoute?.pathname !== newRoute.pathname;
 
     // Optionally apply dynamic routes (can mutate routes)
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
-    if (asRoute) {
-      this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
-    }
 
     const shallow = options?.shallow || false;
 
@@ -172,15 +171,10 @@ export class MemoryRouter extends BaseRouter {
 
     // Update this instance:
     this.asPath = asPath;
-    if (asRoute) {
-      this.pathname = asRoute.pathname;
-      this.query = rawPathnamesDiffer ? asRoute.query : newRoute.query;
-      this.hash = asRoute.hash;
-    } else {
-      this.pathname = newRoute.pathname;
-      this.query = newRoute.query;
-      this.hash = newRoute.hash;
-    }
+    this.pathname = newRoute.pathname;
+    this.query = newRoute.query;
+    this.hash = newRoute.hash;
+
     if (options?.locale) {
       this.locale = options.locale;
     }
