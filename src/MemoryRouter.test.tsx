@@ -417,23 +417,27 @@ describe("MemoryRouter", () => {
           });
         });
 
-        describe("when the paths don't match", () => {
-          it("as path and query is used", async () => {
-            await memoryRouter.push("/path?queryParam=123", "/differentPath?differentQueryParam=456");
+        describe("with different paths", () => {
+          it("the real path and query are used", async () => {
+            await memoryRouter.push("/real-path", "/as-path");
             expectMatch(memoryRouter, {
-              asPath: "/differentPath?differentQueryParam=456",
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
+              asPath: "/as-path",
+              pathname: "/real-path",
+              query: {},
             });
 
-            await memoryRouter.push("/path?queryParam=123", {
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
-            });
+            await memoryRouter.push("/real-path?real", "/as-path?as");
             expectMatch(memoryRouter, {
-              asPath: "/differentPath?differentQueryParam=456",
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
+              asPath: "/as-path?as",
+              pathname: "/real-path",
+              query: { real: "" },
+            });
+
+            await memoryRouter.push("/real-path?param=real", "/as-path?param=as");
+            expectMatch(memoryRouter, {
+              asPath: "/as-path?param=as",
+              pathname: "/real-path",
+              query: { param: "real" },
             });
           });
         });

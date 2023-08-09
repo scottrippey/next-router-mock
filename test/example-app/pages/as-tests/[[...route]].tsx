@@ -115,7 +115,7 @@ const Page = () => {
           href={{ pathname, query: { hrefParam: "href" } }}
           as={{ pathname: "/one/two/three", query: { asParam: "as" } }}
           {...expected({
-            asPath: "/",
+            asPath: "/one/two/three?asParam=as",
             pathname,
             query: { hrefParam: "href", route: ["one", "two", "three"] },
           })}
