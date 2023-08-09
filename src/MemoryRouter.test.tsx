@@ -371,29 +371,22 @@ describe("MemoryRouter", () => {
         });
 
         it('works with the "as" param', async () => {
-          await memoryRouter.push("/real-path", "/as-path");
+          await memoryRouter.push("/path", "/path?param=as");
           expectMatch(memoryRouter, {
-            asPath: "/as-path",
-            pathname: "/as-path",
+            asPath: "/path?param=as",
+            pathname: "/path",
             query: {},
           });
 
-          await memoryRouter.push("/real-path?param=real", "/as-path?param=as");
+          await memoryRouter.push("/path", { pathname: "/path", query: { param: "as" } });
           expectMatch(memoryRouter, {
-            asPath: "/as-path?param=as",
-            pathname: "/as-path",
-            query: { param: "as" },
-          });
-
-          await memoryRouter.push("/real-path", "");
-          expectMatch(memoryRouter, {
-            asPath: "/",
-            pathname: "/",
+            asPath: "/path?param=as",
+            pathname: "/path",
             query: {},
           });
         });
 
-        it("if as path matches href path, href query is used", async () => {
+        it("the real query is always used", async () => {
           await memoryRouter.push("/path?queryParam=123", "/path");
           expectMatch(memoryRouter, {
             asPath: "/path",
@@ -401,11 +394,11 @@ describe("MemoryRouter", () => {
             query: { queryParam: "123" },
           });
 
-          await memoryRouter.push("/path?queryParam=123", { pathname: "/path" });
+          await memoryRouter.push("/path", "/path?queryParam=123");
           expectMatch(memoryRouter, {
-            asPath: "/path",
+            asPath: "/path?queryParam=123",
             pathname: "/path",
-            query: { queryParam: "123" },
+            query: {},
           });
 
           await memoryRouter.push("/path?queryParam=123", "/path?differentQueryParam=456");
@@ -430,6 +423,22 @@ describe("MemoryRouter", () => {
             asPath: "/",
             pathname: "/",
             query: { queryParam: "123" },
+          });
+        });
+
+        it("dynamic paths get correct parameters", async () => {
+          await memoryRouter.push("/[[...route]]", "/noe/two/three");
+          expectMatch(memoryRouter, {
+            asPath: "/one/two/three",
+            pathname: "/[[...route]]",
+            query: { route: ["one", "two", "three"] },
+          });
+
+          await memoryRouter.push({ pathname: "/[[...route]]", query: { param: "href" } }, "/one/two/three");
+          expectMatch(memoryRouter, {
+            asPath: "/one/two/three",
+            pathname: "/[[...route]]",
+            query: { param: "href", route: ["one", "two", "three"] },
           });
         });
 
