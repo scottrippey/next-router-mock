@@ -1,5 +1,6 @@
 import { MemoryRouter } from "../MemoryRouter";
 import { createDynamicRouteParser } from "./next-12";
+import { expectMatch } from "../../test/test-utils";
 
 describe("dynamic routes", () => {
   let memoryRouter: MemoryRouter;
@@ -11,7 +12,7 @@ describe("dynamic routes", () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]/attribute/[name]", "/[...slug]"]));
 
     memoryRouter.push("/entity/101/attribute/everything");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]/attribute/[name]",
       asPath: "/entity/101/attribute/everything",
       query: {
@@ -25,7 +26,7 @@ describe("dynamic routes", () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]/attribute/[name]", "/[...slug]"]));
 
     memoryRouter.push("/one/two/three");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/[...slug]",
       asPath: "/one/two/three",
       query: {
@@ -38,7 +39,7 @@ describe("dynamic routes", () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]/attribute/[name]"]));
 
     memoryRouter.push("/one/two/three");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/one/two/three",
       asPath: "/one/two/three",
       query: {},
@@ -49,7 +50,7 @@ describe("dynamic routes", () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]", "/entity/list"]));
 
     memoryRouter.push("/entity/list");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/list",
       asPath: "/entity/list",
       query: {},
@@ -61,7 +62,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push("/entity/100?id=500");
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]",
       query: { id: "100" },
       asPath: "/entity/100?id=500",
@@ -73,7 +74,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push({ pathname: "/entity/[id]", query: { id: "42" } });
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]",
       asPath: "/entity/42",
       query: { id: "42" },
@@ -85,7 +86,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push({ pathname: "/entity/[id]", query: { id: "42", filter: "abc" } });
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]",
       asPath: "/entity/42?filter=abc",
       query: { id: "42", filter: "abc" },
@@ -97,7 +98,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push({ pathname: "/[...slug]", query: { slug: ["one", "two", "three"] } });
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/[...slug]",
       asPath: "/one/two/three",
       query: { slug: ["one", "two", "three"] },
@@ -109,7 +110,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push({ pathname: "/entity/100", query: { filter: "abc", max: "1000" } });
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]",
       asPath: "/entity/100?filter=abc&max=1000",
       query: { id: "100", filter: "abc", max: "1000" },
@@ -121,7 +122,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push("/one/two/three/four");
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/one/two/[[...slug]]",
       asPath: "/one/two/three/four",
       query: { slug: ["three", "four"] },
@@ -133,7 +134,7 @@ describe("dynamic routes", () => {
 
     memoryRouter.push("/entity/42");
 
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       pathname: "/entity/[id]/[[...slug]]",
       asPath: "/entity/42",
       query: { id: "42" },
@@ -141,11 +142,23 @@ describe("dynamic routes", () => {
   });
 
   describe('the "as" parameter', () => {
-    it("uses as path param over href path param", async () => {
+    it('uses "as" path param over "url" path param', async () => {
       memoryRouter.useParser(createDynamicRouteParser(["/path/[testParam]"]));
 
       memoryRouter.push("/path/123", "/path/456");
-      expect(memoryRouter).toMatchObject({
+      expectMatch(memoryRouter, {
+        asPath: "/path/456",
+        pathname: "/path/[testParam]",
+        query: {
+          testParam: "456",
+        },
+      });
+    });
+    it('uses "as" path param with a dynamic route', async () => {
+      memoryRouter.useParser(createDynamicRouteParser(["/path/[testParam]"]));
+
+      memoryRouter.push("/path/[testParam]", "/path/456");
+      expectMatch(memoryRouter, {
         asPath: "/path/456",
         pathname: "/path/[testParam]",
         query: {
@@ -159,14 +172,14 @@ describe("dynamic routes", () => {
     memoryRouter.useParser(createDynamicRouteParser(["/entity/[id]"]));
 
     memoryRouter.setCurrentUrl("/entity/42#hash");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       asPath: "/entity/42#hash",
       pathname: "/entity/[id]",
       hash: "#hash",
     });
 
     memoryRouter.setCurrentUrl("/entity/42?key=value#hash");
-    expect(memoryRouter).toMatchObject({
+    expectMatch(memoryRouter, {
       asPath: "/entity/42?key=value#hash",
       pathname: "/entity/[id]",
       query: { key: "value", id: "42" },
