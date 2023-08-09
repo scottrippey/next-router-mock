@@ -84,6 +84,10 @@ const Page = () => {
             query: { route: ["path"] },
           })}
         />
+      </fieldset>
+
+      <fieldset style={{ display: "flex", flexDirection: "column" }}>
+        <legend>Dynamic Paths</legend>
 
         <TestLink
           label="Dynamic path"
@@ -95,12 +99,20 @@ const Page = () => {
             query: { route: ["one", "two", "three"] },
           })}
         />
-      </fieldset>
 
-      <fieldset style={{ display: "flex", flexDirection: "column" }}>
-        <legend>Using objects for URLs</legend>
         <TestLink
-          label="Dynamic path"
+          label="With conflicting params in route & query"
+          href="/one/two/three?route=four"
+          as="/one/two/three?route=four"
+          {...expected({
+            asPath: "/one/two/three?route=four",
+            pathname,
+            query: { route: ["one", "two", "three"] },
+          })}
+        />
+
+        <TestLink
+          label="With query strings"
           href={{ pathname, query: { param: "href" } }}
           as="/one/two/three"
           {...expected({
@@ -111,7 +123,7 @@ const Page = () => {
         />
 
         <TestLink
-          label="Dynamic path"
+          label="With multiple query strings"
           href={{ pathname, query: { hrefParam: "href" } }}
           as={{ pathname: "/one/two/three", query: { asParam: "as" } }}
           {...expected({

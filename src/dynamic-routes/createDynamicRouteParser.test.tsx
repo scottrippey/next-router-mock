@@ -63,9 +63,9 @@ describe("dynamic routes", () => {
     memoryRouter.push("/entity/100?id=500");
 
     expectMatch(memoryRouter, {
+      asPath: "/entity/100?id=500",
       pathname: "/entity/[id]",
       query: { id: "100" },
-      asPath: "/entity/100?id=500",
     });
   });
 
@@ -142,9 +142,21 @@ describe("dynamic routes", () => {
   });
 
   describe('the "as" parameter', () => {
-    it('uses "as" path param over "url" path param', async () => {
+    beforeEach(() => {
       memoryRouter.useParser(createDynamicRouteParser(["/path/[testParam]"]));
-
+    });
+    it('uses "as" path param with a dynamic route', async () => {
+      memoryRouter.push("/path/[testParam]", "/path/456");
+      expectMatch(memoryRouter, {
+        asPath: "/path/456",
+        pathname: "/path/[testParam]",
+        query: {
+          testParam: "456",
+        },
+      });
+    });
+    it('uses "as" path param over "url" path param', async () => {
+      // This actually doesn't work well in Next, it forces a page refresh
       memoryRouter.push("/path/123", "/path/456");
       expectMatch(memoryRouter, {
         asPath: "/path/456",
@@ -154,14 +166,13 @@ describe("dynamic routes", () => {
         },
       });
     });
-    it('uses "as" path param with a dynamic route', async () => {
-      memoryRouter.useParser(createDynamicRouteParser(["/path/[testParam]"]));
-
-      memoryRouter.push("/path/[testParam]", "/path/456");
+    it("merges the real query params with the route params", () => {
+      memoryRouter.push({ query: { param: "href" } }, "/path/456");
       expectMatch(memoryRouter, {
         asPath: "/path/456",
         pathname: "/path/[testParam]",
         query: {
+          param: "href",
           testParam: "456",
         },
       });
@@ -183,6 +194,7 @@ describe("dynamic routes", () => {
       asPath: "/entity/42?key=value#hash",
       pathname: "/entity/[id]",
       query: { key: "value", id: "42" },
+      hash: "#hash",
     });
   });
 });
