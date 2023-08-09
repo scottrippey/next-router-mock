@@ -167,7 +167,13 @@ describe("dynamic routes", () => {
       });
     });
     it("merges the real query params with the route params", () => {
-      memoryRouter.push({ query: { param: "href" } }, "/path/456");
+      memoryRouter.push(
+        {
+          pathname: "/path/[testParam]",
+          query: { param: "href" },
+        },
+        "/path/456"
+      );
       expectMatch(memoryRouter, {
         asPath: "/path/456",
         pathname: "/path/[testParam]",

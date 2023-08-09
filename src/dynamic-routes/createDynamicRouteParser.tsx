@@ -35,14 +35,12 @@ export function factory(dependencies: AbstractedNextDependencies) {
       const matcher = matchers.find((matcher) => matcher.match(pathname));
 
       if (matcher) {
-        // Mutate the url:
+        // Update the route name:
         url.pathname = matcher.pathname;
-        // When pushing to a dynamic route with un-interpolated slugs passed in the pathname, the assumption is that
-        // a query dictionary will be provided, so instead of using the match we interpolate the route from
-        // the provided query:
+
         if (!isDynamic) {
-          const match = matcher.match(pathname);
-          url.query = { ...url.query, ...match };
+          // Extract the route variables from the path:
+          url.routeParams = matcher.match(pathname) || {};
         }
       }
     };
