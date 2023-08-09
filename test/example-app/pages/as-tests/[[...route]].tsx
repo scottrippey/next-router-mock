@@ -28,20 +28,21 @@ const Page = () => {
   const values = {
     "root path": root,
     "router.asPath": router.asPath.replace(root, ""),
-    "expected.asPath": expectedValues.asPath,
+    "expect.asPath": expectedValues.asPath,
     "router.pathname": router.pathname.replace(root, ""),
-    "expected.pathname": expectedValues.pathname,
+    "expect.pathname": expectedValues.pathname,
     "router.query": router.query,
-    "expected.query": expectedValues.query,
+    "expect.query": expectedValues.query,
   };
   const pathname = "/[[...route]]";
 
   return (
     <>
       <fieldset style={{ display: "flex", flexDirection: "column" }}>
-        <legend>Test Links</legend>
+        <legend>Links with different query strings</legend>
 
         <TestLink
+          label="Empty"
           href="/"
           as="/"
           {...expected({
@@ -49,11 +50,10 @@ const Page = () => {
             pathname,
             query: {},
           })}
-        >
-          Empty
-        </TestLink>
+        />
 
         <TestLink
+          label="Different query params"
           href="/path?query=real"
           as="/path?query=as"
           {...expected({
@@ -61,11 +61,10 @@ const Page = () => {
             pathname,
             query: { query: "real", route: ["path"] },
           })}
-        >
-          Different query params
-        </TestLink>
+        />
 
         <TestLink
+          label="Different parameters"
           href="/path?foo=real"
           as="/path?bar=as"
           {...expected({
@@ -73,11 +72,10 @@ const Page = () => {
             pathname,
             query: { foo: "real", route: ["path"] },
           })}
-        >
-          Different parameters
-        </TestLink>
+        />
 
         <TestLink
+          label="Different hash"
           href="/path#real-hash"
           as="/path#as-hash"
           {...expected({
@@ -85,11 +83,10 @@ const Page = () => {
             pathname,
             query: { route: ["path"] },
           })}
-        >
-          Different hash
-        </TestLink>
+        />
 
         <TestLink
+          label="Dynamic path"
           href={pathname}
           as="/one/two/three"
           {...expected({
@@ -97,13 +94,13 @@ const Page = () => {
             pathname,
             query: { route: ["one", "two", "three"] },
           })}
-        >
-          Dynamic path
-        </TestLink>
+        />
       </fieldset>
+
       <fieldset style={{ display: "flex", flexDirection: "column" }}>
         <legend>Using objects for URLs</legend>
         <TestLink
+          label="Dynamic path"
           href={{ pathname, query: { param: "href" } }}
           as="/one/two/three"
           {...expected({
@@ -111,11 +108,10 @@ const Page = () => {
             pathname,
             query: { param: "href", route: ["one", "two", "three"] },
           })}
-        >
-          Dynamic path
-        </TestLink>
+        />
 
         <TestLink
+          label="Dynamic path"
           href={{ pathname, query: { hrefParam: "href" } }}
           as={{ pathname: "/one/two/three", query: { asParam: "as" } }}
           {...expected({
@@ -123,25 +119,60 @@ const Page = () => {
             pathname,
             query: { hrefParam: "href", route: ["one", "two", "three"] },
           })}
-        >
-          Dynamic path
-        </TestLink>
+        />
       </fieldset>
+
       <fieldset style={{ display: "flex", flexDirection: "column" }}>
-        <legend>The following URLs have mismatched paths, so they behave strangely</legend>
+        <legend>Links with different static paths</legend>
         <TestLink
+          label="Real paths"
           href="/real-path"
           as="/as-path"
           {...expected({
             asPath: "/as-path",
-            pathname,
-            query: { route: ["as-path"] },
+            pathname: "/real-path",
+            query: {},
           })}
-        >
-          Different paths (will cause full refresh)
-        </TestLink>
+        />
 
         <TestLink
+          label="With different query strings"
+          href="/real-path?real=param"
+          as="/as-path?as=param"
+          {...expected({
+            asPath: "/as-path?as=param",
+            pathname: "/real-path",
+            query: { real: "param" },
+          })}
+        />
+
+        <TestLink
+          label="With overriding query strings"
+          href="/real-path?param=real"
+          as="/as-path?param=as"
+          {...expected({
+            asPath: "/as-path?param=as",
+            pathname: "/real-path",
+            query: { param: "real" },
+          })}
+        />
+      </fieldset>
+
+      <fieldset style={{ display: "flex", flexDirection: "column" }}>
+        <legend>Links with different dynamic paths (can cause full-page refresh)</legend>
+        <TestLink
+          label="Different paths (will cause full refresh)"
+          href="/path-real"
+          as="/path-as"
+          {...expected({
+            asPath: "/path-as",
+            pathname,
+            query: { route: ["path-as"] },
+          })}
+        />
+
+        <TestLink
+          label="Different paths (will cause full refresh)"
           href="/path-one/path-two"
           as="/path-one/path-three"
           {...expected({
@@ -149,10 +180,9 @@ const Page = () => {
             pathname,
             query: { route: ["path-one", "path-three"] },
           })}
-        >
-          Different paths (will cause full refresh)
-        </TestLink>
+        />
       </fieldset>
+
       <fieldset>
         <legend>Router Details</legend>
         <DetailsTable values={values} />
@@ -161,13 +191,12 @@ const Page = () => {
   );
 };
 const TestLink: FC<
-  PropsWithChildren<
-    Pick<NextLinkProps, "href" | "as"> & {
-      active: boolean;
-      onClick: ReactEventHandler;
-    }
-  >
-> = ({ href, as, children, active, onClick }) => {
+  Pick<NextLinkProps, "href" | "as"> & {
+    label: string;
+    active: boolean;
+    onClick: ReactEventHandler;
+  }
+> = ({ label, href, as, active, onClick }) => {
   const normalizeUrl = (url: typeof as) => {
     // Prepend the 'root' URL:
     if (typeof url === "string") {
@@ -187,7 +216,7 @@ const TestLink: FC<
       }}
       onClick={onClick}
     >
-      {children}
+      {label}
       (href <code>{JSON.stringify(href)}</code> as <code>{JSON.stringify(as)}</code>)
     </NextLink>
   );
