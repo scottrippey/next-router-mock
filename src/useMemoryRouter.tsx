@@ -39,10 +39,11 @@ export const useMemoryRouter = (singletonRouter: MemoryRouter, eventHandlers?: M
   useEffect(() => {
     if (!eventHandlers) return;
     const {
+      //
       onRouteChangeStart,
       onRouteChangeComplete,
-      onHashChangeComplete,
       onHashChangeStart,
+      onHashChangeComplete,
       onPush,
       onReplace,
     } = eventHandlers;
