@@ -33,7 +33,8 @@
     "clean": "rimraf dist",
     "build:watch": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
-    "preversion": "npm run checks"
+    "preversion": "npm run checks",
+    "release": "changeset publish"
   },
   "repository": {
     "type": "git",
