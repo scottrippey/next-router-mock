@@ -51,7 +51,7 @@ import { useRouter } from 'next/router';
 import { render, screen, fireEvent } from '@testing-library/react';
 import mockRouter from 'next-router-mock';
 
-jest.mock('next/router', () => require('next-router-mock'));
+jest.mock('next/router', () => jest.requireActual('next-router-mock'))
 
 const ExampleComponent = ({ href = '' }) => {
   const router = useRouter();
