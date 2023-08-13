@@ -8,7 +8,14 @@ export type UrlObject = {
   query?: NextRouter["query"];
   hash?: string;
 };
-export type UrlObjectComplete = Required<UrlObject>;
+export type UrlObjectComplete = {
+  pathname: string;
+  query: NextRouter["query"];
+  hash: string;
+  // While parsing, keep the routeParams separate from the query.
+  // We'll merge them at the end.
+  routeParams: NextRouter["query"];
+};
 
 // interface not exported by the package next/router
 interface TransitionOptions {
@@ -29,15 +36,20 @@ type InternalEventTypes =
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
 export abstract class BaseRouter implements NextRouter {
-  isReady = true;
   pathname = "/";
-  hash = "";
   query: NextRouter["query"] = {};
   asPath = "/";
+  /**
+   * The `hash` property is NOT part of NextRouter.
+   * It is only supplied as part of next-router-mock, for the sake of testing
+   */
+  hash = "";
+
+  // These are constant:
+  isReady = true;
   basePath = "";
   isFallback = false;
   isPreview = false;
-
   isLocaleDomain = false;
   locale: NextRouter["locale"] = undefined;
   locales: NextRouter["locales"] = [];
@@ -137,24 +149,21 @@ export class MemoryRouter extends BaseRouter {
   ) {
     // Parse the URL if needed:
     const newRoute = parseUrlToCompleteUrl(url, this.pathname);
-
-    let asPath: string;
-    let asRoute: UrlObjectComplete | undefined;
-    if (as === undefined || as === null) {
-      asRoute = undefined;
-      asPath = getRouteAsPath(newRoute.pathname, newRoute.query, newRoute.hash);
-    } else {
-      asRoute = parseUrlToCompleteUrl(as, this.pathname);
-      asPath = getRouteAsPath(asRoute.pathname, asRoute.query, asRoute.hash);
-    }
-
-    // Compare pathnames before they are parsed (e.g. /path/1 !== /path/2 but /path/[id] === /path/[id])
-    const rawPathnamesDiffer = asRoute?.pathname !== newRoute.pathname;
-
     // Optionally apply dynamic routes (can mutate routes)
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
-    if (asRoute) {
+
+    let asPath: string;
+    if (as === undefined || as === null) {
+      asPath = getRouteAsPath(newRoute);
+    } else {
+      const asRoute = parseUrlToCompleteUrl(as, this.pathname);
       this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
+
+      asPath = getRouteAsPath(asRoute);
+
+      // "as" hash and route params always take precedence:
+      newRoute.hash = asRoute.hash;
+      newRoute.routeParams = asRoute.routeParams;
     }
 
     const shallow = options?.shallow || false;
@@ -172,15 +181,10 @@ export class MemoryRouter extends BaseRouter {
 
     // Update this instance:
     this.asPath = asPath;
-    if (asRoute) {
-      this.pathname = asRoute.pathname;
-      this.query = rawPathnamesDiffer ? asRoute.query : newRoute.query;
-      this.hash = asRoute.hash;
-    } else {
-      this.pathname = newRoute.pathname;
-      this.query = newRoute.query;
-      this.hash = newRoute.hash;
-    }
+    this.pathname = newRoute.pathname;
+    this.query = { ...newRoute.query, ...newRoute.routeParams };
+    this.hash = newRoute.hash;
+
     if (options?.locale) {
       this.locale = options.locale;
     }
@@ -210,6 +214,7 @@ function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComp
     pathname: normalizeTrailingSlash(parsedUrl.pathname ?? currentPathname),
     query: parsedUrl.query || {},
     hash: parsedUrl.hash || "",
+    routeParams: {},
   };
 }
 
@@ -217,15 +222,20 @@ function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComp
  * Creates a URL from a pathname + query.
  * Injects query params into the URL slugs, the same way that next/router does.
  */
-function getRouteAsPath(pathname: string, query: NextRouter["query"], hash: string | null | undefined) {
+function getRouteAsPath({ pathname, query, hash, routeParams }: UrlObjectComplete) {
   const remainingQuery = { ...query };
 
   // Replace slugs, and remove them from the `query`
   let asPath = pathname.replace(/\[{1,2}(.+?)]{1,2}/g, ($0, slug: string) => {
     if (slug.startsWith("...")) slug = slug.replace("...", "");
 
-    const value = remainingQuery[slug]!;
-    delete remainingQuery[slug];
+    let value = routeParams[slug];
+    if (!value) {
+      // Pop the slug value from the query:
+      value = remainingQuery[slug]!;
+      delete remainingQuery[slug];
+    }
+
     if (Array.isArray(value)) {
       return value.map((v) => encodeURIComponent(v)).join("/");
     }

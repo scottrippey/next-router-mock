@@ -417,84 +417,88 @@ describe("MemoryRouter", () => {
           });
         });
 
-        describe("when the paths don't match", () => {
-          it("as path and query is used", async () => {
-            await memoryRouter.push("/path?queryParam=123", "/differentPath?differentQueryParam=456");
+        describe("with different paths", () => {
+          it("the real path and query are used", async () => {
+            await memoryRouter.push("/real-path", "/as-path");
             expectMatch(memoryRouter, {
-              asPath: "/differentPath?differentQueryParam=456",
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
+              asPath: "/as-path",
+              pathname: "/real-path",
+              query: {},
             });
 
-            await memoryRouter.push("/path?queryParam=123", {
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
-            });
+            await memoryRouter.push("/real-path?real=real", "/as-path?as=as");
             expectMatch(memoryRouter, {
-              asPath: "/differentPath?differentQueryParam=456",
-              pathname: "/differentPath",
-              query: { differentQueryParam: "456" },
+              asPath: "/as-path?as=as",
+              pathname: "/real-path",
+              query: { real: "real" },
+            });
+
+            await memoryRouter.push("/real-path?param=real", "/as-path?param=as");
+            expectMatch(memoryRouter, {
+              asPath: "/as-path?param=as",
+              pathname: "/real-path",
+              query: { param: "real" },
             });
           });
         });
 
         it('"as" param hash overrides "url" hash', async () => {
-          await memoryRouter.push("/path", "/path#hash");
+          await memoryRouter.push("/path", "/path#as-hash");
           expectMatch(memoryRouter, {
-            asPath: "/path#hash",
+            asPath: "/path#as-hash",
             pathname: "/path",
-            hash: "#hash",
+            hash: "#as-hash",
           });
 
-          await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
+          await memoryRouter.push("/path", { pathname: "/path", hash: "#as-hash" });
           expectMatch(memoryRouter, {
-            asPath: "/path#hash",
+            asPath: "/path#as-hash",
             pathname: "/path",
-            hash: "#hash",
+            hash: "#as-hash",
           });
 
-          await memoryRouter.push("/path#originalHash", "/path#hash");
+          await memoryRouter.push("/path#real-hash", "/path#as-hash");
           expectMatch(memoryRouter, {
-            asPath: "/path#hash",
+            asPath: "/path#as-hash",
             pathname: "/path",
-            hash: "#hash",
+            hash: "#as-hash",
           });
 
-          await memoryRouter.push("/path", { pathname: "/path", hash: "#hash" });
-          expectMatch(memoryRouter, { asPath: "/path#hash", pathname: "/path", hash: "#hash" });
+          await memoryRouter.push("/path", { pathname: "/path", hash: "#as-hash" });
+          expectMatch(memoryRouter, { asPath: "/path#as-hash", pathname: "/path", hash: "#as-hash" });
 
-          await memoryRouter.push("/path#originalHash", "/path");
+          await memoryRouter.push("/path#real-hash", "/path");
           expectMatch(memoryRouter, { asPath: "/path", pathname: "/path", hash: "" });
 
           await memoryRouter.push("/path", { pathname: "/path" });
           expectMatch(memoryRouter, { asPath: "/path", pathname: "/path", hash: "" });
 
-          await memoryRouter.push("/path#originalHash", "/differentPath");
+          await memoryRouter.push("/path#real-hash", "/as-path");
           expectMatch(memoryRouter, {
-            asPath: "/differentPath",
-            pathname: "/differentPath",
+            asPath: "/as-path",
+            pathname: "/path",
             hash: "",
           });
 
-          await memoryRouter.push("/path", { pathname: "/differentPath" });
+          await memoryRouter.push("/path", { pathname: "/as-path" });
           expectMatch(memoryRouter, {
-            asPath: "/differentPath",
-            pathname: "/differentPath",
+            asPath: "/as-path",
+            pathname: "/path",
             hash: "",
           });
 
-          await memoryRouter.push("/path#originalHash", "/differentPath#hash");
+          await memoryRouter.push("/path#real-hash", "/as-path#as-hash");
           expectMatch(memoryRouter, {
-            asPath: "/differentPath#hash",
-            pathname: "/differentPath",
-            hash: "#hash",
+            asPath: "/as-path#as-hash",
+            pathname: "/path",
+            hash: "#as-hash",
           });
 
-          await memoryRouter.push("/path", { pathname: "/differentPath", hash: "#hash" });
+          await memoryRouter.push("/path", { pathname: "/as-path", hash: "#as-hash" });
           expectMatch(memoryRouter, {
-            asPath: "/differentPath#hash",
-            pathname: "/differentPath",
-            hash: "#hash",
+            asPath: "/as-path#as-hash",
+            pathname: "/path",
+            hash: "#as-hash",
           });
         });
       });
