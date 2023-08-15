@@ -105,6 +105,14 @@ export class MemoryRouter extends BaseRouter {
    */
   public async = false;
 
+  public internal = {
+    query: {} as NextRouter["query"],
+    routeParams: {} as NextRouter["query"],
+    selectedLayoutSegmentDepth
+    selectedLayoutSegment: "",
+    selectedLayoutSegments: [] as string[],
+  };
+
   /**
    * This method was removed in v0.7.0.
    * It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
@@ -184,6 +192,8 @@ export class MemoryRouter extends BaseRouter {
     this.pathname = newRoute.pathname;
     this.query = { ...newRoute.query, ...newRoute.routeParams };
     this.hash = newRoute.hash;
+    this.internal.query = newRoute.query;
+    this.internal.routeParams = newRoute.routeParams;
 
     if (options?.locale) {
       this.locale = options.locale;
@@ -202,6 +212,10 @@ export class MemoryRouter extends BaseRouter {
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
+  }
+
+  public reset() {
+    this.setCurrentUrl("/");
   }
 }
 
