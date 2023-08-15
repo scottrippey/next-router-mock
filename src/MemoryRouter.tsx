@@ -105,11 +105,14 @@ export class MemoryRouter extends BaseRouter {
    */
   public async = false;
 
+  /**
+   * Store extra metadata, needed to support App Router (next/navigation)
+   */
   public internal = {
     query: {} as NextRouter["query"],
     routeParams: {} as NextRouter["query"],
-    selectedLayoutSegment: "",
-    selectedLayoutSegments: [] as string[],
+    selectedLayoutSegment: "[next-router-mock] Not Yet Implemented",
+    selectedLayoutSegments: ["[next-router-mock] Not Yet Implemented"],
   };
 
   /**
