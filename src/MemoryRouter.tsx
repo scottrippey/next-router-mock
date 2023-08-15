@@ -108,7 +108,6 @@ export class MemoryRouter extends BaseRouter {
   public internal = {
     query: {} as NextRouter["query"],
     routeParams: {} as NextRouter["query"],
-    selectedLayoutSegmentDepth
     selectedLayoutSegment: "",
     selectedLayoutSegments: [] as string[],
   };
