@@ -115,20 +115,6 @@ export class MemoryRouter extends BaseRouter {
     selectedLayoutSegments: ["[next-router-mock] Not Yet Implemented"],
   };
 
-  /**
-   * This method was removed in v0.7.0.
-   * It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-   * See the README for more details on upgrading.
-   * @deprecated
-   */
-  registerPaths: { ["This method has been replaced"]: "See the README for more details on upgrading" } = (() => {
-    throw new Error(`
-       This method was removed in v0.7.0.
-       It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-       See the README for more details on upgrading.
-    `);
-  }) as any;
-
   useParser(parser: (urlObject: UrlObjectComplete) => void) {
     this.events.on("NEXT_ROUTER_MOCK:parse", parser);
     return () => this.events.off("NEXT_ROUTER_MOCK:parse", parser);

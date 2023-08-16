@@ -535,13 +535,6 @@ describe("MemoryRouter", () => {
           hash: "#hash",
         });
       });
-
-      it('the "registerPaths" method is deprecated', async () => {
-        expect(() => {
-          // @ts-expect-error This should have type errors and runtime errors:
-          memoryRouter.registerPaths(["path"]);
-        }).toThrow("See the README for more details on upgrading.");
-      });
     });
   });
 });
