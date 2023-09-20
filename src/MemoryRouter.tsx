@@ -115,7 +115,16 @@ export class MemoryRouter extends BaseRouter {
     selectedLayoutSegments: ["[next-router-mock] Not Yet Implemented"],
   };
 
-  useParser(parser: (urlObject: UrlObjectComplete) => void) {
+  /**
+   * Removes all event handlers, and sets the current URL back to default.
+   * This will clear dynamic parsers, too.
+   */
+  public reset() {
+    this.events = mitt();
+    this.setCurrentUrl("/");
+  }
+
+  public useParser(parser: (urlObject: UrlObjectComplete) => void) {
     this.events.on("NEXT_ROUTER_MOCK:parse", parser);
     return () => this.events.off("NEXT_ROUTER_MOCK:parse", parser);
   }
@@ -200,10 +209,6 @@ export class MemoryRouter extends BaseRouter {
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
-  }
-
-  public reset() {
-    this.setCurrentUrl("/");
   }
 }
 
