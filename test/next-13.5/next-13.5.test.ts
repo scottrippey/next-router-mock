@@ -17,7 +17,7 @@ describe(`next version ${require("next/package.json").version}`, () => {
       require("../../MemoryRouterProvider");
     });
     it("next-router-mock/MemoryRouterProvider/next-13", () => {
-      require("../../MemoryRouterProvider/next-13");
+      require("../../MemoryRouterProvider/next-13.5");
     });
   });
 });
