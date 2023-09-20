@@ -13,6 +13,7 @@ describe("next-overridable-hook", () => {
     expect(router).toEqual({
       // Ignore these:
       events: expect.any(Object),
+      internal: expect.any(Object),
       async: expect.any(Boolean),
       push: expect.any(Function),
       replace: expect.any(Function),
