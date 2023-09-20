@@ -2,4 +2,4 @@
 "next-router-mock": minor
 ---
 
-Add support for Next 13.5
+Updated `MemoryRouterProvider` to support Next 13.5
