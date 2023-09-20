@@ -3,7 +3,7 @@
 import type { createDynamicRouteParser } from "../../dynamic-routes";
 import type { createDynamicRouteParser as _ } from "../../dynamic-routes/next-13";
 import type { MemoryRouterProvider } from "../../MemoryRouterProvider";
-import type { MemoryRouterProvider as __ } from "../../MemoryRouterProvider/next-13";
+import type { MemoryRouterProvider as __ } from "../../MemoryRouterProvider/next-13.5";
 
 describe(`next version ${require("next/package.json").version}`, () => {
   describe("automatic and explicit import paths are valid", () => {
