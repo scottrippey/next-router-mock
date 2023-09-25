@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 0.9.10
+
+### Patch Changes
+
+- c8270b3: Updated `MemoryRouterProvider` to support Next 13.5
+
 ## 0.9.9
 
 ### Patch Changes
