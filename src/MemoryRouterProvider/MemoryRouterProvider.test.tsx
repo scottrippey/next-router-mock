@@ -3,14 +3,14 @@ import { useRouter } from "next/router";
 import NextLink, { LinkProps } from "next/link";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import { MemoryRouterProvider } from "./next-11";
+import { MemoryRouterProvider } from "./index";
 import { default as singletonRouter } from "../index";
 
 const TestLink = (linkProps: Partial<LinkProps>) => {
   const router = useRouter();
   return (
     <NextLink href="/test" {...linkProps}>
-      <a>Current route: "{router.asPath}"</a>
+      Current route: "{router.asPath}"
     </NextLink>
   );
 };
