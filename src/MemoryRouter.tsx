@@ -4,7 +4,7 @@ import { parseUrl, stringifyQueryString } from "./urls";
 
 export type Url = string | UrlObject;
 export type UrlObject = {
-  pathname?: string;
+  pathname?: string | null | undefined;
   query?: NextRouter["query"];
   hash?: string;
 };
