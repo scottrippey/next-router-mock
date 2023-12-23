@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 0.9.11
+
+### Patch Changes
+
+- 4603169: fix: update UrlObject type to match native url module
+
 ## 0.9.10
 
 ### Patch Changes
