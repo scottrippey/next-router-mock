@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useMemo } from "react";
 
 import { useMemoryRouter, MemoryRouter, Url, default as singletonRouter } from "../index";
+import { default as asyncSingletonRouter } from "../async";
 import { MemoryRouterEventHandlers } from "../useMemoryRouter";
 import { MemoryRouterContext } from "../MemoryRouterContext";
 
@@ -28,7 +29,7 @@ export function factory(dependencies: AbstractedNextDependencies) {
         return new MemoryRouter(url, async);
       }
       // Normally we'll just use the singleton:
-      return singletonRouter;
+      return async ? asyncSingletonRouter : singletonRouter;
     }, [url, async]);
 
     const routerSnapshot = useMemoryRouter(memoryRouter, eventHandlers);
