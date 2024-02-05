@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 0.9.12
+
+### Patch Changes
+
+- d2e8fff: Enable MemoryRouterProvider to use the async singleton
+
 ## 0.9.11
 
 ### Patch Changes
