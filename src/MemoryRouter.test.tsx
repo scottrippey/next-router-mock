@@ -1,5 +1,6 @@
 import { MemoryRouter } from "./MemoryRouter";
 import { expectMatch } from "../test/test-utils";
+import { createMemoryHistory } from "history";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {
@@ -533,6 +534,42 @@ describe("MemoryRouter", () => {
           pathname: "/path",
           query: { key: "value" },
           hash: "#hash",
+        });
+      });
+
+      describe("history sync router", () => {
+        it("push", async () => {
+          const history = createMemoryHistory();
+          memoryRouter.setCurrentHistory(history);
+          expect(memoryRouter.asPath).toEqual("/");
+          expect(memoryRouter.history.index).toEqual(0);
+
+          await memoryRouter.push("/one?foo=bar");
+          expect(memoryRouter.asPath).toEqual("/one?foo=bar");
+          expect(memoryRouter.history.index).toEqual(1);
+
+          await memoryRouter.push("/two");
+          expect(memoryRouter.asPath).toEqual("/two");
+          expect(memoryRouter.history.index).toEqual(2);
+
+          await memoryRouter.push("/three#hash");
+          expect(memoryRouter.asPath).toEqual("/three#hash");
+          expect(memoryRouter.history.index).toEqual(3);
+        });
+
+        it("replace", async () => {
+          const history = createMemoryHistory({ initialEntries: ["/one"] });
+          memoryRouter.setCurrentHistory(history);
+          expect(memoryRouter.asPath).toEqual("/one");
+          expect(memoryRouter.history.index).toEqual(0);
+
+          await memoryRouter.push("/two");
+          expect(memoryRouter.asPath).toEqual("/two");
+          expect(memoryRouter.history.index).toEqual(1);
+
+          await memoryRouter.replace("/three");
+          expect(memoryRouter.asPath).toEqual("/three");
+          expect(memoryRouter.history.index).toEqual(1); // replace does not add a new entry
         });
       });
 
