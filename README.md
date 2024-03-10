@@ -3,7 +3,7 @@
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
 address bar).  Useful in **tests** and **Storybook**. 
-Inspired by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md).
+Inspired by [`react-router > MemoryRouter`](https://github.com/remix-run/react-router/blob/main/docs/router-components/memory-router.md).
 
 Tested with NextJS v13, v12, v11, and v10.
 
