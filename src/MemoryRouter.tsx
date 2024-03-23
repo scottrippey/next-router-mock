@@ -1,7 +1,6 @@
 import type { NextRouter, RouterEvent } from "next/router";
 import mitt, { MittEmitter } from "./lib/mitt";
-import { parseUrl, stringifyQueryString } from "./urls";
-import { parse as parseQueryString } from "querystring";
+import { parseUrl, objectifyQueryString, stringifyQueryString } from "./urls";
 
 export type Url = string | UrlObject;
 export type UrlObject = {
@@ -212,7 +211,7 @@ export class MemoryRouter extends BaseRouter {
  */
 function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
   const parsedUrl = typeof url === "object" ? url : parseUrl(url);
-  const query = parsedUrl.search ? parseQueryString(parsedUrl.search) : parsedUrl.query ?? {};
+  const query = parsedUrl.search ? objectifyQueryString(parsedUrl.search) : parsedUrl.query ?? {};
 
   return {
     pathname: normalizeTrailingSlash(parsedUrl.pathname ?? currentPathname),

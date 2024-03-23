@@ -1,5 +1,6 @@
 import type { NextRouter } from "next/router";
 import type { UrlObject } from "./MemoryRouter";
+import queryString from "querystring";
 
 export function parseUrl(url: string): UrlObject {
   const base = "https://base.com"; // base can be anything
@@ -17,12 +18,8 @@ export function parseUrl(url: string): UrlObject {
   };
 }
 export function stringifyQueryString(query: NextRouter["query"]): string {
-  const params = new URLSearchParams();
-  Object.keys(query).forEach((key) => {
-    const values = query[key];
-    for (const value of Array.isArray(values) ? values : [values]) {
-      params.append(key, value!);
-    }
-  });
-  return params.toString();
+  return queryString.stringify(query);
+}
+export function objectifyQueryString(query: string): NextRouter["query"] {
+  return queryString.parse(query);
 }
