@@ -211,7 +211,9 @@ export class MemoryRouter extends BaseRouter {
  */
 function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
   const parsedUrl = typeof url === "object" ? url : parseUrl(url);
-  const query = parsedUrl.search ? objectifyQueryString(parsedUrl.search) : parsedUrl.query ?? {};
+
+  const queryFromSearch = parsedUrl.search ? objectifyQueryString(parsedUrl.search) : undefined;
+  const query = queryFromSearch ?? parsedUrl.query ?? {};
 
   return {
     pathname: normalizeTrailingSlash(parsedUrl.pathname ?? currentPathname),
