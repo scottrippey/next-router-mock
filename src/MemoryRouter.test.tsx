@@ -417,6 +417,55 @@ describe("MemoryRouter", () => {
           });
         });
 
+        describe("search parameter", () => {
+          it("happy path", async () => {
+            await memoryRouter.push({
+              pathname: "/path",
+              search: "foo=FOO&bar=BAR",
+            });
+            expectMatch(memoryRouter, {
+              asPath: "/path?foo=FOO&bar=BAR",
+              pathname: "/path",
+              query: {
+                foo: "FOO",
+                bar: "BAR",
+              },
+            });
+          });
+
+          it("multiple values can be specified for a query parameter", async () => {
+            await memoryRouter.push({
+              pathname: "/path",
+              search: "foo=FOO&foo=BAR",
+            });
+            expectMatch(memoryRouter, {
+              asPath: "/path?foo=FOO&foo=BAR",
+              pathname: "/path",
+              query: {
+                foo: ["FOO", "BAR"],
+              },
+            });
+          });
+
+          it("if search and query are both provided preference is given to search", async () => {
+            await memoryRouter.push({
+              pathname: "/path",
+              search: "foo=FOO&bar=BAR",
+              query: {
+                baz: "BAZ",
+              },
+            });
+            expectMatch(memoryRouter, {
+              asPath: "/path?foo=FOO&bar=BAR",
+              pathname: "/path",
+              query: {
+                foo: "FOO",
+                bar: "BAR",
+              },
+            });
+          });
+        });
+
         describe("with different paths", () => {
           it("the real path and query are used", async () => {
             await memoryRouter.push("/real-path", "/as-path");
