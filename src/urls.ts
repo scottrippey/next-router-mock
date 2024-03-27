@@ -26,3 +26,8 @@ export function stringifyQueryString(query: NextRouter["query"]): string {
   });
   return params.toString();
 }
+export function parseQueryString(query: string): NextRouter["query"] | undefined {
+  const parsedUrl = parseUrl(`?${query}`);
+
+  return parsedUrl.query;
+}
