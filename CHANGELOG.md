@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 0.9.13
+
+### Patch Changes
+
+- 5afd47b: Add support for parsing `search` parameter for URLs
+
 ## 0.9.12
 
 ### Patch Changes
