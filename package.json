@@ -4,11 +4,7 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "files": [
-    "dist",
-    "async",
-    "dynamic-routes",
-    "MemoryRouterProvider",
-    "src"
+    "dist"
   ],
   "scripts": {
     "checks": "npm run docs && npm run lint && npm run test && npm run build && npm run typecheck && npm run test:integration",
