@@ -16,6 +16,7 @@ export function parseUrl(url: string): UrlObject {
     query,
   };
 }
+
 export function stringifyQueryString(query: NextRouter["query"]): string {
   const params = new URLSearchParams();
   Object.keys(query).forEach((key) => {
@@ -26,6 +27,7 @@ export function stringifyQueryString(query: NextRouter["query"]): string {
   });
   return params.toString();
 }
+
 export function parseQueryString(query: string): NextRouter["query"] | undefined {
   const parsedUrl = parseUrl(`?${query}`);
 

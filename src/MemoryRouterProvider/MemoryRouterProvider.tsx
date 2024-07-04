@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useMemo } from "react";
+import { MemoryHistory } from "history";
 
 import { useMemoryRouter, MemoryRouter, Url, default as singletonRouter } from "../index";
 import { default as asyncSingletonRouter } from "../async";
@@ -16,21 +17,26 @@ export type MemoryRouterProviderProps = {
    */
   url?: Url;
   async?: boolean;
+  history?: MemoryHistory;
   children?: ReactNode;
 } & MemoryRouterEventHandlers;
 
 export function factory(dependencies: AbstractedNextDependencies) {
   const { RouterContext } = dependencies;
 
-  const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, ...eventHandlers }) => {
+  const MemoryRouterProvider: FC<MemoryRouterProviderProps> = ({ children, url, async, history, ...eventHandlers }) => {
     const memoryRouter = useMemo(() => {
       if (typeof url !== "undefined") {
         // If the `url` was specified, we'll use an "isolated router" instead of the singleton.
-        return new MemoryRouter(url, async);
+        return new MemoryRouter(url, async, undefined);
+      }
+      if (typeof history !== "undefined") {
+        // If the `history` was specified, we'll use an "isolated router" instead of the singleton.
+        return new MemoryRouter(undefined, async, history);
       }
       // Normally we'll just use the singleton:
       return async ? asyncSingletonRouter : singletonRouter;
-    }, [url, async]);
+    }, [url, async, history]);
 
     const routerSnapshot = useMemoryRouter(memoryRouter, eventHandlers);
 
