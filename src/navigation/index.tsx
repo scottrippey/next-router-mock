@@ -71,9 +71,8 @@ export const usePathname: typeof NextNav.usePathname = () => {
   return useSnapshot((r) => r.pathname);
 };
 
-export const useParams: typeof NextNav.useParams = () => {
-  type Params = ReturnType<typeof NextNav.useParams>;
-  return useSnapshot((r) => r.internal.routeParams as Params);
+export const useParams: typeof NextNav.useParams = <T extends ReturnType<typeof NextNav.useParams>>() => {
+  return useSnapshot((r) => r.internal.routeParams as T);
 };
 
 export const useSelectedLayoutSegment: typeof NextNav.useSelectedLayoutSegment = () =>
