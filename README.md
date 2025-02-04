@@ -164,7 +164,7 @@ it('NextLink can be rendered', () => {
     <NextLink href="/example">Example Link</NextLink>, 
     { wrapper: MemoryRouterProvider }
   );
-  fireEvent.click(screen.getByTextContent('Example Link'));
+  fireEvent.click(screen.getByText('Example Link'));
   expect(mockRouter.asPath).toEqual('/example')
 });
 ```
@@ -262,7 +262,7 @@ too; for example:
 ```jsx
 it('next/link can be tested too', async () => {
   render(<NextLink href="/example?foo=bar"><a>Example Link</a></NextLink>);
-  fireEvent.click(screen.getByTextContent('Example Link'));
+  fireEvent.click(screen.getByText('Example Link'));
   await waitFor(() => {
     expect(singletonRouter).toMatchObject({
       asPath: '/example?foo=bar',
