@@ -69,7 +69,7 @@ describe('next-router-mock', () => {
     
     // Render the component:
     render(<ExampleComponent href="/foo?bar=baz" />);
-    expect(screen.getByRole('button')).toHaveText(
+    expect(screen.getByRole('button')).toHaveTextContent(
       'The current route is: "/initial-path"'
     );
 
