@@ -1,5 +1,17 @@
 # next-router-mock
 
+## 0.9.16
+
+- Add support for parsing `search` parameter for URLs
+
+## 0.9.15
+
+- fix history dependency
+
+## 0.9.14
+
+- added history and router.back() from https://github.com/ergofriend/next-router-mock/tree/add-history-support
+  
 ## 0.9.13
 
 ### Patch Changes

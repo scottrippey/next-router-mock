@@ -14,16 +14,18 @@ Install via NPM: `npm install --save-dev next-router-mock`
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [`next-router-mock`](#next-router-mock)
 - [Usage with Jest](#usage-with-jest)
-    - [Jest Configuration](#jest-configuration)
+  - [Jest Configuration](#jest-configuration)
     - [Jest Example](#jest-example)
 - [Usage with Storybook](#usage-with-storybook)
-    - [Storybook Configuration](#storybook-configuration)
-    - [Storybook Example](#storybook-example)
+  - [Storybook Configuration](#storybook-configuration)
+  - [Storybook Example](#storybook-example)
+- [Mock `next/navigation`](#mock-nextnavigation)
 - [Compatibility with `next/link`](#compatibility-with-nextlink)
-    - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
+  - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
     - [Example: `next/link` with Enzyme](#example-nextlink-with-enzyme)
-    - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
+  - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
 - [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
@@ -33,7 +35,8 @@ Install via NPM: `npm install --save-dev next-router-mock`
 
 # Usage with Jest
 
-### Jest Configuration
+## Jest Configuration
+
 For unit tests, the `next-router-mock` module can be used as a drop-in replacement for `next/router`:
 
 ```js
@@ -86,13 +89,14 @@ describe('next-router-mock', () => {
 });
 ```
 
-
 # Usage with Storybook
 
-### Storybook Configuration
+## Storybook Configuration
+
 Globally enable `next-router-mock` by adding the following webpack alias to your Storybook configuration.
 
 In `.storybook/main.js` add:
+
 ```js
 module.exports = {
   webpackFinal: async (config, { configType }) => {
@@ -107,7 +111,7 @@ module.exports = {
 
 This ensures that all your components that use `useRouter` will work in Storybook.  If you also need to test `next/link`, please see the section [Example: **`next/link` with Storybook**](#example-nextlink-with-storybook).
 
-### Storybook Example
+## Storybook Example
 
 In your individual stories, you might want to mock the current URL (eg. for testing an "ActiveLink" component), or you might want to log `push/replace` actions.  You can do this by wrapping your stories with the `<MemoryRouterProvider>` component.  
 
@@ -126,11 +130,13 @@ export const ExampleStory = () => (
 );
 ```
 
-> Be sure to import from **a matching Next.js version**: 
-> ```
+> Be sure to import from **a matching Next.js version**:
+>
+> ```jsx
 > import { MemoryRouterProvider } 
 >   from 'next-router-mock/MemoryRouterProvider/next-13.5';
 > ```
+>
 > Choose from `next-13.5`, `next-13`, `next-12`, or `next-11`.
 
 The `MemoryRouterProvider` has the following optional properties:
@@ -143,12 +149,36 @@ The `MemoryRouterProvider` has the following optional properties:
   - `onRouteChangeStart(url, { shallow })`
   - `onRouteChangeComplete(url, { shallow })`
 
+# Mock `next/navigation`
+
+```tsx
+import mockRouter from 'next-router-mock'
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: mockRouter,
+  useParams: () => {
+    const { query } = mockRouter;
+    return query
+  },
+  useSearchParams: () => {
+    const { query } = mockRouter;
+    const search = new URLSearchParams();
+    
+    Object.entries(query).forEach(([key, value]) => {
+      search.append(key, `${value}`);
+    })
+
+    return search;
+  },
+}))
+```
 
 # Compatibility with `next/link`
 
 To use `next-router-mock` with `next/link`, you must use a `<MemoryRouterProvider>` to wrap the test component.
 
-### Example: `next/link` with React Testing Library
+## Example: `next/link` with React Testing Library
 
 When rendering, simply supply the option `{ wrapper: MemoryRouterProvider }`
 
@@ -192,7 +222,7 @@ it('NextLink can be rendered', () => {
 });
 ```
 
-### Example: `next/link` with Storybook
+## Example: `next/link` with Storybook
 
 In Storybook, you must wrap your component with the `<MemoryRouterProvider>` component (with optional `url` set).
 
@@ -214,7 +244,7 @@ This can be done inline (as above).
 It can also be implemented as a `decorator`, which can be per-Story, per-Component, or Global (see [Storybook Decorators Documentation](https://storybook.js.org/docs/react/writing-stories/decorators) for details).  
 Global example:
 
-```
+```js
 // .storybook/preview.js
 import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
 
@@ -222,7 +252,6 @@ export const decorators = [
   (Story) => <MemoryRouterProvider><Story /></MemoryRouterProvider>
 ]; 
 ```
-
 
 # Dynamic Routes
 
@@ -279,6 +308,7 @@ it('next/link can be tested too', async () => {
 - `withRouter(Component)`
 - `router.push(url, as?, options?)`
 - `router.replace(url, as?, options?)`
+- `router.back()`
 - `router.route`
 - `router.pathname`
 - `router.asPath`
@@ -304,10 +334,8 @@ These fields just have default values; these methods do nothing.
 - `router.defaultLocale`
 - `router.domainLocales`
 - `router.prefetch()`
-- `router.back()`
 - `router.beforePopState(cb)`
 - `router.reload()`
 - `router.events` not implemented:
   - `routeChangeError`
   - `beforeHistoryChange`
-

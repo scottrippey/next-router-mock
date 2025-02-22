@@ -1,4 +1,5 @@
 import type { NextRouter, RouterEvent } from "next/router";
+import { createMemoryHistory, type MemoryHistory } from "history";
 import mitt, { MittEmitter } from "./lib/mitt";
 import { parseUrl, parseQueryString, stringifyQueryString } from "./urls";
 
@@ -31,7 +32,17 @@ type InternalEventTypes =
   /** Emitted when 'router.push' is called */
   | "NEXT_ROUTER_MOCK:push"
   /** Emitted when 'router.replace' is called */
-  | "NEXT_ROUTER_MOCK:replace";
+  | "NEXT_ROUTER_MOCK:replace"
+  /** Emitted when 'router.back' is called */
+  | "NEXT_ROUTER_MOCK:back";
+
+type RouterState = {
+  asPath: string;
+  pathname: string;
+  query: NextRouter["query"];
+  hash: string;
+  locale?: string | false | undefined;
+};
 
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
@@ -45,6 +56,8 @@ export abstract class BaseRouter implements NextRouter {
    * It is only supplied as part of next-router-mock, for the sake of testing
    */
   hash = "";
+
+  _history: MemoryHistory = createMemoryHistory();
 
   // These are constant:
   isReady = true;
@@ -61,9 +74,8 @@ export abstract class BaseRouter implements NextRouter {
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url): Promise<boolean>;
-  back() {
-    // Not implemented
-  }
+  abstract back(): void;
+
   forward() {
     // Not implemented
   }
@@ -93,10 +105,11 @@ export class MemoryRouter extends BaseRouter {
     return Object.assign(new MemoryRouter(), original);
   }
 
-  constructor(initialUrl?: Url, async?: boolean) {
+  constructor(initialUrl?: Url, async?: boolean, history?: MemoryHistory) {
     super();
     if (initialUrl) this.setCurrentUrl(initialUrl);
     if (async) this.async = async;
+    if (history) this.setCurrentHistory(history);
   }
 
   /**
@@ -132,6 +145,111 @@ export class MemoryRouter extends BaseRouter {
   replace = (url: Url, as?: Url, options?: TransitionOptions) => {
     return this._setCurrentUrl(url, as, options, "replace");
   };
+
+  back = () => {
+    this._back();
+  };
+
+  /**
+   * Sets the current MemoryHistory.
+   */
+  public setCurrentHistory = (history: MemoryHistory) => {
+    this._history = history;
+    this.setCurrentUrl(history.location.pathname + history.location.search + history.location.hash);
+  };
+
+  /**
+   * Returns the current MemoryHistory.
+   * history.state property represents the previous location's state in MemoryHistory.
+   */
+  get history() {
+    return {
+      ...this._history,
+      createHref(to) {
+        throw new Error("You cannot use history.createHref() because it is a stateless.");
+      },
+      push(to, state) {
+        throw new Error("You cannot use history.push() because it is a stateless.");
+      },
+      replace(to, state) {
+        throw new Error("You cannot use history.replace() because it is a stateless.");
+      },
+      go(delta) {
+        throw new Error("You cannot use history.go() because it is a stateless.");
+      },
+      back() {
+        throw new Error("You cannot use history.back() because it is a stateless.");
+      },
+      forward() {
+        throw new Error("You cannot use history.forward() because it is a stateless.");
+      },
+      listen() {
+        throw new Error("You cannot use history.listen() because it is a stateless.");
+      },
+      block(blocker) {
+        throw new Error("You cannot use history.block() because it is a stateless.");
+      },
+    } satisfies MemoryHistory;
+  }
+
+  /**
+   * Store the current MemoryHistory state to history.state for the next location.
+   */
+  private _updateHistory(source?: "push" | "replace" | "back" | "set") {
+    switch (source) {
+      case "push":
+        this._history.push(this._state.asPath, this._state);
+        break;
+      case "replace":
+        this._history.replace(this._state.asPath, this._state);
+        break;
+      case "set":
+        this._history = createMemoryHistory({ initialEntries: [this._state.asPath] });
+        break;
+      case "back":
+        this._history.back();
+        break;
+    }
+  }
+
+  private get _state(): RouterState {
+    return {
+      asPath: this.asPath,
+      pathname: this.pathname,
+      query: this.query,
+      hash: this.hash,
+      locale: this.locale,
+    };
+  }
+
+  private set _state(state: RouterState) {
+    this.asPath = state.asPath;
+    this.pathname = state.pathname;
+    this.query = state.query;
+    this.hash = state.hash;
+    if (state.locale) this.locale = state.locale;
+  }
+
+  private _updateState(asPath: string, route: UrlObjectComplete, locale: TransitionOptions["locale"]) {
+    this._state = {
+      asPath,
+      pathname: route.pathname,
+      query: { ...route.query, ...route.routeParams },
+      hash: route.hash,
+      locale,
+    };
+  }
+
+  private _getPreviousState() {
+    const state = this._history.location.state as RouterState;
+    return {
+      asPath: state.asPath,
+      pathname: state.pathname,
+      query: state.query,
+      hash: state.hash,
+      locale: state.locale,
+    };
+  }
 
   /**
    * Sets the current Memory route to the specified url, synchronously.
@@ -180,15 +298,11 @@ export class MemoryRouter extends BaseRouter {
     // Simulate the async nature of this method
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Update this instance:
-    this.asPath = asPath;
-    this.pathname = newRoute.pathname;
-    this.query = { ...newRoute.query, ...newRoute.routeParams };
-    this.hash = newRoute.hash;
+    // Store the current state as the previous state. (must be called before "_updateState"!!!)
+    this._updateHistory(source);
 
-    if (options?.locale) {
-      this.locale = options.locale;
-    }
+    // Update this instance:
+    this._updateState(asPath, newRoute, options?.locale);
 
     // Fire "complete" event:
     if (triggerHashChange) {
@@ -203,6 +317,15 @@ export class MemoryRouter extends BaseRouter {
     if (eventName) this.events.emit(eventName, this.asPath, { shallow });
 
     return true;
+  }
+
+  private _back() {
+    const previousState = this._getPreviousState();
+    this.events.emit("routeChangeStart", previousState.asPath);
+    this._state = previousState;
+    this._updateHistory("back");
+    this.events.emit("routeChangeComplete", previousState.asPath);
+    this.events.emit("NEXT_ROUTER_MOCK:back", previousState.asPath);
   }
 }
 
