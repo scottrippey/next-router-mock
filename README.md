@@ -1,5 +1,7 @@
 # `@cubbk/next-router-mock`
 
+A fork of [next-router-mock](https://github.com/scottrippey/next-router-mock) with the added support of `next/navigation`. In the process of proposing the contribution uppstream
+
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
 address bar). Useful in **tests** and **Storybook**.
 Inspired by [`react-router > MemoryRouter`](https://github.com/remix-run/react-router/blob/main/docs/router-components/memory-router.md).
@@ -14,15 +16,15 @@ For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usag
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Usage with Jest](#usage-with-jest)
-    - [Jest Configuration](#jest-configuration)
-    - [Jest Example](#jest-example)
+  - [Jest Configuration](#jest-configuration)
+  - [Jest Example](#jest-example)
 - [Usage with Storybook](#usage-with-storybook)
-    - [Storybook Configuration](#storybook-configuration)
-    - [Storybook Example](#storybook-example)
+  - [Storybook Configuration](#storybook-configuration)
+  - [Storybook Example](#storybook-example)
 - [Compatibility with `next/link`](#compatibility-with-nextlink)
-    - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
-    - [Example: `next/link` with Enzyme](#example-nextlink-with-enzyme)
-    - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
+  - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
+  - [Example: `next/link` with Enzyme](#example-nextlink-with-enzyme)
+  - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
 - [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
