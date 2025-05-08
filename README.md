@@ -1,7 +1,5 @@
 # `next-router-mock`
 
-A fork of [next-router-mock](https://github.com/scottrippey/next-router-mock) with the added support of `next/navigation`. In the process of proposing the contribution uppstream
-
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
 address bar). Useful in **tests** and **Storybook**.
 Inspired by [`react-router > MemoryRouter`](https://github.com/remix-run/react-router/blob/main/docs/router-components/memory-router.md).
