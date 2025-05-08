@@ -1,4 +1,4 @@
-# `@cubbk/next-router-mock`
+# `next-router-mock`
 
 A fork of [next-router-mock](https://github.com/scottrippey/next-router-mock) with the added support of `next/navigation`. In the process of proposing the contribution uppstream
 
@@ -8,7 +8,7 @@ Inspired by [`react-router > MemoryRouter`](https://github.com/remix-run/react-r
 
 Tested with NextJS v13, v12, v11, and v10.
 
-Install via NPM: `npm install --save-dev @cubbk/next-router-mock`
+Install via NPM: `npm install --save-dev next-router-mock`
 
 For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usage-with-nextnavigation-beta)
 
@@ -42,31 +42,31 @@ For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usag
 
 ### Jest Configuration
 
-For unit tests, the `@cubbk/next-router-mock` module can be used as a drop-in replacement for `next/router`:
+For unit tests, the `next-router-mock` module can be used as a drop-in replacement for `next/router`:
 
 ```js
-jest.mock("next/router", () => require("@cubbk/next-router-mock"));
+jest.mock("next/router", () => require("next-router-mock"));
 ```
 
 You can do this once per spec file, or you can [do this globally using `setupFilesAfterEnv`](https://jestjs.io/docs/configuration/#setupfilesafterenv-array).
 
 ### Jest Example
 
-In your tests, use the router from `@cubbk/next-router-mock` to set the current URL and to make assertions.
+In your tests, use the router from `next-router-mock` to set the current URL and to make assertions.
 
 ```jsx
 import { useRouter } from "next/router";
 import { render, screen, fireEvent } from "@testing-library/react";
-import mockRouter from "@cubbk/next-router-mock";
+import mockRouter from "next-router-mock";
 
-jest.mock("next/router", () => jest.requireActual("@cubbk/next-router-mock"));
+jest.mock("next/router", () => jest.requireActual("next-router-mock"));
 
 const ExampleComponent = ({ href = "" }) => {
   const router = useRouter();
   return <button onClick={() => router.push(href)}>The current route is: "{router.asPath}"</button>;
 };
 
-describe("@cubbk/next-router-mock", () => {
+describe("next-router-mock", () => {
   it("mocks the useRouter hook", () => {
     // Set the initial url:
     mockRouter.push("/initial-path");
@@ -92,7 +92,7 @@ describe("@cubbk/next-router-mock", () => {
 
 ### Storybook Configuration
 
-Globally enable `@cubbk/next-router-mock` by adding the following webpack alias to your Storybook configuration.
+Globally enable `next-router-mock` by adding the following webpack alias to your Storybook configuration.
 
 In `.storybook/main.js` add:
 
@@ -101,7 +101,7 @@ module.exports = {
   webpackFinal: async (config, { configType }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "next/router": "@cubbk/next-router-mock",
+      "next/router": "next-router-mock",
     };
     return config;
   },
@@ -117,7 +117,7 @@ In your individual stories, you might want to mock the current URL (eg. for test
 ```jsx
 // ActiveLink.story.jsx
 import { action } from "@storybook/addon-actions";
-import { MemoryRouterProvider } from "@cubbk/next-router-mock/MemoryRouterProvider/next-13";
+import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider/next-13";
 import { ActiveLink } from "./active-link";
 
 export const ExampleStory = () => (
@@ -132,7 +132,7 @@ export const ExampleStory = () => (
 >
 > ```
 > import { MemoryRouterProvider }
->   from '@cubbk/next-router-mock/MemoryRouterProvider/next-13.5';
+>   from 'next-router-mock/MemoryRouterProvider/next-13.5';
 > ```
 >
 > Choose from `next-13.5`, `next-13`, `next-12`, or `next-11`.
@@ -149,7 +149,7 @@ The `MemoryRouterProvider` has the following optional properties:
 
 # Compatibility with `next/link`
 
-To use `@cubbk/next-router-mock` with `next/link`, you must use a `<MemoryRouterProvider>` to wrap the test component.
+To use `next-router-mock` with `next/link`, you must use a `<MemoryRouterProvider>` to wrap the test component.
 
 ### Example: `next/link` with React Testing Library
 
@@ -159,8 +159,8 @@ When rendering, simply supply the option `{ wrapper: MemoryRouterProvider }`
 import { render } from "@testing-library/react";
 import NextLink from "next/link";
 
-import mockRouter from "@cubbk/next-router-mock";
-import { MemoryRouterProvider } from "@cubbk/next-router-mock/MemoryRouterProvider";
+import mockRouter from "next-router-mock";
+import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider";
 
 it("NextLink can be rendered", () => {
   render(<NextLink href="/example">Example Link</NextLink>, { wrapper: MemoryRouterProvider });
@@ -177,8 +177,8 @@ When rendering, simply supply the option `{ wrapperComponent: MemoryRouterProvid
 import { shallow } from "enzyme";
 import NextLink from "next/link";
 
-import mockRouter from "@cubbk/next-router-mock";
-import { MemoryRouterProvider } from "@cubbk/next-router-mock/MemoryRouterProvider";
+import mockRouter from "next-router-mock";
+import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider";
 
 it("NextLink can be rendered", () => {
   const wrapper = shallow(<NextLink href="/example">Example Link</NextLink>, {
@@ -200,7 +200,7 @@ In Storybook, you must wrap your component with the `<MemoryRouterProvider>` com
 import NextLink from "next/link";
 import { action } from "@storybook/addon-actions";
 
-import { MemoryRouterProvider } from "@cubbk/next-router-mock/MemoryRouterProvider/next-13.5";
+import { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider/next-13.5";
 
 export const ExampleStory = () => (
   <MemoryRouterProvider url="/initial">
@@ -215,7 +215,7 @@ Global example:
 
 ```
 // .storybook/preview.js
-import { MemoryRouterProvider } from '@cubbk/next-router-mock/MemoryRouterProvider';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
 
 export const decorators = [
   (Story) => <MemoryRouterProvider><Story /></MemoryRouterProvider>
@@ -224,12 +224,12 @@ export const decorators = [
 
 # Dynamic Routes
 
-By default, `@cubbk/next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).
+By default, `next-router-mock` does not know about your dynamic routes (eg. files like `/pages/[id].js`).
 To test code that uses dynamic routes, you must add the routes manually, like so:
 
 ```typescript
-import mockRouter from "@cubbk/next-router-mock";
-import { createDynamicRouteParser } from "@cubbk/next-router-mock/dynamic-routes";
+import mockRouter from "next-router-mock";
+import { createDynamicRouteParser } from "next-router-mock/dynamic-routes";
 
 mockRouter.useParser(
   createDynamicRouteParser([
@@ -253,10 +253,10 @@ it("should parse dynamic routes", () => {
 
 # Sync vs Async
 
-By default, `@cubbk/next-router-mock` handles route changes synchronously. This is convenient for testing, and works for most
+By default, `next-router-mock` handles route changes synchronously. This is convenient for testing, and works for most
 use-cases.  
 However, Next normally handles route changes asynchronously, and in certain cases you might actually rely on that
-behavior. If that's the case, you can use `@cubbk/next-router-mock/async`. Tests will need to account for the async behavior
+behavior. If that's the case, you can use `next-router-mock/async`. Tests will need to account for the async behavior
 too; for example:
 
 ```jsx
@@ -321,24 +321,24 @@ These fields just have default values; these methods do nothing.
 
 ### Jest Configuration
 
-For unit tests, the `@cubbk/next-router-mock/navigation` module can be used as a drop-in replacement for `next/navigation`:
+For unit tests, the `next-router-mock/navigation` module can be used as a drop-in replacement for `next/navigation`:
 
 ```js
-jest.mock("next/navigation", () => require("@cubbk/@cubbk/next-router-mock/navigation"));
+jest.mock("next/navigation", () => require("next-router-mock/navigation"));
 ```
 
 You can do this once per spec file, or you can [do this globally using `setupFilesAfterEnv`](https://jestjs.io/docs/configuration/#setupfilesafterenv-array).
 
 ### Jest Example
 
-In your tests, use the router from `@cubbk/next-router-mock` to set the current URL and to make assertions.
+In your tests, use the router from `next-router-mock` to set the current URL and to make assertions.
 
 ```jsx
-import mockRouter from "@cubbk/@cubbk/next-router-mock";
+import mockRouter from "next-router-mock";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { usePathname, useRouter } from "next/navigation";
 
-jest.mock("next/navigation", () => jest.requireActual("@cubbk/@cubbk/next-router-mock/navigation"));
+jest.mock("next/navigation", () => jest.requireActual("next-router-mock/navigation"));
 
 const ExampleComponent = ({ href = "" }) => {
   const router = useRouter();
@@ -346,7 +346,7 @@ const ExampleComponent = ({ href = "" }) => {
   return <button onClick={() => router.push(href)}>The current route is: {pathname}</button>;
 };
 
-describe("@cubbk/next-router-mock", () => {
+describe("next-router-mock", () => {
   it("mocks the useRouter hook", () => {
     // Set the initial url:
     mockRouter.push("/initial-path");
