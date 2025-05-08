@@ -1,8 +1,12 @@
 {
   "name": "@cubbk/next-router-mock",
-  "version": "0.9.13",
+  "version": "0.10.2",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
+  "exports": {
+    ".": "./dist/index.js",
+    "./navigation": "./dist/navigation/index.js"
+  },
   "files": [
     "dist",
     "async",
