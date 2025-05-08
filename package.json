@@ -1,8 +1,12 @@
 {
-  "name": "next-router-mock",
-  "version": "0.9.13",
+  "name": "@cubbk/next-router-mock",
+  "version": "0.11.0",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
+  "exports": {
+    ".": "./dist/index.js",
+    "./navigation": "./dist/navigation/index.js"
+  },
   "files": [
     "dist",
     "async",
@@ -40,7 +44,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scottrippey/next-router-mock.git"
+    "url": "git+https://github.com/cubbk/next-router-mock.git"
   },
   "keywords": [
     "react",
@@ -55,9 +59,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/scottrippey/next-router-mock/issues"
+    "url": "https://github.com/cubbk/next-router-mock/issues"
   },
-  "homepage": "https://github.com/scottrippey/next-router-mock#readme",
+  "homepage": "https://github.com/cubbk/next-router-mock#readme",
   "peerDependencies": {
     "next": ">=10.0.0",
     "react": ">=17.0.0"
