@@ -13,22 +13,26 @@ For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usag
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
-
 - [Usage with Jest](#usage-with-jest)
-  - [Jest Configuration](#jest-configuration)
-  - [Jest Example](#jest-example)
+    - [Jest Configuration](#jest-configuration)
+    - [Jest Example](#jest-example)
 - [Usage with Storybook](#usage-with-storybook)
-  - [Storybook Configuration](#storybook-configuration)
-  - [Storybook Example](#storybook-example)
+    - [Storybook Configuration](#storybook-configuration)
+    - [Storybook Example](#storybook-example)
 - [Compatibility with `next/link`](#compatibility-with-nextlink)
-  - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
-  - [Example: `next/link` with Enzyme](#example-nextlink-with-enzyme)
-  - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
+    - [Example: `next/link` with React Testing Library](#example-nextlink-with-react-testing-library)
+    - [Example: `next/link` with Enzyme](#example-nextlink-with-enzyme)
+    - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
 - [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
 - [Supported Features](#supported-features)
   - [Not yet supported](#not-yet-supported)
+- [Usage with next/navigation Beta](#usage-with-nextnavigation-beta)
+  - [Usage with Jest](#usage-with-jest-1)
+    - [Jest Configuration](#jest-configuration-1)
+    - [Jest Example](#jest-example-1)
+    - [Supported](#supported)
+    - [Not supported yet](#not-supported-yet)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
