@@ -101,16 +101,22 @@ describe("next/navigation", () => {
   });
 
   describe("useSelectedLayoutSegment", () => {
+    act(() => {
+      singletonRouter.push("/segment1/segment2");
+    });
     const hook = beforeEachRenderHook(() => useSelectedLayoutSegment());
-    it("", () => {
-      //
+    it("should show not implemented yet", () => {
+      expect(hook.result.current).toEqual("[next-router-mock] Not Yet Implemented");
     });
   });
 
   describe("useSelectedLayoutSegments", () => {
+    act(() => {
+      singletonRouter.push("/segment1/segment2");
+    });
     const hook = beforeEachRenderHook(() => useSelectedLayoutSegments());
-    it("  ", () => {
-      //
+    it("should show not implemented yet", () => {
+      expect(hook.result.current).toEqual(["[next-router-mock] Not Yet Implemented"]);
     });
   });
 });
