@@ -8,6 +8,8 @@ Tested with NextJS v13, v12, v11, and v10.
 
 Install via NPM: `npm install --save-dev next-router-mock`
 
+For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usage-with-nextnavigation-beta)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -306,3 +308,69 @@ These fields just have default values; these methods do nothing.
 - `router.events` not implemented:
   - `routeChangeError`
   - `beforeHistoryChange`
+
+# Usage with next/navigation Beta
+
+## Usage with Jest
+
+### Jest Configuration
+
+For unit tests, the `next-router-mock/navigation` module can be used as a drop-in replacement for `next/navigation`:
+
+```js
+jest.mock("next/navigation", () => require("@cubbk/next-router-mock/navigation"));
+```
+
+You can do this once per spec file, or you can [do this globally using `setupFilesAfterEnv`](https://jestjs.io/docs/configuration/#setupfilesafterenv-array).
+
+### Jest Example
+
+In your tests, use the router from `next-router-mock` to set the current URL and to make assertions.
+
+```jsx
+import mockRouter from "@cubbk/next-router-mock";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { usePathname, useRouter } from "next/navigation";
+
+jest.mock("next/navigation", () => jest.requireActual("@cubbk/next-router-mock/navigation"));
+
+const ExampleComponent = ({ href = "" }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  return <button onClick={() => router.push(href)}>The current route is: {pathname}</button>;
+};
+
+describe("next-router-mock", () => {
+  it("mocks the useRouter hook", () => {
+    // Set the initial url:
+    mockRouter.push("/initial-path");
+
+    // Render the component:
+    render(<ExampleComponent href="/foo?bar=baz" />);
+    expect(screen.getByRole("button")).toHaveTextContent("The current route is: /initial-path");
+
+    // Click the button:
+    fireEvent.click(screen.getByRole("button"));
+
+    // Ensure the router was updated:
+    expect(mockRouter).toMatchObject({
+      asPath: "/foo?bar=baz",
+      pathname: "/foo",
+      query: { bar: "baz" },
+    });
+  });
+});
+```
+
+### Supported
+
+- useRouter
+- usePathname
+- useParams
+- useSearchParams
+
+### Not supported yet
+
+- Storybook
+- useSelectedLayoutSegment, useSelectedLayoutSegments
+- non-hook utils in next/navigation
