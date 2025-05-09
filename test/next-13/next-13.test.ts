@@ -1,10 +1,10 @@
 // Validate our types are exported correctly:
 import type { memoryRouter } from "next-router-mock";
-import type { memoryRouter as _ } from "next-router-mock/async";
+import type { memoryRouter as ___ } from "next-router-mock/async";
 import type { createDynamicRouteParser } from "next-router-mock/dynamic-routes";
-import type { createDynamicRouteParser as __ } from "next-router-mock/dynamic-routes/next-13";
+import type { createDynamicRouteParser as _ } from "next-router-mock/dynamic-routes/next-13";
 import type { MemoryRouterProvider } from "next-router-mock/MemoryRouterProvider";
-import type { MemoryRouterProvider as ___ } from "next-router-mock/MemoryRouterProvider/next-13";
+import type { MemoryRouterProvider as __ } from "next-router-mock/MemoryRouterProvider/next-13";
 
 describe(`next version ${require("next/package.json").version}`, () => {
   describe("automatic and explicit import paths are valid", () => {

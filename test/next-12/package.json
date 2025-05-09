@@ -1,8 +1,9 @@
 {
   "dependencies": {
-    "next": "12.1.6"
+    "next": "12.1.6",
+    "next-router-mock": "../.."
   },
   "scripts": {
-    "test": "jest"
+    "test": "tsc && jest"
   }
 }
