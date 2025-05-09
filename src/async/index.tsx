@@ -1,14 +1,14 @@
 import React from "react";
 import type { NextComponentType, NextPageContext } from "next";
 import type { BaseContext } from "next/dist/shared/lib/utils";
-import { MemoryRouter } from "./MemoryRouter";
-import { useMemoryRouter } from "./useMemoryRouter";
-import { withMemoryRouter, WithRouterProps } from "./withMemoryRouter";
-import { MemoryRouterContext } from "./MemoryRouterContext";
+import { MemoryRouter } from "../MemoryRouter";
+import { useMemoryRouter } from "../useMemoryRouter";
+import { withMemoryRouter, WithRouterProps } from "../withMemoryRouter";
+import { MemoryRouterContext } from "../MemoryRouterContext";
 
 // Export extra mock APIs:
-export { useMemoryRouter } from "./useMemoryRouter";
-export { MemoryRouter, BaseRouter, Url } from "./MemoryRouter";
+export { useMemoryRouter } from "../useMemoryRouter";
+export { MemoryRouter, BaseRouter, Url } from "../MemoryRouter";
 
 // Export the singleton:
 export const memoryRouter = new MemoryRouter();
