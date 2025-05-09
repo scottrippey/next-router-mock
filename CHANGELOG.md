@@ -1,5 +1,13 @@
 # next-router-mock
 
+## 1.0.0
+
+### Major Changes
+
+- 58b058c: # Next 13 App Router Support
+  - Adds support for mocking `next/navigation`
+  - Adds `mockRouter.reset()` for easy resetting before tests
+
 ## 0.9.13
 
 ### Patch Changes
