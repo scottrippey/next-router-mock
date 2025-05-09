@@ -3,7 +3,7 @@
 
 An implementation of the Next.js Router that keeps the state of the "URL" in memory (does not read or write to the
 address bar).  Useful in **tests** and **Storybook**. 
-Inspired by [`react-router > MemoryRouter`](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md).
+Inspired by [`react-router > MemoryRouter`](https://github.com/remix-run/react-router/blob/main/docs/router-components/memory-router.md).
 
 Tested with NextJS v13, v12, v11, and v10.
 
@@ -69,7 +69,7 @@ describe('next-router-mock', () => {
     
     // Render the component:
     render(<ExampleComponent href="/foo?bar=baz" />);
-    expect(screen.getByRole('button')).toHaveText(
+    expect(screen.getByRole('button')).toHaveTextContent(
       'The current route is: "/initial-path"'
     );
 
@@ -105,16 +105,17 @@ module.exports = {
 };
 ```
 
-This ensures that all your components that use `useRouter` will just work in Storybook.
+This ensures that all your components that use `useRouter` will work in Storybook.  If you also need to test `next/link`, please see the section [Example: **`next/link` with Storybook**](#example-nextlink-with-storybook).
 
 ### Storybook Example
 
-In your individual stories, you might want to mock the current URL (eg. for testing an "ActiveLink" component), or you might want to log `push/replace` actions.  You can do this by wrapping your stories with the `<MemoryRouterProvider>` component like so:
+In your individual stories, you might want to mock the current URL (eg. for testing an "ActiveLink" component), or you might want to log `push/replace` actions.  You can do this by wrapping your stories with the `<MemoryRouterProvider>` component.  
 
 ```jsx
 // ActiveLink.story.jsx
 import { action } from '@storybook/addon-actions';
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+import { MemoryRouterProvider } 
+  from 'next-router-mock/MemoryRouterProvider/next-13';
 import { ActiveLink } from './active-link';
 
 export const ExampleStory = () => (
@@ -124,6 +125,13 @@ export const ExampleStory = () => (
   </MemoryRouterProvider>
 );
 ```
+
+> Be sure to import from **a matching Next.js version**: 
+> ```
+> import { MemoryRouterProvider } 
+>   from 'next-router-mock/MemoryRouterProvider/next-13.5';
+> ```
+> Choose from `next-13.5`, `next-13`, `next-12`, or `next-11`.
 
 The `MemoryRouterProvider` has the following optional properties:
 
@@ -193,7 +201,7 @@ In Storybook, you must wrap your component with the `<MemoryRouterProvider>` com
 import NextLink from 'next/link';
 import { action } from '@storybook/addon-actions';
 
-import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider';
+import { MemoryRouterProvider } from 'next-router-mock/MemoryRouterProvider/next-13.5';
 
 export const ExampleStory = () => (
   <MemoryRouterProvider url="/initial">
