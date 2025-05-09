@@ -1,5 +1,5 @@
 ---
-"next-router-mock": minor
+"next-router-mock": major
 ---
 
 # Next 13 App Router Support 
