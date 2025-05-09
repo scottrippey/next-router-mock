@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 1.0.1
+
+### Patch Changes
+
+- c1c9da4: chore: update package.json exports to include TypeScript types
+
 ## 1.0.0
 
 ### Major Changes
