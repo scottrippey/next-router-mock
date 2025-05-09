@@ -18,7 +18,6 @@ describe("next-overridable-hook", () => {
       push: expect.any(Function),
       replace: expect.any(Function),
       setCurrentUrl: expect.any(Function),
-      registerPaths: expect.any(Function),
       // Ensure the router has exactly these properties:
       asPath: "/",
       basePath: "",
