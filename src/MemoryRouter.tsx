@@ -107,23 +107,8 @@ export class MemoryRouter extends BaseRouter {
   public async = false;
 
   /**
-   * This method was removed in v0.7.0.
-   * It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-   * See the README for more details on upgrading.
-   * @deprecated
-   */
-  registerPaths: { ["This method has been replaced"]: "See the README for more details on upgrading" } = (() => {
-    throw new Error(`
-       This method was removed in v0.7.0.
-       It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-       See the README for more details on upgrading.
-    `);
-  }) as any;
-
-  /**
    * Store extra metadata, needed to support App Router (next/navigation)
    */
-
   public internal = {
     query: {} as NextRouter["query"],
     routeParams: {} as NextRouter["query"],
@@ -140,7 +125,7 @@ export class MemoryRouter extends BaseRouter {
     this.setCurrentUrl("/");
   }
 
-  useParser(parser: (urlObject: UrlObjectComplete) => void) {
+  public useParser(parser: (urlObject: UrlObjectComplete) => void) {
     this.events.on("NEXT_ROUTER_MOCK:parse", parser);
     return () => this.events.off("NEXT_ROUTER_MOCK:parse", parser);
   }

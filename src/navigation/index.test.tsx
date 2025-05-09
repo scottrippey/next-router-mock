@@ -19,6 +19,9 @@ describe("next/navigation", () => {
     const hook = beforeEachRenderHook(() => useRouter());
 
     it("should be a snapshot of the router", () => {
+      expect(hook.result.current).not.toBe(singletonRouter);
+      expect(hook.result.current.push).toBe(singletonRouter.push);
+      expect(hook.result.current.replace).toBe(singletonRouter.replace);
       expect(Object.keys(hook.result.current)).toEqual([
         //
         "push",
