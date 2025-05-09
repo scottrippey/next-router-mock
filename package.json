@@ -4,8 +4,14 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "exports": {
-    ".": "./dist",
-    "./*": "./dist/*",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*/index.d.ts",
+      "default": "./dist/*/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

@@ -1,6 +1,6 @@
-import { useRouterTests } from "./useMemoryRouter.test";
+import { useRouterTests } from "../useMemoryRouter.test";
 
-import router, { MemoryRouter, useRouter, withRouter } from "./async";
+import router, { MemoryRouter, useRouter, withRouter } from "./index";
 
 describe("next-overridable-hook/async", () => {
   it("should export a default router", () => {
