@@ -6,7 +6,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist"
+      "default": "./dist/index.js"
     },
     "./*": "./dist/*",
     "./package.json": "./package.json"
