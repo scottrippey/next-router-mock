@@ -5,10 +5,10 @@ import {
   isDynamicRoute,
   //
 } from "next/dist/shared/lib/router/utils";
-// @ts-expect-error
-import { normalizePagePath } from "next/dist/server/normalize-page-path";
+//
+import { normalizePagePath } from "next/dist/shared/lib/page-path/normalize-page-path";
 
-import { factory } from "./createDynamicRouteParser";
+import { factory } from "../createDynamicRouteParser";
 
 export const createDynamicRouteParser = factory({
   getSortedRoutes,

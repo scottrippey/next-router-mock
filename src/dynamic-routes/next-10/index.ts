@@ -8,7 +8,7 @@ import {
 // @ts-expect-error
 import { normalizePagePath } from "next/dist/next-server/server/normalize-page-path";
 
-import { factory } from "./createDynamicRouteParser";
+import { factory } from "../createDynamicRouteParser";
 
 export const createDynamicRouteParser = factory({
   getSortedRoutes,
