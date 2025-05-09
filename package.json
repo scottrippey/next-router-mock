@@ -4,8 +4,9 @@
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
   "exports": {
-    ".": "./dist/index.js",
-    "./navigation": "./dist/navigation/index.js"
+    ".": "./dist",
+    "./*": "./dist/*",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
