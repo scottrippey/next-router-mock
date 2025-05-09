@@ -1,8 +1,13 @@
 {
   "name": "next-router-mock",
-  "version": "0.9.13",
+  "version": "0.11.0",
   "description": "Mock implementation of the Next.js Router",
   "main": "dist/index",
+  "exports": {
+    ".": "./dist",
+    "./*": "./dist/*",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "async",

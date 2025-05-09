@@ -107,20 +107,25 @@ export class MemoryRouter extends BaseRouter {
   public async = false;
 
   /**
-   * This method was removed in v0.7.0.
-   * It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-   * See the README for more details on upgrading.
-   * @deprecated
+   * Store extra metadata, needed to support App Router (next/navigation)
    */
-  registerPaths: { ["This method has been replaced"]: "See the README for more details on upgrading" } = (() => {
-    throw new Error(`
-       This method was removed in v0.7.0.
-       It has been replaced with "mockRouter.useParser(createDynamicRouteParser(...))"
-       See the README for more details on upgrading.
-    `);
-  }) as any;
+  public internal = {
+    query: {} as NextRouter["query"],
+    routeParams: {} as NextRouter["query"],
+    selectedLayoutSegment: "[next-router-mock] Not Yet Implemented",
+    selectedLayoutSegments: ["[next-router-mock] Not Yet Implemented"],
+  };
 
-  useParser(parser: (urlObject: UrlObjectComplete) => void) {
+  /**
+   * Removes all event handlers, and sets the current URL back to default.
+   * This will clear dynamic parsers, too.
+   */
+  public reset() {
+    this.events = mitt();
+    this.setCurrentUrl("/");
+  }
+
+  public useParser(parser: (urlObject: UrlObjectComplete) => void) {
     this.events.on("NEXT_ROUTER_MOCK:parse", parser);
     return () => this.events.off("NEXT_ROUTER_MOCK:parse", parser);
   }
@@ -185,6 +190,8 @@ export class MemoryRouter extends BaseRouter {
     this.pathname = newRoute.pathname;
     this.query = { ...newRoute.query, ...newRoute.routeParams };
     this.hash = newRoute.hash;
+    this.internal.query = newRoute.query;
+    this.internal.routeParams = newRoute.routeParams;
 
     if (options?.locale) {
       this.locale = options.locale;
