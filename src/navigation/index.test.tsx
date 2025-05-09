@@ -20,17 +20,14 @@ describe("next/navigation", () => {
 
     it("should be a snapshot of the router", () => {
       expect(hook.result.current).not.toBe(singletonRouter);
-      expect(hook.result.current.push).toBe(singletonRouter.push);
-      expect(hook.result.current.replace).toBe(singletonRouter.replace);
-      expect(Object.keys(hook.result.current)).toEqual([
-        //
-        "push",
-        "replace",
-        "refresh",
-        "prefetch",
-        "back",
-        "forward",
-      ]);
+      expect(hook.result.current).toMatchObject({
+        push: expect.any(Function),
+        replace: expect.any(Function),
+        refresh: expect.any(Function),
+        prefetch: expect.any(Function),
+        back: expect.any(Function),
+        forward: expect.any(Function),
+      });
     });
     it("returns the same object after rerendering", () => {
       const initial = hook.result.current;
@@ -104,16 +101,22 @@ describe("next/navigation", () => {
   });
 
   describe("useSelectedLayoutSegment", () => {
+    act(() => {
+      singletonRouter.push("/segment1/segment2");
+    });
     const hook = beforeEachRenderHook(() => useSelectedLayoutSegment());
-    it("", () => {
-      //
+    it("should show not implemented yet", () => {
+      expect(hook.result.current).toEqual("[next-router-mock] Not Yet Implemented");
     });
   });
 
   describe("useSelectedLayoutSegments", () => {
+    act(() => {
+      singletonRouter.push("/segment1/segment2");
+    });
     const hook = beforeEachRenderHook(() => useSelectedLayoutSegments());
-    it("  ", () => {
-      //
+    it("should show not implemented yet", () => {
+      expect(hook.result.current).toEqual(["[next-router-mock] Not Yet Implemented"]);
     });
   });
 });
