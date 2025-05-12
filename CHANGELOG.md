@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 1.0.2
+
+### Patch Changes
+
+- 4a75df0: Removed debugger statement.
+
 ## 1.0.1
 
 ### Patch Changes
