@@ -47,7 +47,6 @@ export const useRouter: typeof NextNav.useRouter = () => {
 export const useSearchParams: typeof NextNav.useSearchParams = () => {
   return useSnapshot((r, prev) => {
     const query = r.internal.query;
-    debugger;
     // Build the search params from the query object:
     const newSearchParams = new URLSearchParams();
     Object.keys(query).forEach((key) => {
