@@ -6,10 +6,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./dist/*/index.d.ts",
+      "require": "./dist/*/index.js",
+      "import": "./dist/*/index.js",
       "default": "./dist/*/index.js"
     },
     "./package.json": "./package.json"
@@ -41,7 +45,7 @@
     "test:next-13": "cd test/next-13 && npm test",
     "test:next-13.5": "cd test/next-13.5 && npm test",
     "typecheck": "tsc --noEmit",
-    "build": "npm run clean && tsc --project tsconfig.build.json",
+    "build": "tsup",
     "clean": "rimraf dist",
     "build:watch": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
@@ -86,6 +90,7 @@
     "react-test-renderer": "^18.2.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
+    "tsup": "^8.5.0",
     "typescript": "^4.9.5"
   }
 }
