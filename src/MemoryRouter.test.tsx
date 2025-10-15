@@ -1,5 +1,6 @@
 import { MemoryRouter } from "./MemoryRouter";
 import { expectMatch } from "../test/test-utils";
+import { createMemoryHistory } from "history";
 
 describe("MemoryRouter", () => {
   beforeEach(() => {
@@ -583,6 +584,58 @@ describe("MemoryRouter", () => {
           query: { key: "value" },
           hash: "#hash",
         });
+      });
+    });
+
+    describe("history", () => {
+      it("push", async () => {
+        const memoryRouter = new MemoryRouter();
+
+        const history = createMemoryHistory();
+        memoryRouter.setCurrentHistory(history);
+        expect(memoryRouter.asPath).toEqual("/");
+        expect(memoryRouter.history.index).toEqual(0);
+
+        await memoryRouter.push("/one?foo=bar");
+        expect(memoryRouter.asPath).toEqual("/one?foo=bar");
+        expect(memoryRouter.history.index).toEqual(1);
+
+        await memoryRouter.push("/two");
+        expect(memoryRouter.asPath).toEqual("/two");
+        expect(memoryRouter.history.index).toEqual(2);
+
+        await memoryRouter.push("/three#hash");
+        expect(memoryRouter.asPath).toEqual("/three#hash");
+        expect(memoryRouter.history.index).toEqual(3);
+      });
+
+      it("replace", async () => {
+        const memoryRouter = new MemoryRouter();
+
+        const history = createMemoryHistory({ initialEntries: ["/one"] });
+        memoryRouter.setCurrentHistory(history);
+        expect(memoryRouter.asPath).toEqual("/one");
+        expect(memoryRouter.history.index).toEqual(0);
+
+        await memoryRouter.push("/two");
+        expect(memoryRouter.asPath).toEqual("/two");
+        expect(memoryRouter.history.index).toEqual(1);
+
+        await memoryRouter.replace("/three");
+        expect(memoryRouter.asPath).toEqual("/three");
+        expect(memoryRouter.history.index).toEqual(1);
+      });
+
+      it("back", async () => {
+        const memoryRouter = new MemoryRouter();
+        const history = createMemoryHistory({ initialEntries: ["/one"] });
+        memoryRouter.setCurrentHistory(history);
+        expect(memoryRouter.history.index).toEqual(0);
+        await memoryRouter.push("/two");
+        expect(memoryRouter.history.index).toEqual(1);
+        memoryRouter.back();
+        expect(memoryRouter.history.index).toEqual(0);
+        expect(memoryRouter.asPath).toEqual("/one");
       });
     });
   });

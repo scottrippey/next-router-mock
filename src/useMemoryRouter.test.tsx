@@ -143,6 +143,33 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => M
     });
     expect(result.current.locale).toBe("en");
   });
+
+  it("following history", async () => {
+    const { result } = renderHook(() => useRouter());
+    await act(() => {
+      result.current.reset();
+    });
+
+    await act(async () => {
+      await result.current.push("/one");
+    });
+    expect(result.current.history.index).toBe(1);
+
+    await act(async () => {
+      await result.current.push("/two");
+      await result.current.push("/three");
+    });
+    expect(result.current.history.index).toBe(3);
+
+    await act(async () => {
+      await result.current.replace("/four");
+    });
+    expect(result.current.history.index).toBe(3); // replace does not change history index
+    await act(() => {
+      result.current.back();
+    });
+    expect(result.current.asPath).toBe("/three");
+  });
 }
 
 describe("useMemoryRouter", () => {
