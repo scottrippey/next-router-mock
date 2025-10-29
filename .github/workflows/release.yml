@@ -6,6 +6,10 @@ on:
       - main
       - main-test-changesets
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: write # Required for changesets to commit changes
+
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
@@ -31,4 +35,3 @@ jobs:
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
