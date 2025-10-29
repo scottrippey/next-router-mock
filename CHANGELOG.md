@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 1.0.4
+
+### Patch Changes
+
+- 3441ec6: Fix: ensure routeParams are extracted correctly when using object navigation
+
 ## 1.0.3
 
 ### Patch Changes
