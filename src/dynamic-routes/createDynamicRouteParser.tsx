@@ -24,24 +24,40 @@ export function factory(dependencies: AbstractedNextDependencies) {
   } = dependencies;
 
   return function createDynamicRouteParser(paths: string[]) {
-    const matchers = getSortedRoutes(paths.map((path) => normalizePagePath(path))).map((path: string) => ({
-      pathname: path,
-      match: getRouteMatcher(getRouteRegex(path)),
-    }));
+    const matchers = getSortedRoutes(paths.map((path) => normalizePagePath(path))).map((path: string) => {
+      const routeRegex = getRouteRegex(path);
+      return {
+        pathname: path,
+        match: getRouteMatcher(routeRegex),
+        regex: routeRegex, // Cache for later use
+      };
+    });
 
     return function parser(url: UrlObjectComplete): void {
       const pathname = url.pathname;
-      const isDynamic = isDynamicRoute(pathname);
       const matcher = matchers.find((matcher) => matcher.match(pathname));
 
       if (matcher) {
         // Update the route name:
         url.pathname = matcher.pathname;
 
-        if (!isDynamic) {
-          // Extract the route variables from the path:
-          url.routeParams = matcher.match(pathname) || {};
+        // Extract route params from concrete paths
+        const routeParams = matcher.match(pathname) || {};
+
+        // For dynamic pathnames, extract route params from query object
+        if (isDynamicRoute(pathname)) {
+          if (matcher.regex.groups) {
+            Object.keys(matcher.regex.groups).forEach((paramName) => {
+              const paramValue = url.query[paramName];
+              if (paramValue !== undefined) {
+                routeParams[paramName] = paramValue;
+                delete url.query[paramName];
+              }
+            });
+          }
         }
+
+        url.routeParams = routeParams;
       }
     };
   };
