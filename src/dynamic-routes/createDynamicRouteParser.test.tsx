@@ -203,4 +203,61 @@ describe("dynamic routes", () => {
       hash: "#hash",
     });
   });
+
+  describe("route parameter extraction", () => {
+    beforeEach(() => {
+      memoryRouter.useParser(createDynamicRouteParser(["/user/[id]", "/post/[slug]/[category]"]));
+    });
+
+    it("extracts route params consistently for string and object push methods", () => {
+      // String-based navigation
+      memoryRouter.push("/user/123");
+      expect(memoryRouter.internal.routeParams).toEqual({ id: "123" });
+      expect(memoryRouter.internal.query).toEqual({});
+      expect(memoryRouter.query).toEqual({ id: "123" });
+
+      // Object-based navigation with dynamic pathname
+      memoryRouter.push({ pathname: "/user/[id]", query: { id: "456" } });
+      expect(memoryRouter.internal.routeParams).toEqual({ id: "456" });
+      expect(memoryRouter.internal.query).toEqual({});
+      expect(memoryRouter.query).toEqual({ id: "456" });
+    });
+
+    it("separates route params from search params in object navigation", () => {
+      memoryRouter.push({
+        pathname: "/user/[id]",
+        query: { id: "123", filter: "active", sort: "name" },
+      });
+
+      expect(memoryRouter.internal.routeParams).toEqual({ id: "123" });
+      expect(memoryRouter.internal.query).toEqual({ filter: "active", sort: "name" });
+      expect(memoryRouter.query).toEqual({ id: "123", filter: "active", sort: "name" });
+    });
+
+    it("handles multiple dynamic route parameters", () => {
+      memoryRouter.push({
+        pathname: "/post/[slug]/[category]",
+        query: { slug: "hello-world", category: "tech", author: "john" },
+      });
+
+      expect(memoryRouter.internal.routeParams).toEqual({
+        slug: "hello-world",
+        category: "tech",
+      });
+      expect(memoryRouter.internal.query).toEqual({ author: "john" });
+      expect(memoryRouter.query).toEqual({
+        slug: "hello-world",
+        category: "tech",
+        author: "john",
+      });
+    });
+
+    it("extracts route params from concrete pathnames", () => {
+      memoryRouter.push({ pathname: "/user/789", query: { filter: "inactive" } });
+
+      expect(memoryRouter.internal.routeParams).toEqual({ id: "789" });
+      expect(memoryRouter.internal.query).toEqual({ filter: "inactive" });
+      expect(memoryRouter.query).toEqual({ id: "789", filter: "inactive" });
+    });
+  });
 });
