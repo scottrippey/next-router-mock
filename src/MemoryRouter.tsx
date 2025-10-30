@@ -1,6 +1,7 @@
 import type { NextRouter, RouterEvent } from "next/router";
 import mitt, { MittEmitter } from "./lib/mitt";
 import { parseUrl, parseQueryString, stringifyQueryString } from "./urls";
+import { createMemoryHistory, MemoryHistory } from "history";
 
 export type Url = string | UrlObject;
 export type UrlObject = {
@@ -33,6 +34,14 @@ type InternalEventTypes =
   /** Emitted when 'router.replace' is called */
   | "NEXT_ROUTER_MOCK:replace";
 
+type RouterState = {
+  asPath: string;
+  pathname: string;
+  query: NextRouter["query"];
+  hash: string;
+  locale?: string;
+};
+
 /**
  * A base implementation of NextRouter that does nothing; all methods throw.
  */
@@ -45,6 +54,8 @@ export abstract class BaseRouter implements NextRouter {
    * It is only supplied as part of next-router-mock, for the sake of testing
    */
   hash = "";
+
+  _history: MemoryHistory | null = null;
 
   // These are constant:
   isReady = true;
@@ -61,9 +72,8 @@ export abstract class BaseRouter implements NextRouter {
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract replace(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
-  back() {
-    // Not implemented
-  }
+  abstract back(): void;
+
   forward() {
     // Not implemented
   }
@@ -93,10 +103,11 @@ export class MemoryRouter extends BaseRouter {
     return Object.assign(new MemoryRouter(), original);
   }
 
-  constructor(initialUrl?: Url, async?: boolean) {
+  constructor(initialUrl?: Url, async?: boolean, history?: MemoryHistory) {
     super();
     if (initialUrl) this.setCurrentUrl(initialUrl);
     if (async) this.async = async;
+    if (history) this.setCurrentHistory(history);
   }
 
   /**
@@ -138,6 +149,64 @@ export class MemoryRouter extends BaseRouter {
     return this._setCurrentUrl(url, as, options, "replace");
   };
 
+  back = (): void => {
+    if (this.history === null) {
+      throw Error("Please provide a history instance with setCurrentHistory");
+    }
+    this.setCurrentUrl(this.history.location.pathname + this.history.location.search + this.history.location.hash);
+  };
+
+  public setCurrentHistory = (history: MemoryHistory) => {
+    this._history = history;
+    this.setCurrentUrl(history.location.pathname + history.location.search + history.location.hash);
+  };
+
+  get history() {
+    return this._history;
+  }
+
+  /**
+   * Store the current MemoryHistory state to history.state for the next location.
+   */
+  private _updateHistory(source?: "push" | "replace" | "set" | "back") {
+    if (this._history === null) {
+      throw Error("Please provide a history instance with setCurrentHistory");
+      return;
+    }
+    switch (source) {
+      case "push":
+        this._history.push(this._state.asPath, this._state);
+        break;
+      case "replace":
+        this._history.replace(this._state.asPath, this._state);
+        break;
+      case "set":
+        this._history = createMemoryHistory({ initialEntries: [this._state.asPath] });
+        break;
+      case "back":
+        this._history.back();
+        break;
+    }
+  }
+
+  private get _state(): RouterState {
+    return {
+      asPath: this.asPath,
+      pathname: this.pathname,
+      query: this.query,
+      hash: this.hash,
+      locale: this.locale,
+    };
+  }
+
+  private _updateState(asPath: string, route: UrlObjectComplete, locale: TransitionOptions["locale"]) {
+    this.asPath = asPath;
+    this.pathname = route.pathname;
+    this.query = { ...route.query, ...route.routeParams };
+    this.hash = route.hash;
+    if (locale) this.locale = locale;
+  }
+
   /**
    * Sets the current Memory route to the specified url, synchronously.
    */
@@ -150,7 +219,7 @@ export class MemoryRouter extends BaseRouter {
     url: Url,
     as?: Url,
     options?: TransitionOptions,
-    source?: "push" | "replace" | "set",
+    source?: "push" | "replace" | "set" | "back",
     async = this.async
   ) {
     // Parse the URL if needed:
@@ -186,16 +255,12 @@ export class MemoryRouter extends BaseRouter {
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Update this instance:
-    this.asPath = asPath;
-    this.pathname = newRoute.pathname;
-    this.query = { ...newRoute.query, ...newRoute.routeParams };
-    this.hash = newRoute.hash;
+    if (this.history) {
+      this._updateHistory(source);
+    }
+    this._updateState(asPath, newRoute, options?.locale);
     this.internal.query = newRoute.query;
     this.internal.routeParams = newRoute.routeParams;
-
-    if (options?.locale) {
-      this.locale = options.locale;
-    }
 
     // Fire "complete" event:
     if (triggerHashChange) {
