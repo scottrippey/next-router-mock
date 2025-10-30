@@ -25,9 +25,9 @@ jobs:
           - npm run test:integration
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 18.x
+          node-version: "24.x"
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
 

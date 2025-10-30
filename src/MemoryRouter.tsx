@@ -71,8 +71,9 @@ export abstract class BaseRouter implements NextRouter {
   events: MittEmitter<RouterEvent | InternalEventTypes> = mitt();
 
   abstract push(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
-  abstract replace(url: Url): Promise<boolean>;
+  abstract replace(url: Url, as?: Url, options?: TransitionOptions): Promise<boolean>;
   abstract back(): void;
+
   forward() {
     // Not implemented
   }

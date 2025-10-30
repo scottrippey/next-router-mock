@@ -585,6 +585,64 @@ describe("MemoryRouter", () => {
           hash: "#hash",
         });
       });
+
+      describe("transition options", () => {
+        it("should handle scroll option with push and replace", async () => {
+          // Test push with scroll options
+          await memoryRouter.push("/push-scroll", undefined, { scroll: false });
+          expectMatch(memoryRouter, {
+            asPath: "/push-scroll",
+            pathname: "/push-scroll",
+            query: {},
+          });
+
+          // Test replace with scroll options (this was the main issue in GitHub #127)
+          await memoryRouter.replace("/replace-scroll", undefined, { scroll: true });
+          expectMatch(memoryRouter, {
+            asPath: "/replace-scroll",
+            pathname: "/replace-scroll",
+            query: {},
+          });
+        });
+
+        it("should support combined options and backward compatibility", async () => {
+          // Test combined options (scroll + shallow + locale)
+          await memoryRouter.replace("/combined", undefined, {
+            scroll: false,
+            shallow: true,
+            locale: "fr",
+          });
+          expectMatch(memoryRouter, {
+            asPath: "/combined",
+            pathname: "/combined",
+            query: {},
+            locale: "fr",
+          });
+
+          // Test backward compatibility - replace without options
+          await memoryRouter.replace("/no-options");
+          expectMatch(memoryRouter, {
+            asPath: "/no-options",
+            pathname: "/no-options",
+            query: {},
+          });
+
+          // Test with URL objects
+          await memoryRouter.replace(
+            {
+              pathname: "/url-object",
+              query: { test: "value" },
+            },
+            undefined,
+            { scroll: false }
+          );
+          expectMatch(memoryRouter, {
+            asPath: "/url-object?test=value",
+            pathname: "/url-object",
+            query: { test: "value" },
+          });
+        });
+      });
     });
 
     describe("history", () => {
