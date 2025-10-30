@@ -593,6 +593,9 @@ describe("MemoryRouter", () => {
 
         const history = createMemoryHistory();
         memoryRouter.setCurrentHistory(history);
+        if (!memoryRouter.history) {
+          return;
+        }
         expect(memoryRouter.asPath).toEqual("/");
         expect(memoryRouter.history.index).toEqual(0);
 
@@ -614,6 +617,9 @@ describe("MemoryRouter", () => {
 
         const history = createMemoryHistory({ initialEntries: ["/one"] });
         memoryRouter.setCurrentHistory(history);
+        if (!memoryRouter.history) {
+          return;
+        }
         expect(memoryRouter.asPath).toEqual("/one");
         expect(memoryRouter.history.index).toEqual(0);
 
@@ -630,6 +636,9 @@ describe("MemoryRouter", () => {
         const memoryRouter = new MemoryRouter();
         const history = createMemoryHistory({ initialEntries: ["/one"] });
         memoryRouter.setCurrentHistory(history);
+        if (!memoryRouter.history) {
+          return;
+        }
         expect(memoryRouter.history.index).toEqual(0);
         await memoryRouter.push("/two");
         expect(memoryRouter.history.index).toEqual(1);

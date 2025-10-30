@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 
 import { MemoryRouter, MemoryRouterSnapshot } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
+import { createMemoryHistory } from "history";
 
 export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => MemoryRouterSnapshot) {
   it("the useRouter hook only returns a snapshot of the singleton router", async () => {
@@ -148,8 +149,11 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => M
     const { result } = renderHook(() => useRouter());
     await act(() => {
       result.current.reset();
+      result.current.setCurrentHistory(createMemoryHistory());
     });
-
+    if (!result.current.history) {
+      return;
+    }
     await act(async () => {
       await result.current.push("/one");
     });

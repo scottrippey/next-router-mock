@@ -55,7 +55,7 @@ export abstract class BaseRouter implements NextRouter {
    */
   hash = "";
 
-  _history = createMemoryHistory();
+  _history: MemoryHistory | null = null;
 
   // These are constant:
   isReady = true;
@@ -149,6 +149,9 @@ export class MemoryRouter extends BaseRouter {
   };
 
   back = (): void => {
+    if (this.history === null) {
+      throw Error("Please provide a history instance with setCurrentHistory");
+    }
     this.setCurrentUrl(this.history.location.pathname + this.history.location.search + this.history.location.hash);
   };
 
@@ -165,6 +168,10 @@ export class MemoryRouter extends BaseRouter {
    * Store the current MemoryHistory state to history.state for the next location.
    */
   private _updateHistory(source?: "push" | "replace" | "set" | "back") {
+    if (this._history === null) {
+      throw Error("Please provide a history instance with setCurrentHistory");
+      return;
+    }
     switch (source) {
       case "push":
         this._history.push(this._state.asPath, this._state);
@@ -247,7 +254,9 @@ export class MemoryRouter extends BaseRouter {
     if (async) await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Update this instance:
-    this._updateHistory(source);
+    if (this.history) {
+      this._updateHistory(source);
+    }
     this._updateState(asPath, newRoute, options?.locale);
     this.internal.query = newRoute.query;
     this.internal.routeParams = newRoute.routeParams;
