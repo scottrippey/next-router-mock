@@ -25,6 +25,7 @@ For usage with `next/navigation` jump to [Usage with next/navigation Beta](#usag
   - [Example: `next/link` with Storybook](#example-nextlink-with-storybook)
 - [Dynamic Routes](#dynamic-routes)
 - [Sync vs Async](#sync-vs-async)
+- [Back & History](#back--history)
 - [Supported Features](#supported-features)
   - [Not yet supported](#not-yet-supported)
 - [Usage with next/navigation Beta](#usage-with-nextnavigation-beta)
@@ -275,6 +276,13 @@ it("next/link can be tested too", async () => {
 });
 ```
 
+# Back & History
+
+In order to use the `router.back()` method, you need to add a (MemoryHistory)[] instance to the router. You can do this either by:
+
+- passing a MemoryHistory instance to the router constructor
+- calling the `setCurrentHistory` method on an already existing instance
+
 # Supported Features
 
 - `useRouter()`
@@ -285,6 +293,7 @@ it("next/link can be tested too", async () => {
 - `router.pathname`
 - `router.asPath`
 - `router.query`
+- `router.back()` (requires history)
 - Works with `next/link` (see Jest notes)
 - `router.events` supports:
   - `routeChangeStart(url, { shallow })`
@@ -306,7 +315,6 @@ These fields just have default values; these methods do nothing.
 - `router.defaultLocale`
 - `router.domainLocales`
 - `router.prefetch()`
-- `router.back()`
 - `router.beforePopState(cb)`
 - `router.reload()`
 - `router.events` not implemented:

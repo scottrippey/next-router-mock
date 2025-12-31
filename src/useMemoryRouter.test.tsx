@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 
 import { MemoryRouter, MemoryRouterSnapshot } from "./MemoryRouter";
 import { useMemoryRouter } from "./useMemoryRouter";
+import { createMemoryHistory } from "history";
 
 export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => MemoryRouterSnapshot) {
   it("the useRouter hook only returns a snapshot of the singleton router", async () => {
@@ -142,6 +143,36 @@ export function useRouterTests(singletonRouter: MemoryRouter, useRouter: () => M
       await result.current.push("/", undefined, { locale: "en" });
     });
     expect(result.current.locale).toBe("en");
+  });
+
+  it("following history", async () => {
+    const { result } = renderHook(() => useRouter());
+    await act(() => {
+      result.current.reset();
+      result.current.setCurrentHistory(createMemoryHistory());
+    });
+    if (!result.current.history) {
+      return;
+    }
+    await act(async () => {
+      await result.current.push("/one");
+    });
+    expect(result.current.history.index).toBe(1);
+
+    await act(async () => {
+      await result.current.push("/two");
+      await result.current.push("/three");
+    });
+    expect(result.current.history.index).toBe(3);
+
+    await act(async () => {
+      await result.current.replace("/four");
+    });
+    expect(result.current.history.index).toBe(3); // replace does not change history index
+    await act(() => {
+      result.current.back();
+    });
+    expect(result.current.asPath).toBe("/three");
   });
 }
 
