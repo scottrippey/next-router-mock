@@ -41,6 +41,17 @@ describe("next/navigation", () => {
       });
       expect(hook.result.current).toBe(initial);
     });
+    it("should pass scroll option with push and replace", async () => {
+      const pushSpy = jest.spyOn(singletonRouter, "push");
+      hook.result.current.push("/push-scroll", { scroll: false });
+      expect(pushSpy).toHaveBeenCalledWith("/push-scroll", undefined, { scroll: false });
+      pushSpy.mockRestore();
+
+      const replaceSpy = jest.spyOn(singletonRouter, "replace");
+      hook.result.current.replace("/replace-scroll", { scroll: false });
+      expect(replaceSpy).toHaveBeenCalledWith("/replace-scroll", undefined, { scroll: false });
+      replaceSpy.mockRestore();
+    });
   });
 
   describe("usePathname", () => {

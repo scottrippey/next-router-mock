@@ -33,8 +33,8 @@ export const useRouter: typeof NextNav.useRouter = () => {
   // All these methods are static, and never trigger a rerender:
   return useMemo(
     () => ({
-      push: (url, options) => singletonRouter.push(url),
-      replace: (url, options) => singletonRouter.replace(url),
+      push: (url, options) => singletonRouter.push(url, undefined, options),
+      replace: (url, options) => singletonRouter.replace(url, undefined, options),
       refresh: singletonRouter.reload,
       prefetch: singletonRouter.prefetch,
       back: singletonRouter.back,
