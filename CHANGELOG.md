@@ -1,5 +1,11 @@
 # next-router-mock
 
+## 1.0.5
+
+### Patch Changes
+
+- 44e58b9: Pass options for push and replace down to singletonRouter
+
 ## 1.0.4
 
 ### Patch Changes
