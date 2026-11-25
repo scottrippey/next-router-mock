@@ -568,6 +568,34 @@ describe("MemoryRouter", () => {
         expect(memoryRouter.asPath).toEqual("/path?id=42");
       });
 
+      it.each(["push", "replace"] as const)("%s with a query-only string preserves the pathname", async (method) => {
+        await memoryRouter.push("/one/two?old=value#old");
+
+        await memoryRouter[method]("?id=42");
+        expect(memoryRouter.asPath).toEqual("/one/two?id=42");
+        expectMatch(memoryRouter, {
+          pathname: "/one/two",
+          query: { id: "42" },
+          hash: "",
+        });
+
+        await memoryRouter[method]("?id=43#hash");
+        expectMatch(memoryRouter, {
+          pathname: "/one/two",
+          asPath: "/one/two?id=43#hash",
+          query: { id: "43" },
+          hash: "#hash",
+        });
+
+        await memoryRouter[method]("?");
+        expectMatch(memoryRouter, {
+          pathname: "/one/two",
+          asPath: "/one/two",
+          query: {},
+          hash: "",
+        });
+      });
+
       it("hashes are preserved", async () => {
         memoryRouter.setCurrentUrl("/path#hash");
         expectMatch(memoryRouter, {
