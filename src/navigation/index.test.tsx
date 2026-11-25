@@ -66,6 +66,57 @@ describe("next/navigation", () => {
 
       expect(hook.result.current).toEqual("/new-path");
     });
+    it.each<[string, string, object]>([
+      ["/blog/[slug]", "/blog/hello", { slug: "hello" }],
+      ["/blog/[slug]", "/blog/hello%20world", { slug: "hello world" }],
+      ["/docs/[...slug]", "/docs/a/b", { slug: ["a", "b"] }],
+      ["/shop/[[...slug]]", "/shop", {}],
+    ])("should return the concrete pathname for %s", (pattern, pathname, params) => {
+      singletonRouter.useParser(createDynamicRouteParser([pattern]));
+      act(() => {
+        singletonRouter.setCurrentUrl(`${pathname}?tab=comments#section`);
+      });
+      const initial = renderHook(() => ({
+        pathname: usePathname(),
+        params: useParams(),
+        search: useSearchParams().toString(),
+      }));
+
+      expect(initial.result.current).toEqual({ pathname, params, search: "tab=comments" });
+      expect(hook.result.current).toEqual(pathname);
+      expect(singletonRouter.pathname).toEqual(pattern);
+    });
+    it("should follow dynamic navigation without including search or hash", () => {
+      singletonRouter.useParser(createDynamicRouteParser(["/blog/[slug]"]));
+      act(() => {
+        singletonRouter.push("/blog/hello?tab=comments#section");
+      });
+      expect(hook.result.current).toEqual("/blog/hello");
+
+      act(() => {
+        singletonRouter.replace("/blog/goodbye?tab=comments#section");
+      });
+      expect(hook.result.current).toEqual("/blog/goodbye");
+
+      act(() => {
+        singletonRouter.push("/blog/goodbye?tab=posts#other");
+      });
+      expect(hook.result.current).toEqual("/blog/goodbye");
+    });
+    it("should use the displayed path when an as URL is provided", () => {
+      act(() => {
+        singletonRouter.push("/internal", "/displayed?tab=comments#section");
+      });
+      expect(hook.result.current).toEqual("/displayed");
+      expect(singletonRouter.pathname).toEqual("/internal");
+    });
+    it("should fall back to the root for an invalid asPath", () => {
+      act(() => {
+        singletonRouter.setCurrentUrl({ pathname: "////" });
+      });
+      expect(singletonRouter.asPath).toEqual("//");
+      expect(hook.result.current).toEqual("/");
+    });
   });
 
   describe("useParams", () => {

@@ -67,7 +67,13 @@ export const useSearchParams: typeof NextNav.useSearchParams = () => {
 };
 
 export const usePathname: typeof NextNav.usePathname = () => {
-  return useSnapshot((r) => r.pathname);
+  return useSnapshot((r) => {
+    try {
+      return new URL(r.asPath, "http://localhost").pathname;
+    } catch {
+      return "/";
+    }
+  });
 };
 
 export const useParams: typeof NextNav.useParams = <T extends ReturnType<typeof NextNav.useParams>>() => {
