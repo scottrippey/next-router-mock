@@ -154,7 +154,7 @@ export class MemoryRouter extends BaseRouter {
     async = this.async
   ) {
     // Parse the URL if needed:
-    const newRoute = parseUrlToCompleteUrl(url, this.pathname, this.asPath);
+    const newRoute = parseUrlToCompleteUrl(url, this.pathname);
     // Optionally apply dynamic routes (can mutate routes)
     this.events.emit("NEXT_ROUTER_MOCK:parse", newRoute);
 
@@ -162,7 +162,7 @@ export class MemoryRouter extends BaseRouter {
     if (as === undefined || as === null) {
       asPath = getRouteAsPath(newRoute);
     } else {
-      const asRoute = parseUrlToCompleteUrl(as, this.pathname, this.asPath);
+      const asRoute = parseUrlToCompleteUrl(as, this.pathname);
       this.events.emit("NEXT_ROUTER_MOCK:parse", asRoute);
 
       asPath = getRouteAsPath(asRoute);
@@ -216,9 +216,9 @@ export class MemoryRouter extends BaseRouter {
 /**
  * Normalizes the url or urlObject into a UrlObjectComplete.
  */
-function parseUrlToCompleteUrl(url: Url, currentPathname: string, currentAsPath: string): UrlObjectComplete {
+function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
   if (typeof url === "string" && url.startsWith("?")) {
-    url = currentAsPath.split(/[?#]/)[0] + url;
+    url = currentPathname + url;
   }
 
   const parsedUrl = typeof url === "object" ? url : parseUrl(url);

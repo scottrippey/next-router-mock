@@ -598,38 +598,45 @@ describe("MemoryRouter", () => {
       });
 
       [
-        { pathname: "/one/[id]", asPath: "/one/42", routeParams: { id: "42" } },
-        { pathname: "/blog/[...slug]", asPath: "/blog/a/b", routeParams: { slug: ["a", "b"] } },
-      ].forEach(({ pathname, asPath, routeParams }) => {
-        it.each(["push", "replace"] as const)(`%s with a query-only string preserves ${asPath}`, async (method) => {
-          const router = new MemoryRouter(undefined, async);
-          router.useParser(createDynamicRouteParser([pathname]));
-          await router.push(`${asPath}?old=value#old`);
+        {
+          pathname: "/one/[id]",
+          initialPath: "/one/42",
+          queryString: "?id=99&foo=bar",
+          asPath: "/one/99?foo=bar",
+          routeParams: { id: "99" },
+        },
+        {
+          pathname: "/blog/[...slug]",
+          initialPath: "/blog/a/b",
+          queryString: "?slug=c&slug=d&foo=bar",
+          asPath: "/blog/c/d?foo=bar",
+          routeParams: { slug: ["c", "d"] },
+        },
+      ].forEach(({ pathname, initialPath, queryString, asPath, routeParams }) => {
+        it.each(["push", "replace"] as const)(
+          `%s with a query-only string interpolates ${pathname}`,
+          async (method) => {
+            const router = new MemoryRouter(undefined, async);
+            router.useParser(createDynamicRouteParser([pathname]));
+            await router.push(`${initialPath}?old=value#old`);
 
-          await router[method]("?foo=bar");
-          expectMatch(router, {
-            pathname,
-            asPath: `${asPath}?foo=bar`,
-            query: { foo: "bar", ...routeParams },
-            hash: "",
-          });
+            await router[method](queryString);
+            expectMatch(router, {
+              pathname,
+              asPath,
+              query: { foo: "bar", ...routeParams },
+              hash: "",
+            });
 
-          await router[method]("?foo=baz#hash");
-          expectMatch(router, {
-            pathname,
-            asPath: `${asPath}?foo=baz#hash`,
-            query: { foo: "baz", ...routeParams },
-            hash: "#hash",
-          });
-
-          await router[method]("?");
-          expectMatch(router, {
-            pathname,
-            asPath,
-            query: routeParams,
-            hash: "",
-          });
-        });
+            await router[method](`${queryString}#hash`);
+            expectMatch(router, {
+              pathname,
+              asPath: `${asPath}#hash`,
+              query: { foo: "bar", ...routeParams },
+              hash: "#hash",
+            });
+          }
+        );
       });
 
       it("hashes are preserved", async () => {

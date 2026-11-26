@@ -2,4 +2,4 @@
 "next-router-mock": patch
 ---
 
-Preserve the current URL path, including dynamic route segments, when pushing or replacing a query-only string URL.
+Resolve query-only string URLs against the current pathname when pushing or replacing, allowing supplied query values to fill dynamic route parameters.
