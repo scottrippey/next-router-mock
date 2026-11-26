@@ -217,6 +217,10 @@ export class MemoryRouter extends BaseRouter {
  * Normalizes the url or urlObject into a UrlObjectComplete.
  */
 function parseUrlToCompleteUrl(url: Url, currentPathname: string): UrlObjectComplete {
+  if (typeof url === "string" && url.startsWith("?")) {
+    url = currentPathname + url;
+  }
+
   const parsedUrl = typeof url === "object" ? url : parseUrl(url);
 
   const queryFromSearch = parsedUrl.search ? parseQueryString(parsedUrl.search) : undefined;
