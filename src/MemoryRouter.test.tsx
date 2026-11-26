@@ -1,4 +1,5 @@
 import { MemoryRouter } from "./MemoryRouter";
+import { createDynamicRouteParser } from "./dynamic-routes";
 import { expectMatch } from "../test/test-utils";
 
 describe("MemoryRouter", () => {
@@ -593,6 +594,41 @@ describe("MemoryRouter", () => {
           asPath: "/one/two",
           query: {},
           hash: "",
+        });
+      });
+
+      [
+        { pathname: "/one/[id]", asPath: "/one/42", routeParams: { id: "42" } },
+        { pathname: "/blog/[...slug]", asPath: "/blog/a/b", routeParams: { slug: ["a", "b"] } },
+      ].forEach(({ pathname, asPath, routeParams }) => {
+        it.each(["push", "replace"] as const)(`%s with a query-only string preserves ${asPath}`, async (method) => {
+          const router = new MemoryRouter(undefined, async);
+          router.useParser(createDynamicRouteParser([pathname]));
+          await router.push(`${asPath}?old=value#old`);
+
+          await router[method]("?foo=bar");
+          expectMatch(router, {
+            pathname,
+            asPath: `${asPath}?foo=bar`,
+            query: { foo: "bar", ...routeParams },
+            hash: "",
+          });
+
+          await router[method]("?foo=baz#hash");
+          expectMatch(router, {
+            pathname,
+            asPath: `${asPath}?foo=baz#hash`,
+            query: { foo: "baz", ...routeParams },
+            hash: "#hash",
+          });
+
+          await router[method]("?");
+          expectMatch(router, {
+            pathname,
+            asPath,
+            query: routeParams,
+            hash: "",
+          });
         });
       });
 
